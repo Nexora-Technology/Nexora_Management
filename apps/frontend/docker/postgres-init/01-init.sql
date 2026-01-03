@@ -1,0 +1,8 @@
+-- Nexora Database Initialization
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE SCHEMA IF NOT EXISTS identity;
+CREATE SCHEMA IF NOT EXISTS management;
+CREATE SCHEMA IF NOT EXISTS collaboration;
+GRANT ALL PRIVILEGES ON SCHEMA identity TO nexora;
+GRANT ALL PRIVILEGES ON SCHEMA management TO nexora;
+GRANT ALL PRIVILEGES ON SCHEMA collaboration TO nexora;

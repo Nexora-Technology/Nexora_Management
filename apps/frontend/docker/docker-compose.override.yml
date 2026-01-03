@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  backend:
+    volumes:
+      - ../apps/backend/src/Nexora.Management.API:/app:ro
+      - ../apps/backend/src/Nexora.Management.Application:/app/Application:ro
+      - ../apps/backend/src/Nexora.Management.Domain:/app/Domain:ro
+      - ../apps/backend/src/Nexora.Management.Infrastructure:/app/Infrastructure:ro
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
+  frontend:
+    volumes:
+      - ../apps/frontend/src:/app/src:ro
+      - ../apps/frontend/public:/app/public:ro
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5000
+      - NODE_ENV=development
