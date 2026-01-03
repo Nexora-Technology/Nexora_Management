@@ -56,7 +56,8 @@ Nexora_Management/
 
 ```json
 {
-  "pipeline": {
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**", "bin/**"]
@@ -378,22 +379,30 @@ on:
 
 ```yaml
 runs-on: ubuntu-latest
-steps:
-  - Checkout code
-  - Setup .NET 9.0
-  - Setup Node.js 20
-  - Install Turbo globally
-  - Run all tests (turbo run test)
-  - Build all packages (turbo run build)
-  - Build Docker images with SHA tags
-  - Tag images as latest
-  - Upload build artifacts (bin/, .next/)
+jobs:
+  backend-test-and-build:
+    steps:
+      - Checkout code
+      - Setup .NET 9.0
+      - dotnet restore
+      - dotnet build
+      - dotnet test
+
+  frontend-test-and-build:
+    steps:
+      - Checkout code
+      - Setup Node.js 20
+      - npm ci
+      - npx turbo run test --filter=@nexora/frontend
+      - npx turbo run build --filter=@nexora/frontend
+      - Upload build artifacts
 ```
 
-**Future Steps (Commented):**
+**Notes:**
 
-- Push to Docker registry
-- Deploy to staging/production
+- Uses `npx turbo` to run locally installed Turborepo
+- No Docker build step (Dockerfiles not yet implemented)
+- package-lock.json is committed for reproducible installs
 
 ### CI/CD Best Practices
 
