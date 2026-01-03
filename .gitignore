@@ -43,10 +43,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# package manager
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
+# package manager (we use npm, so package-lock.json is committed)
+# yarn.lock
+# pnpm-lock.yaml
 
 # semantic-release
 .nyc_output
