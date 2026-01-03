@@ -16,6 +16,17 @@
 # next.js
 /.next/
 /out/
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+
+# Build outputs
 dist/
 bin/
 

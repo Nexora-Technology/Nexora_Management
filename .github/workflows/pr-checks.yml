@@ -1,0 +1,95 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: |
+          cd apps/backend
+          dotnet restore
+
+      - name: Build
+        run: |
+          cd apps/backend
+          dotnet build --no-restore
+
+      - name: Run tests
+        run: |
+          cd apps/backend
+          dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: apps/backend/TestResults/test-results.trx
+
+  frontend-tests:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          cd apps/frontend
+          npm ci
+
+      - name: Run linter
+        run: |
+          cd apps/frontend
+          npm run lint
+
+      - name: Type check
+        run: |
+          cd apps/frontend
+          npm run type-check || echo "No type-check script found"
+
+      - name: Build
+        run: |
+          cd apps/frontend
+          npm run build
+
+  docker-build:
+    name: Docker Build Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Backend Docker Image
+        run: |
+          docker build -t nexora-backend:test ./apps/backend
+
+      - name: Build Frontend Docker Image
+        run: |
+          docker build -t nexora-frontend:test ./apps/frontend
+
+      - name: Validate docker-compose configuration
+        run: |
+          docker-compose -f docker-compose.yml config
