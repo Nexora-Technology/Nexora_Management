@@ -24,10 +24,12 @@ public record CreateTaskCommand(
 public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, Result<TaskDto>>
 {
     private readonly IAppDbContext _db;
+    private readonly IUserContext _userContext;
 
-    public CreateTaskCommandHandler(IAppDbContext db)
+    public CreateTaskCommandHandler(IAppDbContext db, IUserContext userContext)
     {
         _db = db;
+        _userContext = userContext;
     }
 
     public async System.Threading.Tasks.Task<Result<TaskDto>> Handle(CreateTaskCommand request, CancellationToken ct)
@@ -68,7 +70,7 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, Resul
             EstimatedHours = request.EstimatedHours,
             PositionOrder = maxPosition + 1,
             CustomFieldsJsonb = new Dictionary<string, object>(),
-            CreatedBy = Guid.Empty // TODO: Get from user context
+            CreatedBy = _userContext.UserId
         };
 
         _db.Tasks.Add(task);

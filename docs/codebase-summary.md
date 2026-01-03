@@ -1,7 +1,7 @@
 # Codebase Summary
 
 **Last Updated:** 2026-01-03
-**Version:** Phase 04 Complete (Task Management Core)
+**Version:** Phase 03 Complete (Authentication & Authorization)
 
 ## Project Overview
 
@@ -92,6 +92,16 @@ Nexora Management is a ClickUp-inspired project management platform built with .
   - `ApiResponse<T>` - Standardized API response wrapper
   - MediatR setup for CQRS pattern
 
+- **Authentication:**
+  - **Commands:** RegisterCommand, LoginCommand, RefreshTokenCommand
+  - **DTOs:** RegisterRequest, LoginRequest, RefreshTokenRequest, AuthResponse, UserDto
+
+- **Authorization:**
+  - `PermissionAuthorizationHandler` - Validates permissions against user roles
+  - `PermissionAuthorizationPolicyProvider` - Dynamic policy provider for permission-based authorization
+  - `RequirePermissionAttribute` - Attribute for endpoint-level authorization
+  - `PermissionRequirement` - Authorization requirement for resource-action based access control
+
 - **Tasks:**
   - **Commands:** CreateTask, UpdateTask, DeleteTask
   - **Queries:** GetTaskById, GetTasks (with filtering)
@@ -104,14 +114,22 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 **Components:**
 
 - **Endpoints:**
+  - `AuthEndpoints.cs` - Authentication endpoints at `/api/auth`
   - `TaskEndpoints.cs` - Task CRUD endpoints at `/api/tasks`
-  - **Program.cs** - Application entry point
-    - Serilog configuration
-    - CORS setup
-    - DbContext registration
-    - Swagger/OpenAPI setup
-    - Health check endpoint
-    - Welcome endpoint
+
+- **Middleware:**
+  - `WorkspaceAuthorizationMiddleware.cs` - Sets user context for Row-Level Security (RLS)
+
+- **Program.cs** - Application entry point
+  - Serilog configuration
+  - JWT Authentication setup
+  - Authorization with dynamic policy provider
+  - CORS setup
+  - DbContext registration
+  - Swagger/OpenAPI setup
+  - Workspace Authorization Middleware registration
+  - Health check endpoint
+  - Welcome endpoint
 
 - **Persistence/Migrations** (3 migration files):
   - `20260103071610_InitialCreate` - Initial schema creation
@@ -256,10 +274,38 @@ apps/backend/
 │   │           └── ActivityLogConfiguration.cs
 │   │
 │   ├── Nexora.Management.Application/
-│   │   └── Common/
-│   │       └── ApiResponse.cs
+│   │   ├── Authentication/
+│   │   │   ├── Commands/
+│   │   │   │   ├── Register/
+│   │   │   │   │   ├── RegisterCommand.cs
+│   │   │   │   │   └── RegisterCommandHandler.cs
+│   │   │   │   ├── Login/
+│   │   │   │   │   ├── LoginCommand.cs
+│   │   │   │   │   └── LoginCommandHandler.cs
+│   │   │   │   └── RefreshToken/
+│   │   │   │       ├── RefreshTokenCommand.cs
+│   │   │   │       └── RefreshTokenCommandHandler.cs
+│   │   │   └── DTOs/
+│   │   │       ├── AuthRequests.cs
+│   │   │       └── AuthResponses.cs
+│   │   ├── Authorization/
+│   │   │   ├── PermissionAuthorizationHandler.cs
+│   │   │   ├── PermissionAuthorizationPolicyProvider.cs
+│   │   │   └── RequirePermissionAttribute.cs
+│   │   ├── Common/
+│   │   │   ├── ApiResponse.cs
+│   │   │   └── Result.cs
+│   │   └── Tasks/
+│   │       ├── Commands/
+│   │       ├── Queries/
+│   │       └── DTOs/
 │   │
 │   └── Nexora.Management.API/
+│       ├── Middleware/
+│       │   └── WorkspaceAuthorizationMiddleware.cs
+│       ├── Endpoints/
+│       │   ├── AuthEndpoints.cs
+│       │   └── TaskEndpoints.cs
 │       ├── Persistence/
 │       │   └── Migrations/
 │       │       ├── 20260103071610_InitialCreate.cs
@@ -316,6 +362,10 @@ apps/backend/
 - [x] **Phase 01:** Project setup and architecture
 - [x] **Phase 02:** Domain entities and database schema
 - [x] **Phase 03:** Authentication & authorization
+  - JWT-based authentication with access/refresh tokens
+  - Permission-based authorization with dynamic policy provider
+  - Workspace Authorization Middleware for RLS user context
+  - Raw SQL execution methods for authorization queries
 - [ ] **Phase 04:** Core workspace functionality
 - [x] **Phase 05:** Task management CRUD
 - [ ] **Phase 06:** Real-time updates via SignalR

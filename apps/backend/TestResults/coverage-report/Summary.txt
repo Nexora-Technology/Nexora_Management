@@ -1,0 +1,97 @@
+Summary
+  Generated on: 3/1/2026 - 19:01:18
+  Coverage date: 3/1/2026 - 19:00:50
+  Parser: Cobertura
+  Assemblies: 3
+  Classes: 71
+  Files: 49
+  Line coverage: 0%
+  Covered lines: 0
+  Uncovered lines: 1219
+  Coverable lines: 1219
+  Total lines: 2187
+  Branch coverage: 0% (0 of 98)
+  Covered branches: 0
+  Total branches: 98
+  Method coverage: 0% (0 of 326)
+  Full method coverage: 0% (0 of 326)
+  Covered methods: 0
+  Fully covered methods: 0
+  Total methods: 326
+
+Nexora.Management.Application                                                                        0%
+  Nexora.Management.Application.Authentication.Commands.Login.LoginCommand                           0%
+  Nexora.Management.Application.Authentication.Commands.Login.LoginCommandHandler                    0%
+  Nexora.Management.Application.Authentication.Commands.RefreshToken.RefreshTokenCommand             0%
+  Nexora.Management.Application.Authentication.Commands.RefreshToken.RefreshTokenCommandHandler      0%
+  Nexora.Management.Application.Authentication.Commands.Register.RegisterCommand                     0%
+  Nexora.Management.Application.Authentication.Commands.Register.RegisterCommandHandler              0%
+  Nexora.Management.Application.Authentication.DTOs.AuthResponse                                     0%
+  Nexora.Management.Application.Authentication.DTOs.LoginRequest                                     0%
+  Nexora.Management.Application.Authentication.DTOs.RefreshTokenRequest                              0%
+  Nexora.Management.Application.Authentication.DTOs.RegisterRequest                                  0%
+  Nexora.Management.Application.Authentication.DTOs.UserDto                                          0%
+  Nexora.Management.Application.Authorization.PermissionAuthorizationHandler                         0%
+  Nexora.Management.Application.Authorization.PermissionAuthorizationPolicyProvider                  0%
+  Nexora.Management.Application.Authorization.PermissionRequirement                                  0%
+  Nexora.Management.Application.Authorization.RequirePermissionAttribute                             0%
+  Nexora.Management.Application.Common.ApiResponse<T>                                                0%
+  Nexora.Management.Application.Common.AppException                                                  0%
+  Nexora.Management.Application.Common.BusinessRuleException                                         0%
+  Nexora.Management.Application.Common.NotFoundException                                             0%
+  Nexora.Management.Application.Common.PagedResponse<T>                                              0%
+  Nexora.Management.Application.Common.Result                                                        0%
+  Nexora.Management.Application.Common.Result<T>                                                     0%
+  Nexora.Management.Application.Common.UnauthorizedException                                         0%
+  Nexora.Management.Application.Common.ValidationException                                           0%
+  Nexora.Management.Application.Tasks.Commands.CreateTask.CreateTaskCommand                          0%
+  Nexora.Management.Application.Tasks.Commands.CreateTask.CreateTaskCommandHandler                   0%
+  Nexora.Management.Application.Tasks.Commands.DeleteTask.DeleteTaskCommand                          0%
+  Nexora.Management.Application.Tasks.Commands.DeleteTask.DeleteTaskCommandHandler                   0%
+  Nexora.Management.Application.Tasks.Commands.UpdateTask.UpdateTaskCommand                          0%
+  Nexora.Management.Application.Tasks.Commands.UpdateTask.UpdateTaskCommandHandler                   0%
+  Nexora.Management.Application.Tasks.DTOs.CreateTaskRequest                                         0%
+  Nexora.Management.Application.Tasks.DTOs.GetTasksQueryRequest                                      0%
+  Nexora.Management.Application.Tasks.DTOs.TaskDto                                                   0%
+  Nexora.Management.Application.Tasks.DTOs.UpdateTaskRequest                                         0%
+  Nexora.Management.Application.Tasks.Queries.GetTaskByIdQuery                                       0%
+  Nexora.Management.Application.Tasks.Queries.GetTaskByIdQueryHandler                                0%
+  Nexora.Management.Application.Tasks.Queries.GetTasksQuery                                          0%
+  Nexora.Management.Application.Tasks.Queries.GetTasksQueryHandler                                   0%
+
+Nexora.Management.Domain                                                                             0%
+  Nexora.Management.Domain.Common.BaseEntity                                                         0%
+  Nexora.Management.Domain.Entities.ActivityLog                                                      0%
+  Nexora.Management.Domain.Entities.Attachment                                                       0%
+  Nexora.Management.Domain.Entities.Comment                                                          0%
+  Nexora.Management.Domain.Entities.Permission                                                       0%
+  Nexora.Management.Domain.Entities.Project                                                          0%
+  Nexora.Management.Domain.Entities.RefreshToken                                                     0%
+  Nexora.Management.Domain.Entities.Role                                                             0%
+  Nexora.Management.Domain.Entities.RolePermission                                                   0%
+  Nexora.Management.Domain.Entities.Task                                                             0%
+  Nexora.Management.Domain.Entities.TaskStatus                                                       0%
+  Nexora.Management.Domain.Entities.User                                                             0%
+  Nexora.Management.Domain.Entities.UserRole                                                         0%
+  Nexora.Management.Domain.Entities.Workspace                                                        0%
+  Nexora.Management.Domain.Entities.WorkspaceMember                                                  0%
+
+Nexora.Management.Infrastructure                                                                     0%
+  Nexora.Management.Infrastructure.Authentication.JwtSettings                                        0%
+  Nexora.Management.Infrastructure.Authentication.JwtTokenService                                    0%
+  Nexora.Management.Infrastructure.Persistence.AppDbContext                                          0%
+  Nexora.Management.Infrastructure.Persistence.AppDbContextFactory                                   0%
+  Nexora.Management.Infrastructure.Persistence.Configurations.ActivityLogConfiguration               0%
+  Nexora.Management.Infrastructure.Persistence.Configurations.AttachmentConfiguration                0%
+  Nexora.Management.Infrastructure.Persistence.Configurations.CommentConfiguration                   0%
+  Nexora.Management.Infrastructure.Persistence.Configurations.PermissionConfiguration                0%
+  Nexora.Management.Infrastructure.Persistence.Configurations.ProjectConfiguration                   0%
+  Nexora.Management.Infrastructure.Persistence.Configurations.RefreshTokenConfiguration              0%
+  Nexora.Management.Infrastructure.Persistence.Configurations.RoleConfiguration                      0%
+  Nexora.Management.Infrastructure.Persistence.Configurations.RolePermissionConfiguration            0%
+  Nexora.Management.Infrastructure.Persistence.Configurations.TaskConfiguration                      0%
+  Nexora.Management.Infrastructure.Persistence.Configurations.TaskStatusConfiguration                0%
+  Nexora.Management.Infrastructure.Persistence.Configurations.UserConfiguration                      0%
+  Nexora.Management.Infrastructure.Persistence.Configurations.UserRoleConfiguration                  0%
+  Nexora.Management.Infrastructure.Persistence.Configurations.WorkspaceConfiguration                 0%
+  Nexora.Management.Infrastructure.Persistence.Configurations.WorkspaceMemberConfiguration           0%

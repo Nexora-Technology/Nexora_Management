@@ -10,7 +10,10 @@ using Nexora.Management.Infrastructure.Interfaces;
 using Nexora.Management.API.Middleware;
 using Nexora.Management.Infrastructure.Persistence;
 using Nexora.Management.API.Endpoints;
+using Nexora.Management.API.Middlewares;
+using Nexora.Management.Infrastructure.Services;
 using Nexora.Management.Application.Authorization;
+using Nexora.Management.Application.Common;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -94,6 +97,12 @@ builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 // Register Password Hasher
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
+// Register User Context
+builder.Services.AddScoped<IUserContext, UserContext>();
+
+// Register File Storage Service
+builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -124,6 +133,12 @@ app.MapAuthEndpoints();
 
 // Map Task endpoints
 app.MapTaskEndpoints();
+
+// Map Comment endpoints
+app.MapCommentEndpoints();
+
+// Map Attachment endpoints
+app.MapAttachmentEndpoints();
 
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok(new

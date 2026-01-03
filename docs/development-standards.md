@@ -1,7 +1,7 @@
 # Development Standards
 
 **Last Updated:** 2026-01-03
-**Version:** Phase 03 Complete (Authentication)
+**Version:** Phase 03 Complete (Authentication & Authorization)
 
 ## Overview
 
@@ -823,6 +823,75 @@ public interface IUserService
 ```
 
 ## Security Standards
+
+### Authorization Standards
+
+**Permission-Based Authorization:**
+
+All API endpoints must use the `RequirePermission` attribute for authorization:
+
+```csharp
+// Good
+[RequirePermission("tasks", "create")]
+[HttpPost]
+public async Task<IActionResult> CreateTask(CreateTaskRequest request)
+{
+    // Handler checks if user has "tasks:create" permission
+}
+
+// Bad - No authorization
+[HttpPost]
+public async Task<IActionResult> CreateTask(CreateTaskRequest request)
+{
+    // Anyone can access!
+}
+```
+
+**Permission Format:**
+
+- Format: `{resource}:{action}`
+- Examples:
+  - `tasks:create` - Create tasks
+  - `tasks:read` - View tasks
+  - `tasks:update` - Update tasks
+  - `tasks:delete` - Delete tasks
+  - `projects:create` - Create projects
+  - `workspaces:manage` - Manage workspace settings
+
+**Permission Validation:**
+
+- Permissions are validated against user's roles in their workspace context
+- Users can have different roles in different workspaces
+- Permission checks use raw SQL for efficiency and SQL injection protection
+- No permission caching - always fresh from database
+
+**SQL Injection Protection:**
+
+When working with raw SQL for authorization:
+
+```csharp
+// Good - Parameterized query
+await db.SqlQuerySingleAsync<bool>(
+    """
+    SELECT EXISTS (
+        SELECT 1 FROM "Users" u
+        JOIN "WorkspaceMembers" wm ON u."Id" = wm."UserId"
+        WHERE u."Id" = {0}
+    )
+    """,
+    userId);
+
+// Bad - String concatenation (SQL injection risk)
+var sql = $"SELECT * FROM \"Users\" WHERE \"Id\" = '{userId}'";
+await db.ExecuteSqlRawAsync(sql);
+```
+
+**Row-Level Security (RLS):**
+
+- All database queries automatically filter by workspace membership
+- Workspace Authorization Middleware sets `app.current_user_id` for each request
+- RLS policies enforce data isolation at the database level
+- Never bypass RLS - always let the middleware set the user context
 
 ### Secrets Management
 

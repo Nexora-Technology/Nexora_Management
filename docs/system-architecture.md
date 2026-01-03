@@ -1,7 +1,7 @@
 # System Architecture
 
 **Last Updated:** 2026-01-03
-**Version:** Phase 04 Complete (Task Management Core)
+**Version:** Phase 03 Complete (Authentication & Authorization)
 
 ## Overview
 
@@ -160,6 +160,32 @@ public class AppDbContext : DbContext, IAppDbContext
 - Auto-generation of UUIDs
 - PostgreSQL extension registration (uuid-ossp, pg_trgm)
 - Configuration assembly scanning
+- Raw SQL execution support for RLS and authorization queries
+
+**Raw SQL Methods:**
+
+```csharp
+public Task<int> ExecuteSqlRawAsync(string sql, params object[] parameters)
+{
+    return Database.ExecuteSqlRawAsync(sql, parameters);
+}
+
+public async Task<List<T>> SqlQueryRawAsync<T>(string sql, params object[] parameters)
+{
+    return await Database.SqlQueryRaw<T>(sql, parameters).ToListAsync();
+}
+
+public async Task<T> SqlQuerySingleAsync<T>(string sql, params object[] parameters)
+{
+    return await Database.SqlQueryRaw<T>(sql, parameters).FirstOrDefaultAsync();
+}
+```
+
+**Usage:**
+
+- **RLS User Context:** `ExecuteSqlRawAsync` sets `app.current_user_id` for Row-Level Security
+- **Permission Queries:** `SqlQuerySingleAsync<bool>` checks user permissions efficiently
+- **Custom Queries:** `SqlQueryRawAsync<T>` for complex database queries
 
 #### EF Core Configurations (14 Files)
 
@@ -203,10 +229,15 @@ public interface IAppDbContext
     DbSet<Role> Roles { get; }
     // ... (all DbSets)
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    // For raw SQL execution (needed for RLS and authorization queries)
+    Task<int> ExecuteSqlRawAsync(string sql, params object[] parameters);
+    Task<List<T>> SqlQueryRawAsync<T>(string sql, params object[] parameters);
+    Task<T> SqlQuerySingleAsync<T>(string sql, params object[] parameters);
 }
 ```
 
-**Purpose:** Dependency inversion - allows mocking DbContext in tests
+**Purpose:** Dependency inversion - allows mocking DbContext in tests. Raw SQL methods enable RLS user context setting and optimized permission queries.
 
 ## 3. Application Layer
 
@@ -295,6 +326,55 @@ Implemented CQRS commands for authentication:
 
 - `AuthRequests`: RegisterRequest, LoginRequest, RefreshTokenRequest
 - `AuthResponses`: AuthResponse, UserDto
+
+### Authorization System
+
+**Location:** `/apps/backend/src/Nexora.Management.Application/Authorization/`
+
+Permission-based authorization system with dynamic policy provider:
+
+**Components:**
+
+1. **PermissionRequirement** - Authorization requirement for resource-action based access control
+   - Format: `resource:action` (e.g., `tasks:create`)
+   - Validates against user's role permissions
+
+2. **PermissionAuthorizationHandler** - Handler that validates permissions against user roles
+   - Retrieves user's roles from WorkspaceMemberships
+   - Joins with RolePermissions and Permissions
+   - Executes raw SQL for efficient permission lookup
+   - Includes SQL injection protection via permission format validation
+   - Registered as Scoped service for DbContext resolution
+
+3. **PermissionAuthorizationPolicyProvider** - Dynamic policy provider
+   - Handles policies in format: `Permission:resource:action`
+   - Dynamically generates authorization policies at runtime
+   - Registered as Singleton service
+
+4. **RequirePermissionAttribute** - Attribute for endpoint-level authorization
+   - Usage: `[RequirePermission("tasks", "create")]`
+   - Generates policy: `Permission:tasks:create`
+   - Applies to methods or classes
+
+**Permission Lookup Flow:**
+
+```
+Request with [RequirePermission("tasks", "create")]
+    ↓
+Policy: "Permission:tasks:create"
+    ↓
+PermissionAuthorizationPolicyProvider.GetPolicyAsync()
+    ↓
+Creates PermissionRequirement("tasks", "create")
+    ↓
+PermissionAuthorizationHandler.HandleRequirementAsync()
+    ↓
+SQL Query: User → WorkspaceMembers → Roles → RolePermissions → Permissions
+    ↓
+Validate: Permission.Name == "tasks:create"
+    ↓
+Grant/Deny Access
+```
 
 ### Task Management Commands and Queries
 
@@ -410,6 +490,12 @@ Implemented CQRS operations for task management:
    builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
    ```
 
+8. **Authorization Services:**
+   ```csharp
+   builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+   builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+   ```
+
 **Middleware Pipeline:**
 
 1. Swagger (Development only)
@@ -417,7 +503,59 @@ Implemented CQRS operations for task management:
 3. CORS
 4. Authentication
 5. Authorization
-6. Map Controllers
+6. Workspace Authorization (RLS user context)
+7. Map Controllers
+
+#### Workspace Authorization Middleware
+
+**Location:** `/apps/backend/src/Nexora.Management.API/Middleware/WorkspaceAuthorizationMiddleware.cs`
+
+**Purpose:** Sets user context for Row-Level Security (RLS) in PostgreSQL
+
+**Implementation:**
+
+```csharp
+public async Task InvokeAsync(HttpContext context, IAppDbContext db)
+{
+    var userIdClaim = context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+    if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out var userId))
+    {
+        // Set user context for RLS in PostgreSQL
+        await db.ExecuteSqlRawAsync(
+            "SET LOCAL app.current_user_id = {0}", userId);
+    }
+
+    await _next(context);
+}
+```
+
+**Key Features:**
+
+- Registered after authentication middleware via `UseWorkspaceAuthorization()`
+- Extracts user ID from JWT claims
+- Sets PostgreSQL session variable `app.current_user_id`
+- Enables RLS policies to filter queries based on user context
+- Executes `SET LOCAL` for request-scoped user context
+
+**Integration with RLS:**
+
+The middleware works with PostgreSQL RLS policies defined in migrations:
+
+```sql
+-- RLS policy uses the user context set by middleware
+CREATE POLICY tasks_select_policy ON "Tasks"
+FOR SELECT
+USING (
+    "ProjectId" IN (
+        SELECT "Id" FROM "Projects"
+        WHERE "WorkspaceId" IN (
+            SELECT "WorkspaceId" FROM "WorkspaceMembers"
+            WHERE "UserId" = current_setting('app.current_user_id', true)::UUID
+        )
+    )
+);
+```
 
 **Endpoints:**
 
@@ -492,6 +630,130 @@ public class JwtSettings
   "RefreshTokenExpirationDays": 7
 }
 ```
+
+## Security Architecture
+
+### Authentication & Authorization Overview
+
+Nexora Management implements a comprehensive security model with three layers:
+
+1. **Authentication Layer** - JWT-based user authentication
+2. **Authorization Layer** - Permission-based access control
+3. **Data Layer** - Row-Level Security (RLS) for multi-tenancy
+
+### Permission-Based Authorization
+
+**Concept:** Resource-action based permissions (e.g., `tasks:create`, `projects:delete`)
+
+**Implementation:**
+
+1. **RequirePermission Attribute:**
+   ```csharp
+   [RequirePermission("tasks", "create")]
+   [HttpPost]
+   public async Task<IActionResult> CreateTask(CreateTaskRequest request)
+   {
+       // Handler checks if user has "tasks:create" permission
+   }
+   ```
+
+2. **Dynamic Policy Generation:**
+   - Policy format: `Permission:{resource}:{action}`
+   - Provider dynamically creates policies at runtime
+   - No need to pre-register policies
+
+3. **Permission Validation Flow:**
+   ```
+   Endpoint Request
+       ↓
+   [RequirePermission] Attribute
+       ↓
+   Authorization Policy: "Permission:tasks:create"
+       ↓
+   PermissionAuthorizationHandler
+       ↓
+   SQL Query (via raw SQL):
+   SELECT EXISTS (
+       SELECT 1
+       FROM "Users" u
+       JOIN "WorkspaceMembers" wm ON u."Id" = wm."UserId"
+       JOIN "Roles" r ON wm."RoleId" = r."Id"
+       JOIN "RolePermissions" rp ON r."Id" = rp."RoleId"
+       JOIN "Permissions" p ON rp."PermissionId" = p."Id"
+       WHERE u."Id" = @userId
+       AND p."Name" = 'tasks:create'
+   )
+       ↓
+   Grant/Deny Access
+   ```
+
+**Security Features:**
+
+- SQL injection protection via permission format validation
+- Workspace-scoped role checking (users have different roles per workspace)
+- Efficient single-query permission lookup
+- No permission caching (always fresh from database)
+
+### Row-Level Security (RLS)
+
+**Concept:** Database-level policies that automatically filter queries based on user context.
+
+**Implementation:**
+
+1. **User Context Function:**
+
+   ```sql
+   CREATE FUNCTION set_current_user_id(user_id UUID)
+   RETURNS VOID AS $$
+   BEGIN
+       PERFORM set_config('app.current_user_id', user_id::TEXT, true);
+   END;
+   $$ LANGUAGE plpgsql SECURITY DEFINER;
+   ```
+
+2. **Middleware Sets Context:**
+
+   ```csharp
+   // WorkspaceAuthorizationMiddleware
+   await db.ExecuteSqlRawAsync(
+       "SET LOCAL app.current_user_id = {0}", userId);
+   ```
+
+3. **Policy Example (Tasks SELECT):**
+   ```sql
+   CREATE POLICY tasks_select_policy ON "Tasks"
+   FOR SELECT
+   USING (
+       "ProjectId" IN (
+           SELECT "Id" FROM "Projects"
+           WHERE "WorkspaceId" IN (
+               SELECT "WorkspaceId" FROM "WorkspaceMembers"
+               WHERE "UserId" = current_setting('app.current_user_id', true)::UUID
+           )
+       )
+   );
+   ```
+
+**Protected Tables:**
+
+- Tasks (4 policies: SELECT, INSERT, UPDATE, DELETE)
+- Projects (4 policies)
+- Comments (4 policies)
+- Attachments (3 policies: SELECT, INSERT, DELETE)
+- ActivityLog (1 policy: SELECT)
+
+**Unprotected Tables:**
+
+- Users (authentication layer handles access)
+- Roles, Permissions (static system data)
+- WorkspaceMembers, UserRoles, RolePermissions (junction tables)
+
+**Benefits:**
+
+- Defense in depth (application + database layer)
+- Automatic query filtering
+- No accidental data leaks
+- Performance (filtered at source)
 
 ## Database Architecture
 
@@ -594,93 +856,46 @@ Comment (ParentCommentId) → Comment (self)
 - `Tasks.DueDate` WHERE due_date IS NOT NULL
 - `Projects.WorkspaceId` WHERE status = 'active'
 
-## Security Architecture
-
-### Row-Level Security (RLS)
-
-**Concept:** Database-level policies that automatically filter queries based on user context.
-
-**Implementation:**
-
-1. **User Context Function:**
-
-   ```sql
-   CREATE FUNCTION set_current_user_id(user_id UUID)
-   RETURNS VOID AS $$
-   BEGIN
-       PERFORM set_config('app.current_user_id', user_id::TEXT, true);
-   END;
-   $$ LANGUAGE plpgsql SECURITY DEFINER;
-   ```
-
-2. **Policy Example (Tasks SELECT):**
-   ```sql
-   CREATE POLICY tasks_select_policy ON "Tasks"
-   FOR SELECT
-   USING (
-       "ProjectId" IN (
-           SELECT "Id" FROM "Projects"
-           WHERE "WorkspaceId" IN (
-               SELECT "WorkspaceId" FROM "WorkspaceMembers"
-               WHERE "UserId" = current_setting('app.current_user_id', true)::UUID
-           )
-       )
-   );
-   ```
-
-**Protected Tables:**
-
-- Tasks (4 policies: SELECT, INSERT, UPDATE, DELETE)
-- Projects (4 policies)
-- Comments (4 policies)
-- Attachments (3 policies: SELECT, INSERT, DELETE)
-- ActivityLog (1 policy: SELECT)
-
-**Unprotected Tables:**
-
-- Users (authentication layer handles access)
-- Roles, Permissions (static system data)
-- WorkspaceMembers, UserRoles, RolePermissions (junction tables)
-
-**Benefits:**
-
-- Defense in depth (application + database layer)
-- Automatic query filtering
-- No accidental data leaks
-- Performance (filtered at source)
-
 ## Data Flow
 
-### Example: Create Task
+### Example: Create Task with Authorization
 
 ```
-1. HTTP POST /api/tasks
+1. HTTP POST /api/tasks with JWT Bearer token
    ↓ (API Layer)
-2. TaskController.CreateCommand()
+2. WorkspaceAuthorizationMiddleware
+   - Extracts userId from JWT claims
+   - Executes: SET LOCAL app.current_user_id = {userId}
+   ↓
+3. [RequirePermission("tasks", "create")] Attribute
+   ↓
+4. PermissionAuthorizationHandler
+   - SQL Query checks if user has "tasks:create" permission
+   - Validates via WorkspaceMembers → Roles → RolePermissions → Permissions
+   ↓ (if authorized)
+5. TaskController.CreateCommand()
    ↓ (MediatR)
-3. CreateTaskCommandHandler()
+6. CreateTaskCommandHandler()
    ↓ (Application Layer)
-4. Validates business rules
+7. Validates business rules
    ↓
-5. Creates Task entity
+8. Creates Task entity
    ↓
-6. _taskRepository.Add(task)
+9. AppDbContext.Tasks.Add(task)
    ↓ (Infrastructure Layer)
-7. AppDbContext.Tasks.Add(task)
-   ↓
-8. AppDbContext.SaveChangesAsync()
-   ↓ (EF Core)
-9. Sets CreatedAt, UpdatedAt
-   ↓
-10. Generates SQL INSERT
-    ↓ (PostgreSQL)
-11. Executes INSERT with RLS check
+10. AppDbContext.SaveChangesAsync()
+    ↓ (EF Core)
+11. Sets CreatedAt, UpdatedAt
     ↓
-12. Returns new Task with Id
+12. Generates SQL INSERT
+    ↓ (PostgreSQL with RLS)
+13. INSERT checks RLS policy: Is user member of task's workspace?
+    ↓ (if RLS passes)
+14. Returns new Task with Id
     ↓ (Back up the stack)
-13. ApiResponse<Task> with Success=true
+15. ApiResponse<Task> with Success=true
     ↓
-14. HTTP 201 Created with task JSON
+16. HTTP 201 Created with task JSON
 ```
 
 ## Technology Justification

@@ -22,6 +22,7 @@ docs/
 ├── code-standards.md              # Legacy: Refer to development-standards.md
 ├── system-architecture.md         # Clean Architecture overview
 ├── codebase-summary.md            # Quick codebase reference
+├── authorization-implementation.md # NEW: Phase 03 Authorization guide
 ├── design-guidelines.md           # UI/UX standards
 ├── project-roadmap.md             # Development phases
 ├── development/
@@ -87,6 +88,8 @@ docs/
   - Clean Architecture layers (Domain, Infrastructure, Application, API)
   - Entity relationships and database schema
   - Row-Level Security (RLS) implementation
+  - Permission-based authorization system
+  - Workspace Authorization Middleware
   - Technology stack justification
 
 - **[Codebase Summary](codebase-summary.md)**
@@ -94,6 +97,15 @@ docs/
   - Entity hierarchy and relationships
   - File structure and organization
   - Configuration files
+  - Phase completion status
+
+- **[Authorization Implementation Guide](authorization-implementation.md)**
+  - Phase 03 authentication & authorization details
+  - Permission-based access control
+  - Row-Level Security (RLS) setup
+  - Workspace Authorization Middleware
+  - Permission system and seeding
+  - Best practices and troubleshooting
 
 ### Development Standards
 
@@ -180,7 +192,24 @@ The `docs/research/` directory contains research and investigation documents:
 - [system-architecture.md](system-architecture.md)
 - [codebase-summary.md](codebase-summary.md)
 
-### Phase 03-12: In Progress
+### Phase 03: Authentication & Authorization ✅
+
+**Completed:**
+
+- [x] JWT-based authentication with access/refresh tokens
+- [x] Permission-based authorization with dynamic policy provider
+- [x] Workspace Authorization Middleware for RLS user context
+- [x] Raw SQL execution methods for authorization queries
+- [x] RequirePermission attribute for endpoint-level authorization
+
+**Documentation Deliverables:**
+
+- [authorization-implementation.md](authorization-implementation.md) - Comprehensive guide
+- Updated [system-architecture.md](system-architecture.md) with authorization details
+- Updated [codebase-summary.md](codebase-summary.md) with new components
+- Updated [development-standards.md](development-standards.md) with authorization standards
+
+### Phase 04-12: In Progress
 
 See [project-roadmap.md](project-roadmap.md) for upcoming phases.
 
