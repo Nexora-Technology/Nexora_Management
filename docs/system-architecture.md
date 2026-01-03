@@ -1,7 +1,7 @@
 # System Architecture
 
 **Last Updated:** 2026-01-03
-**Version:** Phase 03 Complete (Authentication)
+**Version:** Phase 04 Complete (Task Management Core)
 
 ## Overview
 
@@ -218,6 +218,30 @@ public interface IAppDbContext
 
 #### Common
 
+**Result Pattern**
+Non-generic and generic result types for operation outcomes:
+
+```csharp
+public record Result
+{
+    public bool IsSuccess { get; }
+    public bool IsFailure => !IsSuccess;
+    public string? Error { get; }
+    public static Result Success() => new(true, null);
+    public static Result Failure(string error) => new(false, error);
+}
+
+public record Result<T>
+{
+    public bool IsSuccess { get; }
+    public bool IsFailure => !IsSuccess;
+    public T? Value { get; }
+    public string? Error { get; }
+    public static Result<T> Success(T value) => new(true, value, null);
+    public static Result<T> Failure(string error) => new(false, default, error);
+}
+```
+
 **ApiResponse<T>**
 Standardized wrapper for all API responses:
 
@@ -271,6 +295,28 @@ Implemented CQRS commands for authentication:
 
 - `AuthRequests`: RegisterRequest, LoginRequest, RefreshTokenRequest
 - `AuthResponses`: AuthResponse, UserDto
+
+### Task Management Commands and Queries
+
+**Location:** `/apps/backend/src/Nexora.Management.Application/Tasks/`
+
+Implemented CQRS operations for task management:
+
+- **Commands** (`Commands/`):
+  - `CreateTask` - Creates new task with project association, optional parent task, assignee, dates, estimates
+  - `UpdateTask` - Updates task fields (title, description, status, priority, assignee, dates, estimates)
+  - `DeleteTask` - Soft deletes task by ID
+
+- **Queries** (`Queries/`):
+  - `GetTaskById` - Retrieves single task by ID
+  - `GetTasks` - Lists tasks with filtering (project, status, assignee, search, sorting, pagination)
+
+**DTOs** (`DTOs/`):
+
+- `TaskDto`: Task response with all fields
+- `CreateTaskRequest`: Task creation payload
+- `UpdateTaskRequest`: Task update payload
+- `GetTasksQueryRequest`: Task list query parameters
 
 ### Future Components (Planned)
 
@@ -381,6 +427,11 @@ Implemented CQRS commands for authentication:
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
 - `POST /api/auth/refresh` - Token refresh
+- `POST /api/tasks` - Create task
+- `GET /api/tasks/{id}` - Get task by ID
+- `GET /api/tasks` - List tasks with filters
+- `PUT /api/tasks/{id}` - Update task
+- `DELETE /api/tasks/{id}` - Delete task
 
 #### Database Migrations
 

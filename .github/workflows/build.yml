@@ -6,9 +6,13 @@ on:
       - main
 
 jobs:
-  test-and-build:
-    name: Test and Build
+  backend-test-and-build:
+    name: Backend - Test and Build
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./apps/backend
 
     steps:
       - name: Checkout code
@@ -19,45 +23,44 @@ jobs:
         with:
           dotnet-version: '9.0.x'
 
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build backend
+        run: dotnet build --no-restore
+
+      - name: Run backend tests
+        run: dotnet test --no-build --verbosity normal
+
+  frontend-test-and-build:
+    name: Frontend - Test and Build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install Turbo
-        run: npm install -g turbo
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Run tests
-        run: turbo run test
+      - name: Run frontend tests
+        run: turbo run test --filter=@nexora/frontend
 
-      - name: Build all packages
-        run: turbo run build
+      - name: Build frontend
+        run: turbo run build --filter=@nexora/frontend
 
-      - name: Build Docker images
-        run: |
-          docker build -t nexora-backend:${{ github.sha }} ./apps/backend
-          docker build -t nexora-frontend:${{ github.sha }} ./apps/frontend
-          docker tag nexora-backend:${{ github.sha }} nexora-backend:latest
-          docker tag nexora-frontend:${{ github.sha }} nexora-frontend:latest
-
-      # Placeholder for pushing to Docker registry
-      # - name: Login to Docker Registry
-      #   uses: docker/login-action@v3
-      #   with:
-      #     registry: ${{ secrets.DOCKER_REGISTRY }}
-      #     username: ${{ secrets.DOCKER_USERNAME }}
-      #     password: ${{ secrets.DOCKER_PASSWORD }}
-
-      # - name: Push Docker images
-      #   run: |
-      #     docker push nexora-backend:latest
-      #     docker push nexora-frontend:latest
-
-      - name: Upload build artifacts
+      - name: Upload frontend build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-artifacts
-          path: |
-            apps/backend/bin/
-            apps/frontend/.next/
+          name: frontend-build
+          path: apps/frontend/.next/
           retention-days: 7

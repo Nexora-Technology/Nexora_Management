@@ -1,7 +1,7 @@
 # Codebase Summary
 
 **Last Updated:** 2026-01-03
-**Version:** Phase 02 Complete
+**Version:** Phase 04 Complete (Task Management Core)
 
 ## Project Overview
 
@@ -10,6 +10,7 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 ## Technology Stack
 
 ### Backend
+
 - **Framework:** .NET 9.0 / ASP.NET Core Web API
 - **ORM:** Entity Framework Core 9.0
 - **Database:** PostgreSQL 16
@@ -17,6 +18,7 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 - **Architecture:** Clean Architecture (Domain, Infrastructure, Application, API layers)
 
 ### Frontend
+
 - **Framework:** Next.js 15 (App Router)
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
@@ -29,9 +31,11 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 ### Clean Architecture Layers
 
 #### 1. Domain Layer (`/apps/backend/src/Nexora.Management.Domain/`)
+
 **Purpose:** Core business logic and enterprise rules
 
 **Components:**
+
 - **Entities** (14 domain models):
   - `User` - User accounts and authentication
   - `Role` - User roles (Admin, Member, Guest)
@@ -52,9 +56,11 @@ Nexora Management is a ClickUp-inspired project management platform built with .
   - `IAuditable` - Audit interface
 
 #### 2. Infrastructure Layer (`/apps/backend/src/Nexora.Management.Infrastructure/`)
+
 **Purpose:** External concerns and data access
 
 **Components:**
+
 - **Persistence** (`/Persistence/`):
   - `AppDbContext` - EF Core DbContext with 13 DbSets
   - **Configurations** (14 EF Core configurations):
@@ -76,24 +82,36 @@ Nexora Management is a ClickUp-inspired project management platform built with .
   - `IAppDbContext` - Abstraction for DbContext
 
 #### 3. Application Layer (`/apps/backend/src/Nexora.Management.Application/`)
+
 **Purpose:** Application logic and use cases
 
 **Components:**
+
 - **Common:**
+  - `Result` / `Result<T>` - Non-generic and generic result patterns for operation outcomes
   - `ApiResponse<T>` - Standardized API response wrapper
-  - MediatR setup for CQRS pattern (to be expanded in future phases)
+  - MediatR setup for CQRS pattern
+
+- **Tasks:**
+  - **Commands:** CreateTask, UpdateTask, DeleteTask
+  - **Queries:** GetTaskById, GetTasks (with filtering)
+  - **DTOs:** TaskDto, CreateTaskRequest, UpdateTaskRequest, GetTasksQueryRequest
 
 #### 4. API Layer (`/apps/backend/src/Nexora.Management.API/`)
+
 **Purpose:** Presentation and external interfaces
 
 **Components:**
-- **Program.cs** - Application entry point
-  - Serilog configuration
-  - CORS setup
-  - DbContext registration
-  - Swagger/OpenAPI setup
-  - Health check endpoint
-  - Welcome endpoint
+
+- **Endpoints:**
+  - `TaskEndpoints.cs` - Task CRUD endpoints at `/api/tasks`
+  - **Program.cs** - Application entry point
+    - Serilog configuration
+    - CORS setup
+    - DbContext registration
+    - Swagger/OpenAPI setup
+    - Health check endpoint
+    - Welcome endpoint
 
 - **Persistence/Migrations** (3 migration files):
   - `20260103071610_InitialCreate` - Initial schema creation
@@ -171,21 +189,26 @@ Role (1) ────< (N) RolePermission >─── (N) Permission
 ### Row-Level Security Policies
 
 **Tasks Table:**
+
 - SELECT/INSERT/UPDATE/DELETE policies based on workspace membership
 - Validates access through Project → Workspace → WorkspaceMember
 
 **Projects Table:**
+
 - SELECT/INSERT/UPDATE/DELETE policies based on workspace membership
 
 **Comments Table:**
+
 - SELECT/INSERT based on task accessibility (via workspace membership)
 - UPDATE/DELETE restricted to comment author
 
 **Attachments Table:**
+
 - SELECT/INSERT based on task accessibility
 - DELETE restricted to attachment uploader
 
 **ActivityLog Table:**
+
 - SELECT policy allows access to workspace member activities
 
 ## File Structure
@@ -255,6 +278,7 @@ apps/backend/
 ## Configuration Files
 
 ### appsettings.json
+
 ```json
 {
   "ConnectionStrings": {
@@ -281,6 +305,7 @@ apps/backend/
 ## Dependencies
 
 ### Backend
+
 - `Microsoft.EntityFrameworkCore` (9.0.x)
 - `Npgsql.EntityFrameworkCore.PostgreSQL` (9.0.x)
 - `MediatR` (12.x)
@@ -290,9 +315,9 @@ apps/backend/
 
 - [x] **Phase 01:** Project setup and architecture
 - [x] **Phase 02:** Domain entities and database schema
-- [ ] **Phase 03:** Authentication & authorization
+- [x] **Phase 03:** Authentication & authorization
 - [ ] **Phase 04:** Core workspace functionality
-- [ ] **Phase 05:** Task management CRUD
+- [x] **Phase 05:** Task management CRUD
 - [ ] **Phase 06:** Real-time updates via SignalR
 - [ ] **Phase 07:** File attachments
 - [ ] **Phase 08:** Comments and collaboration
@@ -303,10 +328,10 @@ apps/backend/
 
 ## Next Steps
 
-1. **Phase 03:** Implement JWT authentication and role-based authorization
-2. **Phase 04:** Build workspace management endpoints
-3. **Phase 05:** Create task CRUD operations
-4. **Future:** Add real-time updates, file handling, advanced search
+1. **Phase 04:** Complete workspace management endpoints
+2. **Phase 06:** Add real-time updates via SignalR
+3. **Phase 07:** Implement file attachment handling
+4. **Future:** Add advanced search, comments, performance optimization
 
 ---
 

@@ -122,10 +122,11 @@
 
 ---
 
-### Phase 04: Core Workspace Functionality ⏳ **PLANNED**
+### Phase 04: Core Workspace Functionality 🔄 **IN PROGRESS**
 
 **Timeline:** Q1 2026
-**Status:** 📋 Planned
+**Status:** 🔄 In Progress (50%)
+**Progress:** Core CRUD operations complete. Pending: tests, validation, attachments, bulk operations.
 
 **Planned Deliverables:**
 
@@ -161,25 +162,46 @@
 
 ---
 
-### Phase 05: Task Management CRUD ⏳ **PLANNED**
+### Phase 05: Task Management CRUD ✅ **COMPLETE**
 
-**Timeline:** Q1 2026
-**Status:** 📋 Planned
+**Timeline:** Completed 2026-01-03
+**Status:** ✅ Done
 
-**Planned Deliverables:**
+**Deliverables:**
 
-- [ ] Create task endpoint
-- [ ] Update task endpoint
-- [ ] Delete task endpoint
-- [ ] Get task by ID
-- [ ] List tasks (with filters)
-- [ ] Task status management
-- [ ] Task assignment
-- [ ] Task priority levels
-- [ ] Due date management
-- [ ] Task nesting (parent-child)
-- [ ] Bulk task operations
-- [ ] Task search
+- [x] Create task endpoint (POST /api/tasks)
+- [x] Update task endpoint (PUT /api/tasks/{id})
+- [x] Delete task endpoint (DELETE /api/tasks/{id})
+- [x] Get task by ID (GET /api/tasks/{id})
+- [x] List tasks with filters (GET /api/tasks)
+- [ ] Task status management (future)
+- [x] Task assignment (via AssigneeId)
+- [x] Task priority levels
+- [x] Due date management
+- [x] Task nesting (via ParentTaskId)
+- [ ] Bulk task operations (future)
+- [x] Task search (via search parameter)
+
+**API Endpoints:**
+
+- `POST /api/tasks` - Create task
+- `GET /api/tasks/{id}` - Get task by ID
+- `GET /api/tasks` - List tasks with filters (ProjectId, StatusId, AssigneeId, Search, SortBy, Page, PageSize)
+- `PUT /api/tasks/{id}` - Update task
+- `DELETE /api/tasks/{id}` - Delete task
+
+**Features Implemented:**
+
+- Task CRUD operations with CQRS pattern
+- Filtering by project, status, assignee
+- Full-text search on title/description
+- Sorting (any field, ascending/descending)
+- Pagination (Page, PageSize)
+- Hierarchical tasks (parent-child via ParentTaskId)
+- Priority levels (low, medium, high, urgent)
+- Date tracking (StartDate, DueDate)
+- Time estimation (EstimatedHours)
+- Result pattern for error handling (non-generic + generic Result types)
 
 **Endpoints:**
 
@@ -200,7 +222,7 @@
 
 ---
 
-### Phase 06: Project Management ⏳ **PLANNED**
+### Phase 06: Real-time Updates via SignalR ⏳ **PLANNED**
 
 **Timeline:** Q1 2026
 **Status:** 📋 Planned
@@ -236,7 +258,43 @@
 
 ---
 
-### Phase 07: Real-time Updates via SignalR ⏳ **PLANNED**
+### Phase 07: Project Management ⏳ **PLANNED**
+
+**Timeline:** Q1 2026
+**Status:** 📋 Planned
+
+**Planned Deliverables:**
+
+- [ ] Create project endpoint
+- [ ] Update project endpoint
+- [ ] Delete project endpoint
+- [ ] Get project by ID
+- [ ] List workspace projects
+- [ ] Project status management
+- [ ] Project color/icon customization
+- [ ] Project settings
+- [ ] Archive/restore projects
+
+**Endpoints:**
+
+- `POST /api/workspaces/{workspaceId}/projects`
+- `GET /api/workspaces/{workspaceId}/projects`
+- `GET /api/projects/{id}`
+- `PUT /api/projects/{id}`
+- `DELETE /api/projects/{id}`
+- `PATCH /api/projects/{id}/status`
+
+**Features:**
+
+- Project CRUD operations
+- Custom statuses per project
+- Color and icon customization
+- Project archiving
+- Project cloning (future)
+
+---
+
+### Phase 08: Real-time Updates via SignalR ⏳ **PLANNED**
 
 **Timeline:** Q2 2026
 **Status:** 📋 Planned
@@ -269,7 +327,7 @@
 
 ---
 
-### Phase 08: File Attachments ⏳ **PLANNED**
+### Phase 09: File Attachments ⏳ **PLANNED**
 
 **Timeline:** Q2 2026
 **Status:** 📋 Planned
@@ -305,7 +363,7 @@
 
 ---
 
-### Phase 09: Comments and Collaboration ⏳ **PLANNED**
+### Phase 10: Comments and Collaboration ⏳ **PLANNED**
 
 **Timeline:** Q2 2026
 **Status:** 📋 Planned
@@ -341,7 +399,7 @@
 
 ---
 
-### Phase 10: Advanced Filtering and Search ⏳ **PLANNED**
+### Phase 11: Advanced Filtering and Search ⏳ **PLANNED**
 
 **Timeline:** Q2 2026
 **Status:** 📋 Planned
@@ -374,7 +432,7 @@
 
 ---
 
-### Phase 11: Activity Logging and Audit Trail ⏳ **PLANNED**
+### Phase 12: Activity Logging and Audit Trail ⏳ **PLANNED**
 
 **Timeline:** Q2 2026
 **Status:** 📋 Planned
@@ -404,7 +462,7 @@
 
 ---
 
-### Phase 12: Task Status Management ⏳ **PLANNED**
+### Phase 13: Task Status Management ⏳ **PLANNED**
 
 **Timeline:** Q2 2026
 **Status:** 📋 Planned
@@ -437,7 +495,7 @@
 
 ---
 
-### Phase 13: Frontend Development ⏳ **PLANNED**
+### Phase 14: Frontend Development ⏳ **PLANNED**
 
 **Timeline:** Q2-Q3 2026
 **Status:** 📋 Planned
@@ -472,7 +530,7 @@
 
 ---
 
-### Phase 14: Mobile Responsive Design ⏳ **PLANNED**
+### Phase 15: Mobile Responsive Design ⏳ **PLANNED**
 
 **Timeline:** Q3 2026
 **Status:** 📋 Planned
@@ -496,7 +554,7 @@
 
 ---
 
-### Phase 15: Performance Optimization ⏳ **PLANNED**
+### Phase 16: Performance Optimization ⏳ **PLANNED**
 
 **Timeline:** Q3 2026
 **Status:** 📋 Planned
@@ -523,7 +581,7 @@
 
 ---
 
-### Phase 16: Testing and Quality Assurance ⏳ **PLANNED**
+### Phase 17: Testing and Quality Assurance ⏳ **PLANNED**
 
 **Timeline:** Q3 2026
 **Status:** 📋 Planned
@@ -550,7 +608,7 @@
 
 ---
 
-### Phase 17: Deployment and DevOps ⏳ **PLANNED**
+### Phase 18: Deployment and DevOps ⏳ **PLANNED**
 
 **Timeline:** Q4 2026
 **Status:** 📋 Planned
@@ -581,7 +639,7 @@
 
 ---
 
-### Phase 18: Advanced Features ⏳ **PLANNED**
+### Phase 19: Advanced Features ⏳ **PLANNED**
 
 **Timeline:** Q4 2026
 **Status:** 📋 Planned
@@ -608,22 +666,24 @@
 - [x] **M1:** Project Setup (Phase 01) - Q4 2025
 - [x] **M2:** Core Database (Phase 02) - Q1 2026
 - [x] **M3:** Authentication (Phase 03) - Q1 2026
-- [ ] **M4:** Basic CRUD (Phases 04-06) - Q1 2026
-- [ ] **M5:** Real-time Features (Phase 07) - Q2 2026
-- [ ] **M6:** Collaboration (Phases 08-09) - Q2 2026
-- [ ] **M7:** Frontend Complete (Phase 13) - Q3 2026
-- [ ] **M8:** Production Ready (Phases 15-17) - Q4 2026
+- [x] **M4:** Task Management (Phase 05) - Q1 2026
+- [ ] **M5:** Workspace Management (Phase 04) - Q1 2026
+- [ ] **M6:** Real-time Features (Phase 08) - Q2 2026
+- [ ] **M7:** Collaboration (Phases 09-10) - Q2 2026
+- [ ] **M8:** Frontend Complete (Phase 14) - Q3 2026
+- [ ] **M9:** Production Ready (Phases 16-18) - Q4 2026
 
 ## Dependencies
 
 **Phase 03 depends on:** Phase 02
 **Phase 04 depends on:** Phase 03
-**Phase 05 depends on:** Phase 04
-**Phase 07 depends on:** Phase 05
+**Phase 05 depends on:** Phase 03
+**Phase 07 depends on:** Phase 04
 **Phase 08 depends on:** Phase 05
 **Phase 09 depends on:** Phase 05
-**Phase 13 depends on:** Phases 03-12
-**Phase 17 depends on:** All previous phases
+**Phase 10 depends on:** Phase 05
+**Phase 14 depends on:** Phases 03-13
+**Phase 18 depends on:** All previous phases
 
 ## Risk Assessment
 

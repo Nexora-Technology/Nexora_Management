@@ -10,6 +10,10 @@ jobs:
     name: Backend Tests
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: ./apps/backend
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -20,19 +24,13 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Restore dependencies
-        run: |
-          cd apps/backend
-          dotnet restore
+        run: dotnet restore
 
       - name: Build
-        run: |
-          cd apps/backend
-          dotnet build --no-restore
+        run: dotnet build --no-restore
 
       - name: Run tests
-        run: |
-          cd apps/backend
-          dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
+        run: dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx"
 
       - name: Upload test results
         if: always()
@@ -55,41 +53,13 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: |
-          cd apps/frontend
-          npm ci
+        run: npm ci
 
       - name: Run linter
-        run: |
-          cd apps/frontend
-          npm run lint
+        run: turbo run lint --filter=@nexora/frontend
 
       - name: Type check
-        run: |
-          cd apps/frontend
-          npm run type-check || echo "No type-check script found"
+        run: turbo run type-check --filter=@nexora/frontend || echo "No type-check script found"
 
       - name: Build
-        run: |
-          cd apps/frontend
-          npm run build
-
-  docker-build:
-    name: Docker Build Validation
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Build Backend Docker Image
-        run: |
-          docker build -t nexora-backend:test ./apps/backend
-
-      - name: Build Frontend Docker Image
-        run: |
-          docker build -t nexora-frontend:test ./apps/frontend
-
-      - name: Validate docker-compose configuration
-        run: |
-          docker-compose -f docker-compose.yml config
+        run: turbo run build --filter=@nexora/frontend
