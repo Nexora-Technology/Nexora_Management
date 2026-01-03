@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Nexora.Management.Application.Tasks.Commands.CreateTask;
 using Nexora.Management.Application.Tasks.Commands.DeleteTask;
 using Nexora.Management.Application.Tasks.Commands.UpdateTask;
+using Nexora.Management.Application.Tasks.Commands.UpdateTaskStatus;
 using Nexora.Management.Application.Tasks.DTOs;
 using Nexora.Management.Application.Tasks.Queries;
+using Nexora.Management.Application.Tasks.Queries.ViewQueries;
 
 namespace Nexora.Management.API.Endpoints;
 
@@ -127,5 +129,71 @@ public static class TaskEndpoints
         })
         .WithName("DeleteTask")
         .WithSummary("Delete task");
+
+        // Update task status (for Board view drag-drop)
+        group.MapPatch("/{id}/status", async (Guid id, [FromBody] UpdateTaskStatusRequest request, ISender sender) =>
+        {
+            var command = new UpdateTaskStatusCommand(id, request.StatusId);
+            var result = await sender.Send(command);
+
+            if (result.IsFailure)
+            {
+                return Results.BadRequest(new { error = result.Error });
+            }
+
+            return Results.Ok(result.Value);
+        })
+        .WithName("UpdateTaskStatus")
+        .WithSummary("Update task status");
+
+        // Board View - Get kanban board data
+        group.MapGet("/views/board/{projectId}", async (Guid projectId, ISender sender) =>
+        {
+            var query = new GetBoardViewQuery(projectId);
+            var result = await sender.Send(query);
+
+            if (result.IsFailure)
+            {
+                return Results.BadRequest(new { error = result.Error });
+            }
+
+            return Results.Ok(result.Value);
+        })
+        .WithName("GetBoardView")
+        .WithSummary("Get board view data");
+
+        // Calendar View - Get calendar data
+        group.MapGet("/views/calendar/{projectId}", async (Guid projectId, int year, int month, ISender sender) =>
+        {
+            var query = new GetCalendarViewQuery(projectId, year, month);
+            var result = await sender.Send(query);
+
+            if (result.IsFailure)
+            {
+                return Results.BadRequest(new { error = result.Error });
+            }
+
+            return Results.Ok(result.Value);
+        })
+        .WithName("GetCalendarView")
+        .WithSummary("Get calendar view data");
+
+        // Gantt View - Get gantt chart data
+        group.MapGet("/views/gantt/{projectId}", async (Guid projectId, ISender sender) =>
+        {
+            var query = new GetGanttViewQuery(projectId);
+            var result = await sender.Send(query);
+
+            if (result.IsFailure)
+            {
+                return Results.BadRequest(new { error = result.Error });
+            }
+
+            return Results.Ok(result.Value);
+        })
+        .WithName("GetGanttView")
+        .WithSummary("Get gantt view data");
     }
 }
+
+public record UpdateTaskStatusRequest(Guid StatusId);
