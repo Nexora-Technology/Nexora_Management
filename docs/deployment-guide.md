@@ -1,7 +1,7 @@
 # Deployment Guide
 
 **Last Updated:** 2026-01-03
-**Version:** Phase 03 Complete (Authentication)
+**Version:** Phase 05 Complete (Multiple Views Implementation)
 
 ## Overview
 
@@ -62,8 +62,8 @@ docker-compose logs backend
 **4. Access Applications:**
 
 - Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
-- Swagger UI: http://localhost:5000/swagger
+- Backend API: http://localhost:5001
+- Swagger UI: http://localhost:5001/swagger
 - PostgreSQL: localhost:5432
 - Redis: localhost:6379
 
@@ -169,8 +169,8 @@ dotnet ef database update --project src/Nexora.Management.API
 cd apps/backend
 dotnet run --project src/Nexora.Management.API
 
-# API available at http://localhost:5000
-# Swagger at http://localhost:5000/swagger
+# API available at http://localhost:5001
+# Swagger at http://localhost:5001/swagger
 ```
 
 **7. Configure Frontend:**
@@ -180,7 +180,7 @@ cd apps/frontend
 
 # Create .env.local
 cat > .env.local << EOF
-NEXT_PUBLIC_API_URL=http://localhost:5000
+NEXT_PUBLIC_API_URL=http://localhost:5001
 EOF
 ```
 
@@ -527,7 +527,7 @@ dotnet ef migrations script --project src/Nexora.Management.API --output migrati
 ```bash
 # Find process using port
 lsof -i :3000  # Frontend
-lsof -i :5000  # Backend
+lsof -i :5001  # Backend
 lsof -i :5432  # PostgreSQL
 
 # Kill process

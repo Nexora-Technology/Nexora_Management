@@ -1,7 +1,7 @@
 # Codebase Summary
 
 **Last Updated:** 2026-01-03
-**Version:** Phase 03 Complete (Authentication & Authorization)
+**Version:** Phase 05 Complete (Multiple Views Implementation)
 
 ## Project Overview
 
@@ -103,9 +103,9 @@ Nexora Management is a ClickUp-inspired project management platform built with .
   - `PermissionRequirement` - Authorization requirement for resource-action based access control
 
 - **Tasks:**
-  - **Commands:** CreateTask, UpdateTask, DeleteTask
-  - **Queries:** GetTaskById, GetTasks (with filtering)
-  - **DTOs:** TaskDto, CreateTaskRequest, UpdateTaskRequest, GetTasksQueryRequest
+  - **Commands:** CreateTask, UpdateTask, DeleteTask, UpdateTaskStatus
+  - **Queries:** GetTaskById, GetTasks (with filtering), GetBoardView, GetCalendarView, GetGanttView
+  - **DTOs:** TaskDto, CreateTaskRequest, UpdateTaskRequest, GetTasksQueryRequest, ViewDTOs (BoardColumnDto, CalendarTaskDto, GanttTaskDto)
 
 #### 4. API Layer (`/apps/backend/src/Nexora.Management.API/`)
 
@@ -403,7 +403,14 @@ apps/backend/
   - Attachments module with security hardening
   - UserContext for authenticated user access
   - Security fixes: path traversal, file size limits, type validation
-- [ ] **Phase 05:** Advanced task features
+- [x] **Phase 05:** Multiple Views Implementation
+  - ViewContext with localStorage persistence
+  - ListView: Sortable table with expandable rows
+  - BoardView: Kanban board with @dnd-kit drag-drop
+  - CalendarView: Monthly calendar grid
+  - GanttView: Timeline with zoom levels
+  - Backend view-specific query handlers
+  - UpdateTaskStatusCommand for drag-drop operations
 - [ ] **Phase 06:** Real-time updates via SignalR
 - [ ] **Phase 07:** Bulk operations
 - [ ] **Phase 08:** Activity logging
@@ -425,6 +432,10 @@ apps/backend/
 - `POST /` - Create new task
 - `PUT /{id}` - Update task
 - `DELETE /{id}` - Delete task
+- `PATCH /{id}/status` - Update task status (for Board drag-drop)
+- `GET /views/board/{projectId}` - Get board view data (columns with tasks)
+- `GET /views/calendar/{projectId}?year=&month=` - Get calendar view data
+- `GET /views/gantt/{projectId}` - Get gantt view data (hierarchical tasks)
 
 ### Comments (`/api/comments`)
 - `POST /` - Add comment to task
@@ -450,8 +461,8 @@ apps/backend/
 
 ## Next Steps
 
-1. **Phase 05:** Bulk operations (BulkUpdate, BulkDelete, BulkMove)
-2. **Phase 06:** Add real-time updates via SignalR
+1. **Phase 06:** Real-time updates via SignalR
+2. **Phase 07:** Bulk operations (BulkUpdate, BulkDelete, BulkMove)
 3. **Phase 08:** Implement activity logging service
 4. **Future:** Add advanced search, performance optimization
 

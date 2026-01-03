@@ -251,7 +251,7 @@ ConnectionStrings__Redis: 'redis:6379,password=nexora_dev'
 
 **Ports:**
 
-- `5000:8080` (Host:Container)
+- `5001:8080` (Host:Container)
 
 **Dependencies:**
 
@@ -676,7 +676,7 @@ docker-compose down -v
 ```bash
 # Find process using port
 lsof -i :3000
-lsof -i :5000
+lsof -i :5001
 
 # Kill process
 kill -9 <PID>

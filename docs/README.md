@@ -1,7 +1,7 @@
 # Documentation Index
 
 **Last Updated:** 2026-01-03
-**Version:** Phase 04 Core Complete
+**Version:** Phase 05 Views Complete (Multiple Views Implementation)
 
 ## Quick Links
 
@@ -235,7 +235,44 @@ The `docs/research/` directory contains research and investigation documents:
 - Updated [codebase-summary.md](codebase-summary.md) with Comments/Attachments modules
 - Code review report: `plans/reports/code-reviewer-260103-1931-phase04-task-mgmt-core.md`
 
-### Phase 05-12: In Progress
+### Phase 05: Multiple Views Implementation ✅
+
+**Completed:**
+
+- [x] **ViewContext** - React Context for view state management with localStorage persistence
+- [x] **ListView** - Sortable table with expandable rows, search, and filters
+- [x] **BoardView** - Kanban board with drag-drop using @dnd-kit library
+- [x] **CalendarView** - Monthly calendar grid showing tasks by due date
+- [x] **GanttView** - Timeline visualization with day/week/month zoom levels
+- [x] Backend view-specific query handlers (BoardViewQuery, CalendarViewQuery, GanttViewQuery)
+- [x] UpdateTaskStatusCommand for drag-drop operations
+- [x] API endpoints: GET /api/tasks/views/{board|calendar|gantt}/{projectId}
+
+**Frontend Files Created:**
+- `src/features/views/ViewContext.tsx` - Context provider for view state
+- `src/features/views/ViewSwitcher.tsx` - Toggle buttons for view switching
+- `src/features/views/ViewLayout.tsx` - Layout wrapper routing to current view
+- `src/features/views/list/ListView.tsx` - Sortable table view
+- `src/features/views/board/BoardView.tsx` - Kanban with drag-drop
+- `src/features/views/calendar/CalendarView.tsx` - Monthly calendar
+- `src/features/views/gantt/GanttView.tsx` - Timeline with zoom
+
+**Backend Files Created:**
+- `Tasks/DTOs/ViewDTOs.cs` - View-specific DTOs
+- `Tasks/Queries/ViewQueries/BoardViewQuery.cs` - Tasks grouped by status
+- `Tasks/Queries/ViewQueries/CalendarViewQuery.cs` - Tasks by month/year
+- `Tasks/Queries/ViewQueries/GanttViewQuery.cs` - Hierarchical task structure
+- `Tasks/Commands/UpdateTaskStatus/UpdateTaskStatusCommand.cs` - Status updates
+
+**Dependencies Added:**
+- `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/modifiers` - Modern drag-drop library
+
+**Documentation Deliverables:**
+
+- Updated [codebase-summary.md](codebase-summary.md) with Views module structure
+- Code review report: `plans/reports/code-reviewer-260103-2040-phase05-multiple-views.md`
+
+### Phase 06-12: In Progress
 
 See [project-roadmap.md](project-roadmap.md) for upcoming phases.
 
@@ -285,8 +322,8 @@ npx lint-staged
 ### Access Points (Local Development)
 
 - Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
-- Swagger UI: http://localhost:5000/swagger
+- Backend API: http://localhost:5001
+- Swagger UI: http://localhost:5001/swagger
 - PostgreSQL: localhost:5432
 - Redis: localhost:6379
 
