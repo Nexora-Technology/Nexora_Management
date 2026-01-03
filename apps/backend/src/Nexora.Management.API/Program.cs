@@ -1,13 +1,16 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Nexora.Management.Domain.Entities;
 using Nexora.Management.Infrastructure.Authentication;
 using Nexora.Management.Infrastructure.Interfaces;
+using Nexora.Management.API.Middleware;
 using Nexora.Management.Infrastructure.Persistence;
 using Nexora.Management.API.Endpoints;
+using Nexora.Management.Application.Authorization;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,7 +47,18 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    // This will be dynamically handled by the PermissionAuthorizationHandler
+    // Policies follow the format: "Permission:resource:action"
+    // Example: [RequirePermission("tasks", "create")] generates policy "Permission:tasks:create"
+});
+
+// Register Permission Authorization Policy Provider
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+
+// Register Permission Authorization Handler (scoped to get DbContext)
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 // Configure CORS
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:3000" };
@@ -99,6 +113,9 @@ app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Add Workspace Authorization Middleware for RLS support
+app.UseWorkspaceAuthorization();
 
 app.MapControllers();
 

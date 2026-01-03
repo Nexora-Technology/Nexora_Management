@@ -23,4 +23,13 @@ public interface IAppDbContext
     DbSet<ActivityLog> ActivityLogs { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+
+    // For raw SQL execution (needed for RLS and authorization queries)
+    Task<int> ExecuteSqlRawAsync(string sql, params object[] parameters);
+
+    // For raw SQL queries with return type
+    Task<List<T>> SqlQueryRawAsync<T>(string sql, params object[] parameters);
+
+    // For raw SQL query that returns single result
+    Task<T> SqlQuerySingleAsync<T>(string sql, params object[] parameters);
 }

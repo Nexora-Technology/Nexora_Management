@@ -61,4 +61,19 @@ public class AppDbContext : DbContext, IAppDbContext
 
         return await base.SaveChangesAsync(cancellationToken);
     }
+
+    public Task<int> ExecuteSqlRawAsync(string sql, params object[] parameters)
+    {
+        return Database.ExecuteSqlRawAsync(sql, parameters);
+    }
+
+    public async Task<List<T>> SqlQueryRawAsync<T>(string sql, params object[] parameters)
+    {
+        return await Database.SqlQueryRaw<T>(sql, parameters).ToListAsync();
+    }
+
+    public async Task<T> SqlQuerySingleAsync<T>(string sql, params object[] parameters)
+    {
+        return await Database.SqlQueryRaw<T>(sql, parameters).FirstOrDefaultAsync();
+    }
 }
