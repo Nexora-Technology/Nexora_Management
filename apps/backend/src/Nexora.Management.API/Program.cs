@@ -105,6 +105,9 @@ app.MapControllers();
 // Map Auth endpoints
 app.MapAuthEndpoints();
 
+// Map Task endpoints
+app.MapTaskEndpoints();
+
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok(new
 {
