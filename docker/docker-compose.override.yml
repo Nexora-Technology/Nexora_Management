@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  backend:
+    volumes:
+      # Hot reload for development
+      - ../apps/backend/src/Nexora.Management.API:/app/src:cached
+      - ../apps/backend/src/Nexora.Management.Application:/app/src/Application:cached
+      - ../apps/backend/src/Nexora.Management.Domain:/app/src/Domain:cached
+      - ../apps/backend/src/Nexora.Management.Infrastructure:/app/src/Infrastructure:cached
+    environment:
+      # Enable detailed error pages
+      ASPNETCORE_ENVIRONMENT: Development
+      # Enable Swagger UI
+      SWASHBUCKLE__ENABLE: "true"
+
+  frontend:
+    volumes:
+      # Hot reload for development
+      - ../apps/frontend/src:/app/apps/frontend/src:cached
+      - ../apps/frontend/public:/app/apps/frontend/public:cached
+      - ../apps/frontend/app:/app/apps/frontend/app:cached
+      - /app/apps/frontend/node_modules
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:5000
+
+  postgres:
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+
+  redis:
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres-dev-data:
+    driver: local
