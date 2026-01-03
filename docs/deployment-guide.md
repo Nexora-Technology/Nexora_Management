@@ -1,7 +1,7 @@
 # Deployment Guide
 
 **Last Updated:** 2026-01-03
-**Version:** Phase 01 Complete
+**Version:** Phase 03 Complete (Authentication)
 
 ## Overview
 
@@ -352,9 +352,13 @@ services:
 **Environment Variables:**
 
 - `DB_PASSWORD` - Database password
-- `JWT_SECRET` - JWT signing secret
+- `JWT__Secret` - JWT signing secret (use `__` for nested config)
+- `JWT__Issuer` - JWT issuer claim
+- `JWT__Audience` - JWT audience claim
 - `ASPNETCORE_ENVIRONMENT` - Environment (Development/Production)
 - `ASPNETCORE_URLS` - Binding URLs
+
+**Important:** For JWT settings in production, use environment variables with double underscore notation for nested configuration (e.g., `JWT__Secret` maps to `Jwt:Secret`).
 
 ### Frontend Configuration
 
@@ -828,16 +832,18 @@ NODE_OPTIONS='--inspect' npm run dev
 
 ### Pre-Deployment
 
-- [ ] All environment variables configured
+- [ ] All environment variables configured (especially JWT settings)
 - [ ] Database migrations applied
 - [ ] SSL certificates configured
 - [ ] CORS settings updated for production domain
 - [ ] Logging and monitoring configured
 - [ ] Backup strategy in place
 - [ ] Health check endpoints configured
-- [ ] Secret management configured
+- [ ] Secret management configured (JWT secret must be secure)
 - [ ] CDN configured for static assets
 - [ ] Database connection pooling optimized
+
+**Security Note:** Ensure JWT secret is at least 32 characters and stored securely in production (never commit to git). Use environment variables or secret management services.
 
 ### Post-Deployment
 

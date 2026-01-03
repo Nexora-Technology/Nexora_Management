@@ -14,6 +14,7 @@ public interface IAppDbContext
     DbSet<WorkspaceMember> WorkspaceMembers { get; }
     DbSet<UserRole> UserRoles { get; }
     DbSet<RolePermission> RolePermissions { get; }
+    DbSet<RefreshToken> RefreshTokens { get; }
     DbSet<Project> Projects { get; }
     DbSet<TaskStatusEntity> TaskStatuses { get; }
     DbSet<TaskEntity> Tasks { get; }

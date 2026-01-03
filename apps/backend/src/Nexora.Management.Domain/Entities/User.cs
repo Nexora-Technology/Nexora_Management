@@ -11,6 +11,7 @@ public class User : BaseEntity
 
     // Navigation properties
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     public ICollection<Workspace> OwnedWorkspaces { get; set; } = new List<Workspace>();
     public ICollection<WorkspaceMember> WorkspaceMemberships { get; set; } = new List<WorkspaceMember>();
     public ICollection<Project> OwnedProjects { get; set; } = new List<Project>();

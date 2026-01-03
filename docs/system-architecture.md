@@ -1,7 +1,7 @@
 # System Architecture
 
 **Last Updated:** 2026-01-03
-**Version:** Phase 02 Complete
+**Version:** Phase 03 Complete (Authentication)
 
 ## Overview
 
@@ -43,7 +43,9 @@ Nexora Management implements **Clean Architecture** principles with clear separa
 ### Components
 
 #### Entities (14 Domain Models)
+
 All entities inherit from `BaseEntity` which provides:
+
 - `Id` (Guid) - Unique identifier
 - `CreatedAt` (DateTime) - Creation timestamp
 - `UpdatedAt` (DateTime) - Last update timestamp
@@ -57,6 +59,7 @@ BaseEntity (abstract)
 ├── Permission
 ├── UserRole (join table)
 ├── RolePermission (join table)
+├── RefreshToken
 ├── Workspace
 ├── WorkspaceMember (join table)
 ├── Project
@@ -121,6 +124,7 @@ BaseEntity (abstract)
 #### Persistence Subsystem
 
 **AppDbContext**
+
 ```csharp
 public class AppDbContext : DbContext, IAppDbContext
 {
@@ -151,6 +155,7 @@ public class AppDbContext : DbContext, IAppDbContext
 ```
 
 **Key Features:**
+
 - Auto-auditing (CreatedAt, UpdatedAt)
 - Auto-generation of UUIDs
 - PostgreSQL extension registration (uuid-ossp, pg_trgm)
@@ -161,6 +166,7 @@ public class AppDbContext : DbContext, IAppDbContext
 Each entity has a dedicated `IEntityTypeConfiguration<T>` implementation:
 
 **Example: UserConfiguration**
+
 ```csharp
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {
@@ -179,6 +185,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 ```
 
 **Configuration Features:**
+
 - Table and column mappings
 - Data type constraints (max length, required)
 - Index creation (unique, composite, filtered)
@@ -188,6 +195,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 #### Interfaces
 
 **IAppDbContext**
+
 ```csharp
 public interface IAppDbContext
 {
@@ -212,6 +220,7 @@ public interface IAppDbContext
 
 **ApiResponse<T>**
 Standardized wrapper for all API responses:
+
 ```csharp
 public class ApiResponse<T>
 {
@@ -225,6 +234,7 @@ public class ApiResponse<T>
 #### MediatR Setup
 
 Registered in `Program.cs`:
+
 ```csharp
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(ApiResponse<>).Assembly));
@@ -232,11 +242,40 @@ builder.Services.AddMediatR(cfg =>
 
 **Purpose:** CQRS pattern implementation (Commands and Queries to be added in Phase 03+)
 
+### Authentication Commands
+
+**Location:** `/apps/backend/src/Nexora.Management.Application/Authentication/Commands/`
+
+Implemented CQRS commands for authentication:
+
+- **RegisterCommand** (`Commands/Register/`)
+  - Creates new user with hashed password
+  - Assigns Owner role
+  - Creates default workspace
+  - Generates JWT access + refresh tokens
+  - Returns AuthResponse with user details
+
+- **LoginCommand** (`Commands/Login/`)
+  - Validates user credentials
+  - Verifies password hash
+  - Generates new JWT tokens
+  - Returns AuthResponse
+
+- **RefreshTokenCommand** (`Commands/RefreshToken/`)
+  - Validates refresh token
+  - Checks token expiry and revocation status
+  - Generates new access token
+  - Rotates refresh token
+
+**DTOs** (`DTOs/`):
+
+- `AuthRequests`: RegisterRequest, LoginRequest, RefreshTokenRequest
+- `AuthResponses`: AuthResponse, UserDto
+
 ### Future Components (Planned)
 
-- **Commands:** Create, Update, Delete operations
+- **Commands:** Create, Update, Delete operations for other domains
 - **Queries:** Read operations with complex business logic
-- **DTOs:** Data transfer objects for API layer
 - **Validation:** FluentValidation rules
 - **Mapping:** AutoMapper profiles
 
@@ -251,13 +290,37 @@ builder.Services.AddMediatR(cfg =>
 #### Program.cs (Application Entry Point)
 
 **Configuration:**
+
 1. **Serilog Logging:**
+
    ```csharp
    builder.Host.UseSerilog((context, configuration) =>
        configuration.ReadFrom.Configuration(context.Configuration));
    ```
 
-2. **CORS Policy:**
+2. **JWT Authentication:**
+
+   ```csharp
+   builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+       .AddJwtBearer(options =>
+       {
+           options.TokenValidationParameters = new TokenValidationParameters
+           {
+               ValidateIssuerSigningKey = true,
+               IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+               ValidateIssuer = true,
+               ValidIssuer = jwtSettings.Issuer,
+               ValidateAudience = true,
+               ValidAudience = jwtSettings.Audience,
+               ValidateLifetime = true,
+               ClockSkew = TimeSpan.Zero
+           };
+       });
+   builder.Services.AddAuthorization();
+   ```
+
+3. **CORS Policy:**
+
    ```csharp
    builder.Services.AddCors(options =>
    {
@@ -271,13 +334,15 @@ builder.Services.AddMediatR(cfg =>
    });
    ```
 
-3. **Swagger/OpenAPI:**
+4. **Swagger/OpenAPI:**
+
    ```csharp
    builder.Services.AddEndpointsApiExplorer();
    builder.Services.AddSwaggerGen();
    ```
 
-4. **DbContext Registration:**
+5. **DbContext Registration:**
+
    ```csharp
    builder.Services.AddDbContext<AppDbContext>(options =>
        options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -285,23 +350,37 @@ builder.Services.AddMediatR(cfg =>
        provider.GetRequiredService<AppDbContext>());
    ```
 
-5. **MediatR Registration:**
+6. **MediatR Registration:**
+
    ```csharp
    builder.Services.AddMediatR(cfg =>
        cfg.RegisterServicesFromAssembly(typeof(Nexora.Management.Application.Common.ApiResponse<>).Assembly));
    ```
 
+7. **Infrastructure Services:**
+   ```csharp
+   builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+   builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+   builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+   ```
+
 **Middleware Pipeline:**
+
 1. Swagger (Development only)
 2. HTTPS Redirection
 3. CORS
-4. Authorization
-5. Map Controllers
+4. Authentication
+5. Authorization
+6. Map Controllers
 
 **Endpoints:**
+
 - `GET /` - Welcome message with API info
 - `GET /health` - Health check endpoint
 - `/swagger` - Swagger UI (root in development)
+- `POST /api/auth/register` - User registration
+- `POST /api/auth/login` - User login
+- `POST /api/auth/refresh` - Token refresh
 
 #### Database Migrations
 
@@ -327,7 +406,41 @@ builder.Services.AddMediatR(cfg =>
    - Creates initial role-permission assignments
 
 **Model Snapshot:**
+
 - `AppDbContextModelSnapshot.cs` - Current EF Core model state
+
+#### Authentication Infrastructure
+
+**JWT Settings** (`Infrastructure/Authentication/JwtSettings.cs`):
+
+```csharp
+public class JwtSettings
+{
+    public string Secret { get; set; } = string.Empty;
+    public string Issuer { get; set; } = string.Empty;
+    public string Audience { get; set; } = string.Empty;
+    public int AccessTokenExpirationMinutes { get; set; }
+    public int RefreshTokenExpirationDays { get; set; }
+}
+```
+
+**JWT Token Service** (`Infrastructure/Authentication/JwtTokenService.cs`):
+
+- `GenerateAccessToken()` - Creates JWT with user claims
+- `GenerateRefreshToken()` - Creates cryptographically secure random token
+- `ValidateToken()` - Validates JWT and returns ClaimsPrincipal
+
+**Configuration** (`appsettings.json`):
+
+```json
+"Jwt": {
+  "Secret": "YOUR_SUPER_SECRET_KEY_MUST_BE_AT_LEAST_32_CHARACTERS_LONG_FOR_SECURITY",
+  "Issuer": "NexoraManagement",
+  "Audience": "NexoraManagementAPI",
+  "AccessTokenExpirationMinutes": 15,
+  "RefreshTokenExpirationDays": 7
+}
+```
 
 ## Database Architecture
 
@@ -340,6 +453,7 @@ builder.Services.AddMediatR(cfg =>
 ### Schema Design
 
 **Multi-tenancy Pattern:**
+
 - Workspace-based data isolation
 - Users can be members of multiple workspaces
 - All data (except Users, Roles, Permissions) is workspace-scoped
@@ -371,6 +485,7 @@ builder.Services.AddMediatR(cfg =>
 ### Entity Relationships
 
 **Core Hierarchy:**
+
 ```
 User
  ├─ OwnedWorkspaces → Workspace
@@ -380,18 +495,21 @@ User
 ```
 
 **Many-to-Many:**
+
 ```
 User ←─ UserRole ──→ Role ←─ RolePermission ──→ Permission
        (Workspace)              (Resource, Action)
 ```
 
 **Self-Referencing:**
+
 ```
 Task (ParentTaskId) → Task (self)
 Comment (ParentCommentId) → Comment (self)
 ```
 
 **Cascading Deletes:**
+
 - Workspace → Projects, Tasks, Comments, Attachments
 - Project → Tasks, TaskStatuses
 - Task → Comments, Attachments
@@ -400,22 +518,27 @@ Comment (ParentCommentId) → Comment (self)
 ### Indexing Strategy
 
 **Unique Indexes:**
+
 - `Users.Email`
 - `Roles.Name`
 - `TaskStatuses.ProjectId, OrderIndex`
 
 **Foreign Key Indexes:**
+
 - All foreign keys have indexes for JOIN performance
 
 **Composite Indexes:**
+
 - `Tasks.ProjectId, StatusId, PositionOrder` (task list queries)
 - `ActivityLog.EntityType, EntityId, CreatedAt` (activity feed)
 - `ActivityLog.WorkspaceId, CreatedAt` (workspace activity)
 
 **GIN Indexes:**
+
 - `Tasks.CustomFieldsJsonb` (JSONB queries)
 
 **Filtered Indexes:**
+
 - `Tasks.AssigneeId` WHERE assignee_id IS NOT NULL
 - `Tasks.DueDate` WHERE due_date IS NOT NULL
 - `Projects.WorkspaceId` WHERE status = 'active'
@@ -429,6 +552,7 @@ Comment (ParentCommentId) → Comment (self)
 **Implementation:**
 
 1. **User Context Function:**
+
    ```sql
    CREATE FUNCTION set_current_user_id(user_id UUID)
    RETURNS VOID AS $$
@@ -454,6 +578,7 @@ Comment (ParentCommentId) → Comment (self)
    ```
 
 **Protected Tables:**
+
 - Tasks (4 policies: SELECT, INSERT, UPDATE, DELETE)
 - Projects (4 policies)
 - Comments (4 policies)
@@ -461,11 +586,13 @@ Comment (ParentCommentId) → Comment (self)
 - ActivityLog (1 policy: SELECT)
 
 **Unprotected Tables:**
+
 - Users (authentication layer handles access)
 - Roles, Permissions (static system data)
 - WorkspaceMembers, UserRoles, RolePermissions (junction tables)
 
 **Benefits:**
+
 - Defense in depth (application + database layer)
 - Automatic query filtering
 - No accidental data leaks
@@ -508,18 +635,21 @@ Comment (ParentCommentId) → Comment (self)
 ## Technology Justification
 
 ### .NET 9.0
+
 - Latest LTS with performance improvements
 - Native AOT compilation support
 - Enhanced JSON APIs
 - Improved logging and diagnostics
 
 ### Entity Framework Core 9.0
+
 - LINQ query translation improvements
 - Better PostgreSQL support via Npgsql
 - Migration management
 - Change tracking optimization
 
 ### PostgreSQL 16
+
 - Advanced RLS capabilities
 - JSONB with GIN indexes
 - Full-text search (pg_trgm)
@@ -527,6 +657,7 @@ Comment (ParentCommentId) → Comment (self)
 - Excellent performance
 
 ### Clean Architecture
+
 - Testability (mock dependencies)
 - Maintainability (clear separation)
 - Flexibility (swap implementations)
@@ -535,6 +666,7 @@ Comment (ParentCommentId) → Comment (self)
 ## Deployment Architecture
 
 ### Development Environment
+
 ```
 Frontend (Next.js) :3000
     ↓ HTTP/WebSocket
@@ -544,21 +676,22 @@ PostgreSQL :5432
 ```
 
 ### Docker Compose (Planned)
+
 ```yaml
 services:
   frontend:
     image: nexora-frontend
-    ports: ["3000:3000"]
+    ports: ['3000:3000']
 
   backend:
     image: nexora-backend
-    ports: ["5000:5000"]
+    ports: ['5000:5000']
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;...
 
   postgres:
     image: postgres:16
-    ports: ["5432:5432"]
+    ports: ['5432:5432']
     volumes:
       - postgres_data:/var/lib/postgresql/data
 ```
@@ -566,6 +699,7 @@ services:
 ## Performance Considerations
 
 ### Database Optimization
+
 - Strategic indexes on foreign keys
 - Composite indexes for common query patterns
 - Filtered indexes to reduce index size
@@ -573,11 +707,13 @@ services:
 - Connection pooling (default in Npgsql)
 
 ### Caching Strategy (Planned)
+
 - In-memory cache for frequently accessed data (Roles, Permissions)
 - Distributed cache (Redis) for session data
 - HTTP caching headers for static assets
 
 ### Query Optimization
+
 - Projection (SELECT specific columns)
 - Eager loading (Include()) vs lazy loading
 - Split queries for complex operations
@@ -586,15 +722,18 @@ services:
 ## Scalability Architecture
 
 ### Horizontal Scaling
+
 - API layer: Stateless design allows multiple instances
 - Database: Read replicas for query scaling
 - Frontend: Static files served via CDN
 
 ### Vertical Scaling
+
 - PostgreSQL: Connection pooling, resource limits
 - .NET: Async/await for better thread utilization
 
 ### Future Considerations
+
 - Message queue (RabbitMQ) for background jobs
 - CQRS with separate read/write databases
 - Event sourcing for audit trail

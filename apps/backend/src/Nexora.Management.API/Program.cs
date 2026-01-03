@@ -1,6 +1,13 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Nexora.Management.Infrastructure.Persistence;
+using Microsoft.IdentityModel.Tokens;
+using Nexora.Management.Domain.Entities;
+using Nexora.Management.Infrastructure.Authentication;
 using Nexora.Management.Infrastructure.Interfaces;
+using Nexora.Management.Infrastructure.Persistence;
+using Nexora.Management.API.Endpoints;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +18,33 @@ builder.Host.UseSerilog((context, configuration) =>
 
 // Add services to the container
 builder.Services.AddControllers();
+
+// Configure JWT Authentication
+var jwtSettings = new JwtSettings();
+builder.Configuration.GetSection(JwtSettings.SectionName).Bind(jwtSettings);
+builder.Services.AddSingleton(jwtSettings);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret)),
+        ValidateIssuer = true,
+        ValidIssuer = jwtSettings.Issuer,
+        ValidateAudience = true,
+        ValidAudience = jwtSettings.Audience,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
+builder.Services.AddAuthorization();
 
 // Configure CORS
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:3000" };
@@ -29,7 +63,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Register Application layer services (will be expanded in future phases)
+// Register Application layer services
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Nexora.Management.Application.Common.ApiResponse<>).Assembly));
 
 // Register Infrastructure layer services
@@ -39,6 +73,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Register Infrastructure interfaces
 builder.Services.AddScoped<IAppDbContext>(provider =>
     provider.GetRequiredService<AppDbContext>());
+
+// Register JWT Token Service
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+
+// Register Password Hasher
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 
 var app = builder.Build();
 
@@ -57,9 +97,13 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowFrontend");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Map Auth endpoints
+app.MapAuthEndpoints();
 
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok(new
