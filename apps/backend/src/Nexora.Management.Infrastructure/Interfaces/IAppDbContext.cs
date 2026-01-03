@@ -21,6 +21,9 @@ public interface IAppDbContext
     DbSet<Comment> Comments { get; }
     DbSet<Attachment> Attachments { get; }
     DbSet<ActivityLog> ActivityLogs { get; }
+    DbSet<UserPresence> UserPresences { get; }
+    DbSet<Notification> Notifications { get; }
+    DbSet<NotificationPreference> NotificationPreferences { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 

@@ -14,6 +14,8 @@ using Nexora.Management.API.Middlewares;
 using Nexora.Management.Infrastructure.Services;
 using Nexora.Management.Application.Authorization;
 using Nexora.Management.Application.Common;
+using Nexora.Management.API.Hubs;
+using Nexora.Management.API.Services;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -103,6 +105,19 @@ builder.Services.AddScoped<IUserContext, UserContext>();
 // Register File Storage Service
 builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 
+// Register SignalR
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+    options.KeepAliveInterval = TimeSpan.FromSeconds(10);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+    options.HandshakeTimeout = TimeSpan.FromSeconds(15);
+});
+
+// Register Presence and Notification Services
+builder.Services.AddSingleton<IPresenceService, PresenceService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline
@@ -139,6 +154,11 @@ app.MapCommentEndpoints();
 
 // Map Attachment endpoints
 app.MapAttachmentEndpoints();
+
+// Map SignalR Hubs
+app.MapHub<TaskHub>("/hubs/tasks");
+app.MapHub<PresenceHub>("/hubs/presence");
+app.MapHub<NotificationHub>("/hubs/notifications");
 
 // Health check endpoint
 app.MapGet("/health", () => Results.Ok(new

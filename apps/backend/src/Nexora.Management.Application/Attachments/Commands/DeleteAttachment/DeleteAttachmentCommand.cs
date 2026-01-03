@@ -6,9 +6,9 @@ using Nexora.Management.Infrastructure.Services;
 
 namespace Nexora.Management.Application.Attachments.Commands.DeleteAttachment;
 
-public record DeleteAttachmentCommand(Guid Id) : IRequest<Result>;
+public record DeleteAttachmentCommand(Guid Id) : IRequest<Result<Guid?>>;
 
-public class DeleteAttachmentCommandHandler : IRequestHandler<DeleteAttachmentCommand, Result>
+public class DeleteAttachmentCommandHandler : IRequestHandler<DeleteAttachmentCommand, Result<Guid?>>
 {
     private readonly IAppDbContext _db;
     private readonly IUserContext _userContext;
@@ -24,19 +24,21 @@ public class DeleteAttachmentCommandHandler : IRequestHandler<DeleteAttachmentCo
         _fileStorageService = fileStorageService;
     }
 
-    public async System.Threading.Tasks.Task<Result> Handle(DeleteAttachmentCommand request, CancellationToken ct)
+    public async System.Threading.Tasks.Task<Result<Guid?>> Handle(DeleteAttachmentCommand request, CancellationToken ct)
     {
         var attachment = await _db.Attachments.FirstOrDefaultAsync(a => a.Id == request.Id, ct);
         if (attachment == null)
         {
-            return Result.Failure("Attachment not found");
+            return Result<Guid?>.Failure("Attachment not found");
         }
 
         // Only the uploader can delete the attachment
         if (attachment.UserId != _userContext.UserId)
         {
-            return Result.Failure("You can only delete your own attachments");
+            return Result<Guid?>.Failure("You can only delete your own attachments");
         }
+
+        var taskId = attachment.TaskId;
 
         // Delete file from storage
         await _fileStorageService.DeleteFileAsync(attachment.FilePath, ct);
@@ -45,6 +47,6 @@ public class DeleteAttachmentCommandHandler : IRequestHandler<DeleteAttachmentCo
         _db.Attachments.Remove(attachment);
         await _db.SaveChangesAsync(ct);
 
-        return Result.Success();
+        return Result<Guid?>.Success(taskId);
     }
 }

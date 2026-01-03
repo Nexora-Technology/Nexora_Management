@@ -1,5 +1,6 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Nexora.Management.Application.Tasks.Commands.CreateTask;
 using Nexora.Management.Application.Tasks.Commands.DeleteTask;
 using Nexora.Management.Application.Tasks.Commands.UpdateTask;
@@ -7,6 +8,9 @@ using Nexora.Management.Application.Tasks.Commands.UpdateTaskStatus;
 using Nexora.Management.Application.Tasks.DTOs;
 using Nexora.Management.Application.Tasks.Queries;
 using Nexora.Management.Application.Tasks.Queries.ViewQueries;
+using Nexora.Management.API.Hubs;
+using Nexora.Management.Application.DTOs.SignalR;
+using System.Security.Claims;
 
 namespace Nexora.Management.API.Endpoints;
 
@@ -19,7 +23,11 @@ public static class TaskEndpoints
             .WithOpenApi();
 
         // Create task
-        group.MapPost("/", async (CreateTaskRequest request, ISender sender) =>
+        group.MapPost("/", async (
+            CreateTaskRequest request,
+            ISender sender,
+            IHubContext<TaskHub> taskHub,
+            HttpContext httpContext) =>
         {
             var command = new CreateTaskCommand(
                 request.ProjectId,
@@ -39,6 +47,20 @@ public static class TaskEndpoints
             {
                 return Results.BadRequest(new { error = result.Error });
             }
+
+            // Broadcast TaskCreated to project group
+            var currentUserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var message = new TaskUpdatedMessage
+            {
+                TaskId = result.Value.Id,
+                ProjectId = request.ProjectId,
+                Type = "created",
+                UpdatedBy = Guid.Parse(currentUserId ?? Guid.Empty.ToString()),
+                Timestamp = DateTime.UtcNow,
+                Data = result.Value
+            };
+            await taskHub.Clients.Group($"project_{request.ProjectId}")
+                .SendAsync("TaskCreated", message);
 
             return Results.Created($"/api/tasks/{result.Value.Id}", result.Value);
         })
@@ -89,7 +111,12 @@ public static class TaskEndpoints
         .WithSummary("Get tasks with filters");
 
         // Update task
-        group.MapPut("/{id}", async (Guid id, UpdateTaskRequest request, ISender sender) =>
+        group.MapPut("/{id}", async (
+            Guid id,
+            UpdateTaskRequest request,
+            ISender sender,
+            IHubContext<TaskHub> taskHub,
+            HttpContext httpContext) =>
         {
             var command = new UpdateTaskCommand(
                 id,
@@ -109,13 +136,31 @@ public static class TaskEndpoints
                 return Results.BadRequest(new { error = result.Error });
             }
 
+            // Broadcast TaskUpdated to project group
+            var currentUserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var message = new TaskUpdatedMessage
+            {
+                TaskId = id,
+                ProjectId = result.Value.ProjectId,
+                Type = "updated",
+                UpdatedBy = Guid.Parse(currentUserId ?? Guid.Empty.ToString()),
+                Timestamp = DateTime.UtcNow,
+                Data = result.Value
+            };
+            await taskHub.Clients.Group($"project_{result.Value.ProjectId}")
+                .SendAsync("TaskUpdated", message);
+
             return Results.Ok(result.Value);
         })
         .WithName("UpdateTask")
         .WithSummary("Update task");
 
         // Delete task
-        group.MapDelete("/{id}", async (Guid id, ISender sender) =>
+        group.MapDelete("/{id}", async (
+            Guid id,
+            ISender sender,
+            IHubContext<TaskHub> taskHub,
+            HttpContext httpContext) =>
         {
             var command = new DeleteTaskCommand(id);
             var result = await sender.Send(command);
@@ -125,13 +170,35 @@ public static class TaskEndpoints
                 return Results.BadRequest(new { error = result.Error });
             }
 
+            // Broadcast TaskDeleted to project group
+            if (result.Value.HasValue)
+            {
+                var currentUserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var message = new TaskUpdatedMessage
+                {
+                    TaskId = id,
+                    ProjectId = result.Value.Value,
+                    Type = "deleted",
+                    UpdatedBy = Guid.Parse(currentUserId ?? Guid.Empty.ToString()),
+                    Timestamp = DateTime.UtcNow,
+                    Data = null
+                };
+                await taskHub.Clients.Group($"project_{result.Value.Value}")
+                    .SendAsync("TaskDeleted", message);
+            }
+
             return Results.NoContent();
         })
         .WithName("DeleteTask")
         .WithSummary("Delete task");
 
         // Update task status (for Board view drag-drop)
-        group.MapPatch("/{id}/status", async (Guid id, [FromBody] UpdateTaskStatusRequest request, ISender sender) =>
+        group.MapPatch("/{id}/status", async (
+            Guid id,
+            [FromBody] UpdateTaskStatusRequest request,
+            ISender sender,
+            IHubContext<TaskHub> taskHub,
+            HttpContext httpContext) =>
         {
             var command = new UpdateTaskStatusCommand(id, request.StatusId);
             var result = await sender.Send(command);
@@ -140,6 +207,20 @@ public static class TaskEndpoints
             {
                 return Results.BadRequest(new { error = result.Error });
             }
+
+            // Broadcast TaskStatusChanged to project group
+            var currentUserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var message = new TaskUpdatedMessage
+            {
+                TaskId = id,
+                ProjectId = result.Value.ProjectId,
+                Type = "status_changed",
+                UpdatedBy = Guid.Parse(currentUserId ?? Guid.Empty.ToString()),
+                Timestamp = DateTime.UtcNow,
+                Data = result.Value
+            };
+            await taskHub.Clients.Group($"project_{result.Value.ProjectId}")
+                .SendAsync("TaskStatusChanged", message);
 
             return Results.Ok(result.Value);
         })

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using MediatR;
 using Nexora.Management.API.Extensions;
@@ -7,6 +8,9 @@ using Nexora.Management.Infrastructure.Interfaces;
 using Nexora.Management.Application.Attachments.Commands.UploadAttachment;
 using Nexora.Management.Application.Attachments.Queries.GetAttachments;
 using Nexora.Management.Infrastructure.Services;
+using Nexora.Management.API.Hubs;
+using Nexora.Management.Application.DTOs.SignalR;
+using System.Security.Claims;
 
 namespace Nexora.Management.API.Endpoints;
 
@@ -34,6 +38,8 @@ public static class AttachmentEndpoints
             Guid taskId,
             IFormFile file,
             ISender sender,
+            IHubContext<TaskHub> taskHub,
+            HttpContext httpContext,
             CancellationToken ct) =>
         {
             if (file == null || file.Length == 0)
@@ -63,7 +69,32 @@ public static class AttachmentEndpoints
             );
 
             var result = await sender.Send(command, ct);
-            return result.IsSuccess ? Results.Ok(result.Value) : Results.BadRequest(result.Error);
+            if (result.IsFailure)
+            {
+                return Results.BadRequest(result.Error);
+            }
+
+            // Broadcast AttachmentUploaded to task's project group
+            var currentUserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var message = new AttachmentUpdatedMessage
+            {
+                AttachmentId = result.Value.Id,
+                TaskId = result.Value.TaskId,
+                Type = "uploaded",
+                UpdatedBy = Guid.Parse(currentUserId ?? Guid.Empty.ToString()),
+                Timestamp = DateTime.UtcNow,
+                Data = result.Value
+            };
+
+            // Get task's project ID from database
+            var task = await sender.Send(new Nexora.Management.Application.Tasks.Queries.GetTaskByIdQuery(result.Value.TaskId));
+            if (task.IsSuccess)
+            {
+                await taskHub.Clients.Group($"project_{task.Value.ProjectId}")
+                    .SendAsync("AttachmentUploaded", message);
+            }
+
+            return Results.Ok(result.Value);
         })
         .WithName("UploadAttachment")
         .WithOpenApi()
@@ -105,11 +136,43 @@ public static class AttachmentEndpoints
         .RequirePermission("tasks", "view");
 
         // Delete attachment
-        group.MapDelete("/{attachmentId:guid}", async (Guid attachmentId, ISender sender) =>
+        group.MapDelete("/{attachmentId:guid}", async (
+            Guid attachmentId,
+            ISender sender,
+            IHubContext<TaskHub> taskHub,
+            HttpContext httpContext) =>
         {
             var command = new DeleteAttachmentCommand(attachmentId);
             var result = await sender.Send(command);
-            return result.IsSuccess ? Results.NoContent() : Results.BadRequest(result.Error);
+            if (result.IsFailure)
+            {
+                return Results.BadRequest(result.Error);
+            }
+
+            // Broadcast AttachmentDeleted to task's project group
+            if (result.Value.HasValue)
+            {
+                var currentUserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var message = new AttachmentUpdatedMessage
+                {
+                    AttachmentId = attachmentId,
+                    TaskId = result.Value.Value,
+                    Type = "deleted",
+                    UpdatedBy = Guid.Parse(currentUserId ?? Guid.Empty.ToString()),
+                    Timestamp = DateTime.UtcNow,
+                    Data = null
+                };
+
+                // Get task's project ID from database
+                var task = await sender.Send(new Nexora.Management.Application.Tasks.Queries.GetTaskByIdQuery(result.Value.Value));
+                if (task.IsSuccess)
+                {
+                    await taskHub.Clients.Group($"project_{task.Value.ProjectId}")
+                        .SendAsync("AttachmentDeleted", message);
+                }
+            }
+
+            return Results.NoContent();
         })
         .WithName("DeleteAttachment")
         .WithOpenApi()
