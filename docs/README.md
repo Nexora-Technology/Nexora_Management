@@ -1,7 +1,7 @@
 # Documentation Index
 
 **Last Updated:** 2026-01-03
-**Version:** Phase 01 Complete
+**Version:** Phase 04 Core Complete
 
 ## Quick Links
 
@@ -209,7 +209,33 @@ The `docs/research/` directory contains research and investigation documents:
 - Updated [codebase-summary.md](codebase-summary.md) with new components
 - Updated [development-standards.md](development-standards.md) with authorization standards
 
-### Phase 04-12: In Progress
+### Phase 04: Task Management Core ✅
+
+**Completed:**
+
+- [x] Task CRUD operations (Create, Read, Update, Delete)
+- [x] Task hierarchy support (parent/child tasks)
+- [x] Task status management (custom statuses per project)
+- [x] Task priority levels
+- [x] Task assignment to users
+- [x] Task filtering and pagination
+- [x] **Comments Module** - Add, update, delete, list comments with nested replies
+- [x] **Attachments Module** - File upload/download with security hardening
+- [x] **UserContext** - Authenticated user access in handlers
+- [x] **Security Fixes** - Path traversal protection, file size limits, type validation
+
+**Key Features:**
+- Comments with max 5000 chars and 5-level reply depth limit
+- Attachments with 100MB size limit and extension allowlist
+- Permission-based authorization on all endpoints
+- Input validation and ownership verification
+
+**Documentation Deliverables:**
+
+- Updated [codebase-summary.md](codebase-summary.md) with Comments/Attachments modules
+- Code review report: `plans/reports/code-reviewer-260103-1931-phase04-task-mgmt-core.md`
+
+### Phase 05-12: In Progress
 
 See [project-roadmap.md](project-roadmap.md) for upcoming phases.
 

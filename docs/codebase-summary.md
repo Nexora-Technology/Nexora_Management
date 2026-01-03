@@ -256,6 +256,9 @@ apps/backend/
 │   ├── Nexora.Management.Infrastructure/
 │   │   ├── Interfaces/
 │   │   │   └── IAppDbContext.cs
+│   │   ├── Services/
+│   │   │   ├── IFileStorageService.cs
+│   │   │   └── LocalFileStorageService.cs
 │   │   └── Persistence/
 │   │       ├── AppDbContext.cs
 │   │       └── Configurations/
@@ -294,18 +297,46 @@ apps/backend/
 │   │   │   └── RequirePermissionAttribute.cs
 │   │   ├── Common/
 │   │   │   ├── ApiResponse.cs
-│   │   │   └── Result.cs
-│   │   └── Tasks/
+│   │   │   ├── Result.cs
+│   │   │   └── IUserContext.cs
+│   │   ├── Tasks/
+│   │   │   ├── Commands/
+│   │   │   │   ├── CreateTask/
+│   │   │   │   ├── UpdateTask/
+│   │   │   │   └── DeleteTask/
+│   │   │   ├── Queries/
+│   │   │   │   ├── GetTasks/
+│   │   │   │   └── GetTaskById/
+│   │   │   └── DTOs/
+│   │   ├── Comments/
+│   │   │   ├── Commands/
+│   │   │   │   ├── AddComment/
+│   │   │   │   ├── UpdateComment/
+│   │   │   │   └── DeleteComment/
+│   │   │   ├── Queries/
+│   │   │   │   ├── GetComments/
+│   │   │   │   └── GetCommentReplies/
+│   │   │   └── DTOs/
+│   │   └── Attachments/
 │   │       ├── Commands/
+│   │       │   ├── UploadAttachment/
+│   │       │   └── DeleteAttachment/
 │   │       ├── Queries/
+│   │       │   └── GetAttachments/
 │   │       └── DTOs/
 │   │
 │   └── Nexora.Management.API/
 │       ├── Middleware/
 │       │   └── WorkspaceAuthorizationMiddleware.cs
+│       ├── Middlewares/
+│       │   └── UserContext.cs
+│       ├── Extensions/
+│       │   └── AuthorizationExtensions.cs
 │       ├── Endpoints/
 │       │   ├── AuthEndpoints.cs
-│       │   └── TaskEndpoints.cs
+│       │   ├── TaskEndpoints.cs
+│       │   ├── CommentEndpoints.cs
+│       │   └── AttachmentEndpoints.cs
 │       ├── Persistence/
 │       │   └── Migrations/
 │       │       ├── 20260103071610_InitialCreate.cs
@@ -366,24 +397,66 @@ apps/backend/
   - Permission-based authorization with dynamic policy provider
   - Workspace Authorization Middleware for RLS user context
   - Raw SQL execution methods for authorization queries
-- [ ] **Phase 04:** Core workspace functionality
-- [x] **Phase 05:** Task management CRUD
+- [x] **Phase 04:** Task Management Core
+  - Task CRUD operations with hierarchy support
+  - Comments module with nested replies (max 5 levels)
+  - Attachments module with security hardening
+  - UserContext for authenticated user access
+  - Security fixes: path traversal, file size limits, type validation
+- [ ] **Phase 05:** Advanced task features
 - [ ] **Phase 06:** Real-time updates via SignalR
-- [ ] **Phase 07:** File attachments
-- [ ] **Phase 08:** Comments and collaboration
+- [ ] **Phase 07:** Bulk operations
+- [ ] **Phase 08:** Activity logging
 - [ ] **Phase 09:** Advanced filtering and search
 - [ ] **Phase 10:** Mobile responsive design
 - [ ] **Phase 11:** Performance optimization
 - [ ] **Phase 12:** Deployment to production
 
+## API Endpoints Summary
+
+### Authentication (`/api/auth`)
+- `POST /register` - User registration
+- `POST /login` - User login (returns access/refresh tokens)
+- `POST /refresh` - Refresh access token
+
+### Tasks (`/api/tasks`)
+- `GET /` - List tasks with filtering and pagination
+- `GET /{id}` - Get task by ID
+- `POST /` - Create new task
+- `PUT /{id}` - Update task
+- `DELETE /{id}` - Delete task
+
+### Comments (`/api/comments`)
+- `POST /` - Add comment to task
+- `GET /task/{taskId}` - Get comments for task
+- `GET /{commentId}/replies` - Get replies to comment
+- `PUT /{commentId}` - Update comment (owner only)
+- `DELETE /{commentId}` - Delete comment (owner only)
+
+### Attachments (`/api/attachments`)
+- `POST /upload/{taskId}` - Upload file attachment (100MB max)
+- `GET /task/{taskId}` - List attachments for task
+- `GET /{attachmentId}/download` - Download file
+- `DELETE /{attachmentId}` - Delete attachment (owner only)
+
+## Security Features
+
+- **Path Traversal Protection:** `Path.GetFileName()` sanitization in file uploads
+- **File Size Limits:** 100MB maximum attachment size
+- **File Type Validation:** Extension allowlist (images, docs, archives - no executables)
+- **Comment Validation:** Max 5000 characters, max 5 reply levels
+- **Authorization:** Permission-based access control on all endpoints
+- **Ownership Verification:** Users can only edit/delete their own content
+
 ## Next Steps
 
-1. **Phase 04:** Complete workspace management endpoints
+1. **Phase 05:** Bulk operations (BulkUpdate, BulkDelete, BulkMove)
 2. **Phase 06:** Add real-time updates via SignalR
-3. **Phase 07:** Implement file attachment handling
-4. **Future:** Add advanced search, comments, performance optimization
+3. **Phase 08:** Implement activity logging service
+4. **Future:** Add advanced search, performance optimization
 
 ---
 
-**Documentation Version:** 1.0
+**Documentation Version:** 1.1
+**Last Updated:** 2026-01-03
 **Maintained By:** Development Team
