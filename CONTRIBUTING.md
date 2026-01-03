@@ -57,6 +57,7 @@ git checkout -b fix/bug-description
 ```
 
 Branch naming conventions:
+
 - `feature/` - New features
 - `fix/` - Bug fixes
 - `docs/` - Documentation updates
@@ -66,9 +67,9 @@ Branch naming conventions:
 
 ### 4. Make Your Changes
 
-#### Coding Standards
+##### Coding Standards
 
-Follow our [Code Standards](docs/code-standards.md):
+Follow our [Development Standards](docs/development-standards.md):
 
 - **TypeScript/JavaScript**:
   - Use TypeScript for type safety
@@ -81,12 +82,20 @@ Follow our [Code Standards](docs/code-standards.md):
   - Use async/await for asynchronous operations
   - Write XML documentation comments for public APIs
   - Use proper access modifiers
+  - Format with `dotnet format`
 
 - **Architecture**:
   - Follow Clean Architecture principles
   - Separate concerns (Core, Application, Infrastructure, API)
   - Use dependency injection
   - Keep business logic independent of frameworks
+
+**Pre-commit Hooks:**
+
+- Husky + lint-staged automatically run on every commit
+- Formats code before committing
+- Blocks commit if linting fails
+- See [Infrastructure Setup](docs/infrastructure-setup.md) for configuration
 
 #### Testing
 
@@ -124,6 +133,7 @@ git commit -m "feat!: redesign workspace structure"
 ```
 
 Commit types:
+
 - `feat:` - New feature
 - `fix:` - Bug fix
 - `docs:` - Documentation changes
@@ -143,6 +153,7 @@ npx lint-staged
 ```
 
 If you need to bypass (not recommended):
+
 ```bash
 git commit --no-verify -m "..."
 ```
@@ -166,21 +177,26 @@ git push origin feature/your-feature-name
 
 ```markdown
 ## Description
+
 Brief description of changes
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Testing
+
 Describe testing performed
+
 - [ ] Unit tests pass
 - [ ] Integration tests pass
 - [ ] Manual testing completed
 
 ## Checklist
+
 - [ ] Code follows style guidelines
 - [ ] Self-review completed
 - [ ] Comments added to complex code
@@ -190,6 +206,7 @@ Describe testing performed
 - [ ] All tests passing
 
 ## Related Issues
+
 Fixes #123
 Related to #456
 ```
@@ -205,6 +222,7 @@ Related to #456
 ### 10. Merge
 
 Once approved:
+
 - Maintainer will merge your PR
 - Use "Squash and merge" for clean history
 - Branch is automatically deleted after merge
@@ -258,12 +276,14 @@ cd apps/frontend && npm test -- --watch
 ### Common Issues
 
 **Port already in use:**
+
 ```bash
 # Kill process on port 3000
 npx kill-port 3000
 ```
 
 **Docker issues:**
+
 ```bash
 # Rebuild containers
 docker-compose down -v
@@ -273,6 +293,9 @@ docker-compose up --build
 ## Getting Help
 
 - Check [documentation](docs/)
+  - [Infrastructure Setup](docs/infrastructure-setup.md) - Docker, CI/CD, tooling
+  - [Development Standards](docs/development-standards.md) - Code quality guidelines
+  - [Deployment Guide](docs/deployment-guide.md) - Build and troubleshooting
 - Search existing [issues](../../issues)
 - Ask in [discussions](../../discussions)
 - Contact maintainers
@@ -280,6 +303,7 @@ docker-compose up --build
 ## Recognition
 
 Contributors are recognized in:
+
 - CONTRIBUTORS.md file
 - Release notes
 - Project website (when applicable)

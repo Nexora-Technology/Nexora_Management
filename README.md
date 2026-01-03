@@ -5,6 +5,7 @@ A powerful, ClickUp-inspired project management platform built with modern techn
 ## Tech Stack
 
 ### Frontend
+
 - **Next.js 15** - React framework with App Router
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Utility-first styling
@@ -14,6 +15,7 @@ A powerful, ClickUp-inspired project management platform built with modern techn
 - **SignalR** - Real-time communication
 
 ### Backend
+
 - **.NET 9.0** - Modern, high-performance framework
 - **ASP.NET Core Web API** - RESTful API
 - **Entity Framework Core 9** - ORM and data access
@@ -22,6 +24,7 @@ A powerful, ClickUp-inspired project management platform built with modern techn
 - **JWT Authentication** - Secure token-based auth
 
 ### DevOps & Tooling
+
 - **Docker & Docker Compose** - Container orchestration
 - **Turborepo** - Monorepo build system
 - **GitHub Actions** - CI/CD pipelines
@@ -143,18 +146,21 @@ npm run format:check # Check code formatting
 ## Testing
 
 ### Backend Tests
+
 ```bash
 cd apps/backend
 dotnet test
 ```
 
 ### Frontend Tests
+
 ```bash
 cd apps/frontend
 npm test
 ```
 
 ### All Tests (from root)
+
 ```bash
 npm test
 ```
@@ -164,6 +170,7 @@ npm test
 We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) to understand our development workflow, coding standards, and PR process.
 
 Key points:
+
 - Follow Clean Architecture principles
 - Write tests for new features
 - Ensure all CI checks pass
@@ -176,11 +183,28 @@ Be respectful, inclusive, and constructive. We're all working together to build 
 
 ## Documentation
 
+### Getting Started
+
 - [Project Overview](docs/project-overview-pdr.md)
-- [Code Standards](docs/code-standards.md)
-- [System Architecture](docs/system-architecture.md)
 - [Local Setup Guide](docs/development/local-setup.md)
+
+### Infrastructure & Development
+
+- [Infrastructure Setup](docs/infrastructure-setup.md) - Monorepo structure, Docker, CI/CD
+- [Development Standards](docs/development-standards.md) - Code formatting, linting, workflows
+- [Deployment Guide](docs/deployment-guide.md) - Build, run, and troubleshooting
+
+### Architecture
+
+- [System Architecture](docs/system-architecture.md) - Clean Architecture layers
+- [Codebase Summary](docs/codebase-summary.md) - Quick reference
 - [Architecture Decisions](docs/adr/001-architecture-decisions.md)
+
+### Project Planning
+
+- [Code Standards](docs/code-standards.md)
+- [Design Guidelines](docs/design-guidelines.md)
+- [Project Roadmap](docs/project-roadmap.md)
 
 ## License
 
@@ -203,6 +227,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Support
 
 For questions, issues, or suggestions:
+
 - Open an issue on GitHub
 - Check existing documentation
 - Contact the maintainers
