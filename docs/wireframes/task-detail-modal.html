@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexora - Task Detail Modal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #FFFFFF;
+      --bg-secondary: #F8FAFC;
+      --bg-tertiary: #F1F5F9;
+      --border-default: #E2E8F0;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-tertiary: #94A3B8;
+      --primary: #0EA5E9;
+      --secondary: #14B8A6;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      overflow: hidden;
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    /* Modal Container */
+    .modal-container {
+      background: var(--bg-primary);
+      border-radius: 16px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      width: 100%;
+      max-width: 900px;
+      max-height: 90vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: slideUp 250ms ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Modal Header */
+    .modal-header {
+      padding: 24px 32px;
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.03) 0%, rgba(20, 184, 166, 0.03) 100%);
+    }
+
+    .header-left {
+      flex: 1;
+    }
+
+    .task-id {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .task-id-badge {
+      background: var(--bg-tertiary);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .task-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+
+    .task-meta-badges {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .meta-badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .badge-status {
+      background: #E0F2FE;
+      color: #0EA5E9;
+    }
+
+    .badge-priority {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+
+    .badge-project {
+      background: #D1FAE5;
+      color: #059669;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 1px solid var(--border-default);
+      background: var(--bg-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 150ms;
+    }
+
+    .icon-button:hover {
+      background: var(--bg-tertiary);
+    }
+
+    /* Modal Body */
+    .modal-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 1fr 320px;
+      gap: 32px;
+    }
+
+    /* Left Column - Main Content */
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .content-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .description-box {
+      padding: 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-primary);
+    }
+
+    .description-placeholder {
+      color: var(--text-tertiary);
+      font-style: italic;
+    }
+
+    /* Subtasks */
+    .subtasks-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .subtask-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 150ms;
+    }
+
+    .subtask-item:hover {
+      background: var(--bg-secondary);
+      border-color: var(--primary);
+    }
+
+    .subtask-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border-default);
+      border-radius: 6px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .subtask-checkbox.checked {
+      background: var(--primary);
+      border-color: var(--primary);
+      position: relative;
+    }
+
+    .subtask-checkbox.checked::after {
+      content: '✓';
+      position: absolute;
+      color: white;
+      font-size: 12px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .subtask-text {
+      flex: 1;
+      font-size: 14px;
+      color: var(--text-primary);
+    }
+
+    .subtask-text.checked {
+      text-decoration: line-through;
+      color: var(--text-tertiary);
+    }
+
+    /* Comments */
+    .comments-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .comment-item {
+      display: flex;
+      gap: 12px;
+    }
+
+    .comment-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .comment-content {
+      flex: 1;
+    }
+
+    .comment-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .comment-author {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .comment-time {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .comment-text {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+    }
+
+    /* Attachments */
+    .attachments-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .attachment-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 150ms;
+    }
+
+    .attachment-item:hover {
+      background: var(--bg-secondary);
+      border-color: var(--primary);
+    }
+
+    .attachment-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .attachment-info {
+      flex: 1;
+    }
+
+    .attachment-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .attachment-size {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    /* Right Column - Sidebar */
+    .sidebar-content {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .sidebar-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .field-value {
+      padding: 10px 14px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      font-size: 14px;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 150ms;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .field-value:hover {
+      background: var(--bg-tertiary);
+      border-color: var(--primary);
+    }
+
+    .field-placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .assignee-avatars {
+      display: flex;
+      gap: 8px;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 12px;
+      border: 2px solid var(--bg-primary);
+      cursor: pointer;
+      transition: all 150ms;
+    }
+
+    .avatar:hover {
+      transform: scale(1.1);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .add-avatar {
+      background: var(--bg-tertiary);
+      color: var(--text-tertiary);
+      font-size: 18px;
+    }
+
+    .add-avatar:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .tags-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .tag-design {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+
+    .tag-development {
+      background: #E0F2FE;
+      color: #0EA5E9;
+    }
+
+    .tag-urgent {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+
+    /* AI Suggestion Panel */
+    .ai-suggestions {
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.05) 0%, rgba(20, 184, 166, 0.05) 100%);
+      border: 1px solid var(--primary);
+      border-radius: 12px;
+    }
+
+    .ai-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .ai-icon {
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .ai-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .ai-suggestion {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 6px;
+    }
+
+    /* Modal Footer */
+    .modal-footer {
+      padding: 20px 32px;
+      border-top: 1px solid var(--border-default);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--bg-secondary);
+    }
+
+    .footer-info {
+      display: flex;
+      gap: 24px;
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .footer-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .button {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 200ms;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .button-secondary {
+      background: white;
+      border: 1px solid var(--border-default);
+      color: var(--text-secondary);
+    }
+
+    .button-secondary:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+    }
+
+    .button-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .modal-body {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar-content {
+        order: -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="modal-overlay">
+    <div class="modal-container">
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <div class="header-left">
+          <div class="task-id">
+            <span class="task-id-badge">#TASK-1847</span>
+            <span>•</span>
+            <span>Created 2 days ago</span>
+          </div>
+          <h1 class="task-title">Design System Setup - Component Library Creation</h1>
+          <div class="task-meta-badges">
+            <span class="meta-badge badge-status">⏳ In Progress</span>
+            <span class="meta-badge badge-priority">🔴 High Priority</span>
+            <span class="meta-badge badge-project">🚀 Product Launch Q1</span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-button" title="Copy link">🔗</button>
+          <button class="icon-button" title="More options">⋯</button>
+          <button class="icon-button" onclick="closeModal()" title="Close">✕</button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modal-body">
+        <!-- Left Column -->
+        <div class="main-content">
+          <!-- Description -->
+          <div class="content-section">
+            <div class="section-title">📝 Description</div>
+            <div class="description-box">
+              <p>Create a comprehensive design system component library using React and Tailwind CSS. This should include all basic UI components like buttons, inputs, cards, modals, etc.</p>
+              <br>
+              <p><strong>Requirements:</strong></p>
+              <ul style="margin-left: 20px; margin-top: 8px;">
+                <li>Follow shadcn/ui component patterns</li>
+                <li>Use Plus Jakarta Sans typography</li>
+                <li>Support light and dark modes</li>
+                <li>Include Storybook documentation</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Subtasks -->
+          <div class="content-section">
+            <div class="section-title">
+              ✅ Subtasks
+              <span style="margin-left: auto; color: var(--text-tertiary); font-weight: 500;">2/4 completed</span>
+            </div>
+            <div class="subtasks-list">
+              <div class="subtask-item">
+                <div class="subtask-checkbox checked"></div>
+                <div class="subtask-text checked">Create color palette documentation</div>
+              </div>
+              <div class="subtask-item">
+                <div class="subtask-checkbox checked"></div>
+                <div class="subtask-text checked">Design button components</div>
+              </div>
+              <div class="subtask-item">
+                <div class="subtask-checkbox"></div>
+                <div class="subtask-text">Create input field components</div>
+              </div>
+              <div class="subtask-item">
+                <div class="subtask-checkbox"></div>
+                <div class="subtask-text">Build card component variants</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Comments -->
+          <div class="content-section">
+            <div class="section-title">💬 Comments (3)</div>
+            <div class="comments-list">
+              <div class="comment-item">
+                <div class="comment-avatar">MK</div>
+                <div class="comment-content">
+                  <div class="comment-header">
+                    <span class="comment-author">Mike K.</span>
+                    <span class="comment-time">2 hours ago</span>
+                  </div>
+                  <div class="comment-text">I've completed the color palette docs. All colors are now documented with HEX, RGB, and HSL values.</div>
+                </div>
+              </div>
+              <div class="comment-item">
+                <div class="comment-avatar" style="background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);">AS</div>
+                <div class="comment-content">
+                  <div class="comment-header">
+                    <span class="comment-author">Alice S.</span>
+                    <span class="comment-time">5 hours ago</span>
+                  </div>
+                  <div class="comment-text">Great progress! Should we also include dark mode variants for all components?</div>
+                </div>
+              </div>
+              <div class="comment-item">
+                <div class="comment-avatar">JD</div>
+                <div class="comment-content">
+                  <div class="comment-header">
+                    <span class="comment-author">John D.</span>
+                    <span class="comment-time">Yesterday</span>
+                  </div>
+                  <div class="comment-text">Yes, dark mode support is a requirement. I'll help with the implementation.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Attachments -->
+          <div class="content-section">
+            <div class="section-title">📎 Attachments (2)</div>
+            <div class="attachments-list">
+              <div class="attachment-item">
+                <div class="attachment-icon">🎨</div>
+                <div class="attachment-info">
+                  <div class="attachment-name">Color-Palette.pdf</div>
+                  <div class="attachment-size">2.4 MB</div>
+                </div>
+              </div>
+              <div class="attachment-item">
+                <div class="attachment-icon">📊</div>
+                <div class="attachment-info">
+                  <div class="attachment-name">Component-Specs.fig</div>
+                  <div class="attachment-size">5.8 MB</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="sidebar-content">
+          <!-- Status -->
+          <div class="sidebar-section">
+            <div class="field-group">
+              <div class="field-label">Status</div>
+              <div class="field-value">
+                ⏳ In Progress
+                <span>▼</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Priority -->
+          <div class="sidebar-section">
+            <div class="field-group">
+              <div class="field-label">Priority</div>
+              <div class="field-value">
+                🔴 High
+                <span>▼</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Assignees -->
+          <div class="sidebar-section">
+            <div class="field-group">
+              <div class="field-label">Assignees</div>
+              <div class="field-value" style="display: block;">
+                <div class="assignee-avatars">
+                  <div class="avatar">MK</div>
+                  <div class="avatar" style="background: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);">AS</div>
+                  <div class="avatar add-avatar">+</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Due Date -->
+          <div class="sidebar-section">
+            <div class="field-group">
+              <div class="field-label">Due Date</div>
+              <div class="field-value">
+                📅 Jan 8, 2026
+                <span>📆</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Project -->
+          <div class="sidebar-section">
+            <div class="field-group">
+              <div class="field-label">Project</div>
+              <div class="field-value">
+                🚀 Product Launch Q1
+                <span>▼</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tags -->
+          <div class="sidebar-section">
+            <div class="field-group">
+              <div class="field-label">Tags</div>
+              <div class="tags-list">
+                <span class="tag tag-design">Design</span>
+                <span class="tag tag-development">Development</span>
+                <span class="tag tag-urgent">Urgent</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Suggestions -->
+          <div class="ai-suggestions">
+            <div class="ai-header">
+              <div class="ai-icon">🤖</div>
+              <span class="ai-title">AI Suggestions</span>
+            </div>
+            <div class="ai-suggestion">
+              Consider breaking this task into smaller subtasks for better tracking. I can help estimate the remaining time based on your team's velocity.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="modal-footer">
+        <div class="footer-info">
+          <span>Created by John D. • Jan 2, 2026</span>
+          <span>•</span>
+          <span>Last modified 2 hours ago</span>
+        </div>
+        <div class="footer-actions">
+          <button class="button button-secondary">Delete Task</button>
+          <button class="button button-primary">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function closeModal() {
+      document.querySelector('.modal-overlay').style.animation = 'fadeOut 200ms ease';
+      setTimeout(() => {
+        alert('Modal closed! In production, this would close the modal.');
+      }, 200);
+    }
+
+    // Subtask checkbox functionality
+    document.querySelectorAll('.subtask-checkbox').forEach(checkbox => {
+      checkbox.addEventListener('click', () => {
+        checkbox.classList.toggle('checked');
+        const text = checkbox.nextElementSibling;
+        text.classList.toggle('checked');
+      });
+    });
+
+    // Close on overlay click
+    document.querySelector('.modal-overlay').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        closeModal();
+      }
+    });
+
+    // Escape key to close
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+      }
+    });
+  </script>
+</body>
+</html>

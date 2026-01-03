@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexora - Calendar View</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #FFFFFF;
+      --bg-secondary: #F8FAFC;
+      --bg-tertiary: #F1F5F9;
+      --border-default: #E2E8F0;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-tertiary: #94A3B8;
+      --primary: #0EA5E9;
+      --secondary: #14B8A6;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-primary);
+      border-right: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px 16px;
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 8px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Bar */
+    .topbar {
+      height: 64px;
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .view-switcher {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      padding: 4px;
+    }
+
+    .view-button {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      background: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 150ms;
+      font-family: inherit;
+    }
+
+    .view-button.active {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .button {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 200ms;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+    }
+
+    .button-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+    }
+
+    /* Calendar Container */
+    .calendar-container {
+      padding: 24px 32px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .calendar-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .month-navigation {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-arrow {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1px solid var(--border-default);
+      background: var(--bg-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 150ms;
+    }
+
+    .nav-arrow:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .view-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      padding: 4px;
+    }
+
+    /* Calendar Grid */
+    .calendar-grid {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .weekdays-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .weekday {
+      padding: 12px;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background: var(--border-default);
+    }
+
+    .day-cell {
+      background: var(--bg-primary);
+      min-height: 120px;
+      padding: 8px;
+      position: relative;
+      cursor: pointer;
+      transition: all 150ms;
+    }
+
+    .day-cell:hover {
+      background: var(--bg-secondary);
+    }
+
+    .day-cell.other-month {
+      background: var(--bg-secondary);
+      opacity: 0.5;
+    }
+
+    .day-cell.today {
+      background: rgba(14, 165, 233, 0.03);
+    }
+
+    .day-number {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+      text-align: center;
+      border-radius: 50%;
+    }
+
+    .day-cell.today .day-number {
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      color: white;
+    }
+
+    .day-events {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .event-item {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 150ms;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .event-item:hover {
+      transform: scale(1.02);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .event-urgent {
+      background: #FEE2E2;
+      color: #DC2626;
+      border-left: 3px solid #DC2626;
+    }
+
+    .event-high {
+      background: #FED7AA;
+      color: #EA580C;
+      border-left: 3px solid #EA580C;
+    }
+
+    .event-medium {
+      background: #FEF3C7;
+      color: #D97706;
+      border-left: 3px solid #D97706;
+    }
+
+    .event-low {
+      background: #D1FAE5;
+      color: #059669;
+      border-left: 3px solid #059669;
+    }
+
+    .event-done {
+      background: #E2E8F0;
+      color: #64748B;
+      border-left: 3px solid #64748B;
+      text-decoration: line-through;
+    }
+
+    /* Mini Calendar */
+    .mini-calendar {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 24px;
+    }
+
+    .mini-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+    }
+
+    .mini-day {
+      width: 100%;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 150ms;
+    }
+
+    .mini-day:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .mini-day.today {
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      color: white;
+      font-weight: 600;
+    }
+
+    .mini-day.has-event {
+      background: var(--bg-secondary);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .days-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .day-cell {
+        min-height: 60px;
+      }
+
+      .weekdays-header {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-area">
+          <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#0EA5E9;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#14B8A6;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="45" fill="url(#grad1)" opacity="0.1" />
+            <g transform="translate(25, 25)">
+              <rect x="0" y="0" width="10" height="50" rx="2.5" fill="url(#grad1)" />
+              <rect x="40" y="0" width="10" height="50" rx="2.5" fill="url(#grad1)" />
+              <path d="M 10 50 L 50 0 L 50 10 L 20 50 Z" fill="url(#grad1)" opacity="0.9" />
+            </g>
+          </svg>
+          <span class="logo-text">Nexora</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="view-switcher">
+          <button class="view-button">📊 Board</button>
+          <button class="view-button">📝 List</button>
+          <button class="view-button active">📅 Calendar</button>
+          <button class="view-button">📈 Gantt</button>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="view-toggle">
+            <button class="view-button active">Month</button>
+            <button class="view-button">Week</button>
+          </div>
+          <button class="button button-primary">
+            ➕ Add Task
+          </button>
+        </div>
+      </header>
+
+      <!-- Calendar Content -->
+      <div class="calendar-container">
+        <div class="calendar-header">
+          <div class="calendar-title">
+            <div class="month-navigation">
+              <button class="nav-arrow">←</button>
+              <span>January 2026</span>
+              <button class="nav-arrow">→</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calendar Grid -->
+        <div class="calendar-grid">
+          <!-- Weekday Headers -->
+          <div class="weekdays-header">
+            <div class="weekday">Sun</div>
+            <div class="weekday">Mon</div>
+            <div class="weekday">Tue</div>
+            <div class="weekday">Wed</div>
+            <div class="weekday">Thu</div>
+            <div class="weekday">Fri</div>
+            <div class="weekday">Sat</div>
+          </div>
+
+          <!-- Days Grid -->
+          <div class="days-grid">
+            <!-- Week 1 -->
+            <div class="day-cell other-month">
+              <div class="day-number">29</div>
+            </div>
+            <div class="day-cell other-month">
+              <div class="day-number">30</div>
+            </div>
+            <div class="day-cell other-month">
+              <div class="day-number">31</div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">1</div>
+              <div class="day-events">
+                <div class="event-item event-high">Design review meeting</div>
+              </div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">2</div>
+              <div class="day-events">
+                <div class="event-item event-medium">API documentation update</div>
+              </div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">3</div>
+              <div class="day-events">
+                <div class="event-item event-urgent">Fix authentication bug</div>
+                <div class="event-item event-low">Team standup</div>
+              </div>
+            </div>
+            <div class="day-cell today">
+              <div class="day-number">4</div>
+              <div class="day-events">
+                <div class="event-item event-high">Design system setup</div>
+                <div class="event-item event-medium">User management review</div>
+              </div>
+            </div>
+
+            <!-- Week 2 -->
+            <div class="day-cell">
+              <div class="day-number">5</div>
+              <div class="day-events">
+                <div class="event-item event-high">Database schema design</div>
+              </div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">6</div>
+              <div class="day-events">
+                <div class="event-item event-medium">Frontend components</div>
+              </div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">7</div>
+              <div class="day-events">
+                <div class="event-item event-low">Code review session</div>
+              </div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">8</div>
+              <div class="day-events">
+                <div class="event-item event-high">Sprint planning</div>
+              </div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">9</div>
+              <div class="day-events">
+                <div class="event-item event-medium">QA testing kickoff</div>
+              </div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">10</div>
+              <div class="day-events">
+                <div class="event-item event-urgent">Marketing campaign launch</div>
+              </div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">11</div>
+            </div>
+
+            <!-- Week 3 -->
+            <div class="day-cell">
+              <div class="day-number">12</div>
+              <div class="day-events">
+                <div class="event-item event-medium">Backend API integration</div>
+              </div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">13</div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">14</div>
+              <div class="day-events">
+                <div class="event-item event-high">Performance optimization</div>
+              </div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">15</div>
+              <div class="day-events">
+                <div class="event-item event-low">Team retrospective</div>
+              </div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">16</div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">17</div>
+              <div class="day-events">
+                <div class="event-item event-medium">Feature demo meeting</div>
+              </div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">18</div>
+            </div>
+
+            <!-- Week 4 -->
+            <div class="day-cell">
+              <div class="day-number">19</div>
+              <div class="day-events">
+                <div class="event-item event-high">Security audit</div>
+              </div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">20</div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">21</div>
+              <div class="day-events">
+                <div class="event-item event-low">Documentation review</div>
+              </div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">22</div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">23</div>
+              <div class="day-events">
+                <div class="event-item event-medium">Client presentation</div>
+              </div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">24</div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">25</div>
+              <div class="day-events">
+                <div class="event-item event-urgent">Production deployment</div>
+              </div>
+            </div>
+
+            <!-- Week 5 -->
+            <div class="day-cell">
+              <div class="day-number">26</div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">27</div>
+              <div class="day-events">
+                <div class="event-item event-low">Post-launch review</div>
+              </div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">28</div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">29</div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">30</div>
+            </div>
+            <div class="day-cell">
+              <div class="day-number">31</div>
+              <div class="day-events">
+                <div class="event-item event-high">Monthly report</div>
+              </div>
+            </div>
+            <div class="day-cell other-month">
+              <div class="day-number">1</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-color" style="background: #FEE2E2; border-left: 3px solid #DC2626;"></div>
+            <span>Urgent</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #FED7AA; border-left: 3px solid #EA580C;"></div>
+            <span>High</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #FEF3C7; border-left: 3px solid #D97706;"></div>
+            <span>Medium</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #D1FAE5; border-left: 3px solid #059669;"></div>
+            <span>Low</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-color" style="background: #E2E8F0; border-left: 3px solid #64748B;"></div>
+            <span>Completed</span>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Add click handlers for events
+    document.querySelectorAll('.event-item').forEach(event => {
+      event.addEventListener('click', (e) => {
+        e.stopPropagation();
+        alert('Event clicked! In production, this would open task details.');
+      });
+    });
+
+    // Add click handlers for day cells
+    document.querySelectorAll('.day-cell').forEach(cell => {
+      cell.addEventListener('click', () => {
+        const dayNumber = cell.querySelector('.day-number');
+        if (dayNumber && !cell.classList.contains('other-month')) {
+          alert(`Create new task on ${dayNumber.textContent} January 2026`);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

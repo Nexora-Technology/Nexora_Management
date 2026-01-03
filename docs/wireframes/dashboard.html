@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexora - Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #FFFFFF;
+      --bg-secondary: #F8FAFC;
+      --bg-tertiary: #F1F5F9;
+      --border-default: #E2E8F0;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-tertiary: #94A3B8;
+      --primary: #0EA5E9;
+      --secondary: #14B8A6;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-primary);
+      border-right: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px 16px;
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 8px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .sidebar-section {
+      padding: 16px 12px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0 8px;
+      margin-bottom: 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 150ms;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .nav-icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    .badge {
+      background: #EF4444;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-left: auto;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px 12px;
+      border-top: 1px solid var(--border-default);
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 150ms;
+    }
+
+    .user-profile:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .user-info {
+      flex: 1;
+    }
+
+    .user-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .user-email {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Bar */
+    .topbar {
+      height: 64px;
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--text-tertiary);
+    }
+
+    .breadcrumbs span {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .search-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      padding: 8px 12px;
+      width: 280px;
+    }
+
+    .search-bar input {
+      border: none;
+      background: none;
+      font-size: 14px;
+      font-family: inherit;
+      width: 100%;
+      outline: none;
+    }
+
+    .search-bar input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .icon-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      transition: all 150ms;
+      position: relative;
+    }
+
+    .icon-button:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .notification-dot {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
+      background: #EF4444;
+      border-radius: 50%;
+      border: 2px solid var(--bg-primary);
+    }
+
+    /* Dashboard Content */
+    .dashboard-content {
+      padding: 32px;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-tertiary);
+      margin-top: 4px;
+    }
+
+    .button {
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 200ms;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+    }
+
+    .button-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 200ms;
+    }
+
+    .stat-card:hover {
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+      transform: translateY(-2px);
+    }
+
+    .stat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .stat-trend {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+
+    .stat-trend.up {
+      background: #D1FAE5;
+      color: #059669;
+    }
+
+    .stat-trend.down {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    /* Recent Activity */
+    .activity-section {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+    }
+
+    .section-card {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .view-all {
+      font-size: 13px;
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .view-all:hover {
+      text-decoration: underline;
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 150ms;
+      border: 1px solid transparent;
+    }
+
+    .task-item:hover {
+      background: var(--bg-secondary);
+      border-color: var(--border-default);
+    }
+
+    .task-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border-default);
+      border-radius: 6px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .task-checkbox.checked {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .task-info {
+      flex: 1;
+    }
+
+    .task-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .task-meta {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .task-priority {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .priority-high {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+
+    .priority-medium {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+
+    .priority-low {
+      background: #D1FAE5;
+      color: #059669;
+    }
+
+    .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .activity-item {
+      display: flex;
+      gap: 12px;
+    }
+
+    .activity-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .activity-content {
+      flex: 1;
+    }
+
+    .activity-text {
+      font-size: 13px;
+      color: var(--text-primary);
+      line-height: 1.5;
+      margin-bottom: 2px;
+    }
+
+    .activity-time {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    /* Responsive */
+    @media (max-width: 1280px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .activity-section {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-area">
+          <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#0EA5E9;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#14B8A6;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="45" fill="url(#grad2)" opacity="0.1" />
+            <g transform="translate(25, 25)">
+              <rect x="0" y="0" width="10" height="50" rx="2.5" fill="url(#grad2)" />
+              <rect x="40" y="0" width="10" height="50" rx="2.5" fill="url(#grad2)" />
+              <path d="M 10 50 L 50 0 L 50 10 L 20 50 Z" fill="url(#grad2)" opacity="0.9" />
+            </g>
+          </svg>
+          <span class="logo-text">Nexora</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title">Main</div>
+        <div class="nav-item active">
+          <span>📊</span>
+          Dashboard
+        </div>
+        <div class="nav-item">
+          <span>📋</span>
+          My Tasks
+          <span class="badge">12</span>
+        </div>
+        <div class="nav-item">
+          <span>📁</span>
+          Projects
+        </div>
+        <div class="nav-item">
+          <span>📅</span>
+          Calendar
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title">Teams</div>
+        <div class="nav-item">
+          <span>👥</span>
+          Engineering
+        </div>
+        <div class="nav-item">
+          <span>🎨</span>
+          Design
+        </div>
+        <div class="nav-item">
+          <span>📈</span>
+          Marketing
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title">AI Assistant</div>
+        <div class="nav-item">
+          <span>🤖</span>
+          Nexora AI
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="avatar">JD</div>
+          <div class="user-info">
+            <div class="user-name">John Doe</div>
+            <div class="user-email">john@company.com</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="breadcrumbs">
+          Workspace / <span>Dashboard</span>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="search-bar">
+            <span>🔍</span>
+            <input type="text" placeholder="Search tasks, projects...">
+          </div>
+
+          <button class="icon-button">
+            🔔
+            <span class="notification-dot"></span>
+          </button>
+
+          <button class="icon-button">
+            💬
+          </button>
+
+          <button class="icon-button">
+            ⚙️
+          </button>
+        </div>
+      </header>
+
+      <!-- Dashboard Content -->
+      <div class="dashboard-content">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Good morning, John! 👋</h1>
+            <p class="page-subtitle">Here's what's happening with your projects today</p>
+          </div>
+          <button class="button button-primary">
+            ➕ New Task
+          </button>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon" style="background: #E0F2FE; color: #0EA5E9;">📋</div>
+              <span class="stat-trend up">↑ 12%</span>
+            </div>
+            <div class="stat-value">24</div>
+            <div class="stat-label">Total Tasks</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon" style="background: #CCFBF1; color: #14B8A6;">✅</div>
+              <span class="stat-trend up">↑ 8%</span>
+            </div>
+            <div class="stat-value">18</div>
+            <div class="stat-label">Completed</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon" style="background: #FEF3C7; color: #F59E0B;">⏳</div>
+              <span class="stat-trend down">↓ 3%</span>
+            </div>
+            <div class="stat-value">6</div>
+            <div class="stat-label">In Progress</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-header">
+              <div class="stat-icon" style="background: #FEE2E2; color: #EF4444;">🔴</div>
+              <span class="stat-trend up">↑ 2</span>
+            </div>
+            <div class="stat-value">3</div>
+            <div class="stat-label">Overdue</div>
+          </div>
+        </div>
+
+        <!-- Activity Section -->
+        <div class="activity-section">
+          <!-- Recent Tasks -->
+          <div class="section-card">
+            <div class="section-header">
+              <h2 class="section-title">Recent Tasks</h2>
+              <a href="#" class="view-all">View all →</a>
+            </div>
+
+            <div class="task-list">
+              <div class="task-item">
+                <div class="task-checkbox"></div>
+                <div class="task-info">
+                  <div class="task-title">Design new dashboard mockups</div>
+                  <div class="task-meta">
+                    <span class="task-priority priority-high">High</span>
+                    <span>•</span>
+                    <span>Due today</span>
+                    <span>•</span>
+                    <span>👤 You</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="task-item">
+                <div class="task-checkbox checked">✓</div>
+                <div class="task-info">
+                  <div class="task-title" style="text-decoration: line-through; color: var(--text-tertiary);">Review pull requests</div>
+                  <div class="task-meta">
+                    <span class="task-priority priority-medium">Medium</span>
+                    <span>•</span>
+                    <span>Completed</span>
+                    <span>•</span>
+                    <span>👤 Sarah</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="task-item">
+                <div class="task-checkbox"></div>
+                <div class="task-info">
+                  <div class="task-title">Update API documentation</div>
+                  <div class="task-meta">
+                    <span class="task-priority priority-low">Low</span>
+                    <span>•</span>
+                    <span>Due in 3 days</span>
+                    <span>•</span>
+                    <span>👤 Mike</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="task-item">
+                <div class="task-checkbox"></div>
+                <div class="task-info">
+                  <div class="task-title">Set up CI/CD pipeline</div>
+                  <div class="task-meta">
+                    <span class="task-priority priority-high">High</span>
+                    <span>•</span>
+                    <span>Due tomorrow</span>
+                    <span>•</span>
+                    <span>👤 You</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity Feed -->
+          <div class="section-card">
+            <div class="section-header">
+              <h2 class="section-title">Activity Feed</h2>
+              <a href="#" class="view-all">View all →</a>
+            </div>
+
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="activity-icon" style="background: #E0F2FE; color: #0EA5E9;">✅</div>
+                <div class="activity-content">
+                  <div class="activity-text"><strong>Sarah</strong> completed task "Review pull requests"</div>
+                  <div class="activity-time">2 minutes ago</div>
+                </div>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-icon" style="background: #CCFBF1; color: #14B8A6;">💬</div>
+                <div class="activity-content">
+                  <div class="activity-text"><strong>Mike</strong> commented on "API Documentation"</div>
+                  <div class="activity-time">15 minutes ago</div>
+                </div>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-icon" style="background: #FEF3C7; color: #F59E0B;">➕</div>
+                <div class="activity-content">
+                  <div class="activity-text"><strong>John</strong> created new task "Deploy to staging"</div>
+                  <div class="activity-time">1 hour ago</div>
+                </div>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-icon" style="background: #FEE2E2; color: #EF4444;">🔔</div>
+                <div class="activity-content">
+                  <div class="activity-text"><strong>System</strong> detected 3 overdue tasks</div>
+                  <div class="activity-time">2 hours ago</div>
+                </div>
+              </div>
+
+              <div class="activity-item">
+                <div class="activity-icon" style="background: #E0F2FE; color: #0EA5E9;">👥</div>
+                <div class="activity-content">
+                  <div class="activity-text"><strong>Alice</strong> joined Engineering team</div>
+                  <div class="activity-time">Yesterday</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

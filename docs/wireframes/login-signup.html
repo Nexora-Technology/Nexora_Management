@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexora - Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 480px;
+      overflow: hidden;
+    }
+
+    .header {
+      padding: 48px 40px 32px;
+      text-align: center;
+    }
+
+    .logo {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 24px;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #0F172A;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #64748B;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #E2E8F0;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 16px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #64748B;
+      cursor: pointer;
+      transition: all 200ms;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+    }
+
+    .tab.active {
+      color: #0EA5E9;
+      border-bottom-color: #0EA5E9;
+    }
+
+    .tab:hover:not(.active) {
+      color: #0F172A;
+    }
+
+    .form {
+      padding: 32px 40px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #0F172A;
+      margin-bottom: 8px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 15px;
+      border: 2px solid #E2E8F0;
+      border-radius: 8px;
+      font-family: inherit;
+      transition: all 200ms;
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: #0EA5E9;
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    }
+
+    .input::placeholder {
+      color: #94A3B8;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #64748B;
+      font-size: 12px;
+    }
+
+    .forgot-link {
+      text-align: right;
+      margin-top: -12px;
+      margin-bottom: 20px;
+    }
+
+    .forgot-link a {
+      color: #0EA5E9;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .forgot-link a:hover {
+      text-decoration: underline;
+    }
+
+    .button {
+      width: 100%;
+      padding: 14px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 200ms;
+      font-family: inherit;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+    }
+
+    .button-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 24px 0;
+      color: #94A3B8;
+      font-size: 13px;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #E2E8F0;
+    }
+
+    .divider span {
+      padding: 0 16px;
+    }
+
+    .social-login {
+      display: flex;
+      gap: 12px;
+    }
+
+    .social-button {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #E2E8F0;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      transition: all 200ms;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 500;
+      color: #475569;
+    }
+
+    .social-button:hover {
+      border-color: #CBD5E1;
+      background: #F8FAFC;
+    }
+
+    .social-button.google::before {
+      content: 'G';
+      font-weight: 700;
+      margin-right: 8px;
+      color: #EA4335;
+    }
+
+    .social-button.github::before {
+      content: '⚡';
+      margin-right: 8px;
+    }
+
+    .footer {
+      padding: 24px 40px;
+      text-align: center;
+      background: #F8FAFC;
+      border-top: 1px solid #E2E8F0;
+    }
+
+    .footer-text {
+      font-size: 13px;
+      color: #64748B;
+    }
+
+    .footer-text a {
+      color: #0EA5E9;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .footer-text a:hover {
+      text-decoration: underline;
+    }
+
+    /* Checkbox */
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .checkbox {
+      width: 18px;
+      height: 18px;
+      accent-color: #0EA5E9;
+    }
+
+    .checkbox-label {
+      font-size: 13px;
+      color: #64748B;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .container {
+        border-radius: 0;
+      }
+
+      .header, .form, .footer {
+        padding-left: 24px;
+        padding-right: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#0EA5E9;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#14B8A6;stop-opacity:1" />
+          </linearGradient>
+        </defs>
+        <circle cx="50" cy="50" r="45" fill="url(#grad1)" opacity="0.1" />
+        <g transform="translate(25, 25)">
+          <rect x="0" y="0" width="10" height="50" rx="2.5" fill="url(#grad1)" />
+          <rect x="40" y="0" width="10" height="50" rx="2.5" fill="url(#grad1)" />
+          <path d="M 10 50 L 50 0 L 50 10 L 20 50 Z" fill="url(#grad1)" opacity="0.9" />
+          <circle cx="0" cy="55" r="3.5" fill="#14B8A6" />
+          <circle cx="50" cy="55" r="3.5" fill="#0EA5E9" />
+          <circle cx="25" cy="55" r="2.5" fill="#14B8A6" opacity="0.7" />
+        </g>
+      </svg>
+      <h1 class="title">Welcome to Nexora</h1>
+      <p class="subtitle">Streamline your project management</p>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('login')">Sign In</div>
+      <div class="tab" onclick="switchTab('signup')">Sign Up</div>
+    </div>
+
+    <div class="form">
+      <div class="form-group">
+        <label class="label" for="email">Email address</label>
+        <input type="email" id="email" class="input" placeholder="you@example.com" value="john@company.com">
+      </div>
+
+      <div class="form-group">
+        <label class="label" for="password">Password</label>
+        <div class="input-wrapper">
+          <input type="password" id="password" class="input" placeholder="••••••••" value="password123">
+          <button class="password-toggle" onclick="togglePassword()">Show</button>
+        </div>
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="remember" class="checkbox" checked>
+        <label for="remember" class="checkbox-label">Remember me for 30 days</label>
+      </div>
+
+      <div class="forgot-link">
+        <a href="#">Forgot password?</a>
+      </div>
+
+      <button class="button button-primary">Sign In</button>
+
+      <div class="divider">
+        <span>or continue with</span>
+      </div>
+
+      <div class="social-login">
+        <button class="social-button google">Google</button>
+        <button class="social-button github">GitHub</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p class="footer-text">
+        Don't have an account? <a href="#" onclick="switchTab('signup')">Sign up</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    function togglePassword() {
+      const input = document.getElementById('password');
+      const button = document.querySelector('.password-toggle');
+      if (input.type === 'password') {
+        input.type = 'text';
+        button.textContent = 'Hide';
+      } else {
+        input.type = 'password';
+        button.textContent = 'Show';
+      }
+    }
+
+    function switchTab(tab) {
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>

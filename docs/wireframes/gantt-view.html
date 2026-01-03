@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexora - Gantt Chart View</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #FFFFFF;
+      --bg-secondary: #F8FAFC;
+      --bg-tertiary: #F1F5F9;
+      --border-default: #E2E8F0;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-tertiary: #94A3B8;
+      --primary: #0EA5E9;
+      --secondary: #14B8A6;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-primary);
+      border-right: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+      z-index: 100;
+    }
+
+    .sidebar-header {
+      padding: 20px 16px;
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 8px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Bar */
+    .topbar {
+      height: 64px;
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .view-switcher {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      padding: 4px;
+    }
+
+    .view-button {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      background: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 150ms;
+      font-family: inherit;
+    }
+
+    .view-button.active {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .button {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 200ms;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+    }
+
+    .button-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+    }
+
+    /* Gantt Container */
+    .gantt-container {
+      padding: 24px 32px;
+      overflow-x: auto;
+      flex: 1;
+    }
+
+    .gantt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .gantt-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .zoom-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .zoom-button {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      background: var(--bg-primary);
+      cursor: pointer;
+      transition: all 150ms;
+      font-family: inherit;
+    }
+
+    .zoom-button:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .zoom-button.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    /* Gantt Chart */
+    .gantt-chart {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      overflow: hidden;
+      min-width: 1200px;
+    }
+
+    .timeline-header {
+      display: flex;
+      border-bottom: 1px solid var(--border-default);
+      background: var(--bg-tertiary);
+    }
+
+    .task-list-header {
+      width: 300px;
+      padding: 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-right: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+
+    .timeline-dates {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(30, 60px);
+      overflow-x: auto;
+    }
+
+    .date-cell {
+      padding: 16px 8px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-secondary);
+      border-right: 1px solid var(--border-default);
+    }
+
+    .date-cell.weekend {
+      background: var(--bg-secondary);
+    }
+
+    .date-cell.today {
+      background: rgba(14, 165, 233, 0.1);
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .day-number {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .day-name {
+      font-size: 10px;
+      color: var(--text-tertiary);
+    }
+
+    /* Gantt Rows */
+    .gantt-row {
+      display: flex;
+      border-bottom: 1px solid var(--border-default);
+      min-height: 60px;
+      position: relative;
+    }
+
+    .gantt-row:hover {
+      background: var(--bg-secondary);
+    }
+
+    .task-info {
+      width: 300px;
+      padding: 16px;
+      border-right: 1px solid var(--border-default);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .task-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border-default);
+      border-radius: 6px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .task-details {
+      flex: 1;
+    }
+
+    .task-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .task-meta {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      display: flex;
+      gap: 8px;
+    }
+
+    .timeline-bars {
+      flex: 1;
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(30, 60px);
+    }
+
+    .grid-lines {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(30, 60px);
+      pointer-events: none;
+    }
+
+    .grid-line {
+      border-right: 1px solid var(--border-default);
+      height: 100%;
+    }
+
+    .grid-line.weekend {
+      background: var(--bg-secondary);
+    }
+
+    .grid-line.today {
+      background: rgba(14, 165, 233, 0.05);
+      border-right: 2px solid var(--primary);
+    }
+
+    .task-bar {
+      position: absolute;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 200ms;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+      top: 14px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .task-bar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      z-index: 10;
+    }
+
+    .task-bar.urgent {
+      background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    }
+
+    .task-bar.high {
+      background: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%);
+    }
+
+    .task-bar.medium {
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+    }
+
+    .task-bar.low {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    }
+
+    .task-bar.completed {
+      background: linear-gradient(135deg, #94A3B8 0%, #64748B 100%);
+      opacity: 0.6;
+    }
+
+    .dependency-line {
+      position: absolute;
+      height: 2px;
+      background: var(--border-default);
+      top: 30px;
+      pointer-events: none;
+    }
+
+    .dependency-line::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: -4px;
+      width: 0;
+      height: 0;
+      border-left: 6px solid var(--border-default);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+    }
+
+    /* Progress Bar */
+    .progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 6px;
+    }
+
+    /* Avatars */
+    .avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 10px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .task-list-header {
+        width: 200px;
+      }
+
+      .task-info {
+        width: 200px;
+      }
+
+      .timeline-dates,
+      .timeline-bars {
+        grid-template-columns: repeat(30, 40px);
+      }
+
+      .date-cell {
+        min-width: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-area">
+          <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#0EA5E9;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#14B8A6;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="45" fill="url(#grad1)" opacity="0.1" />
+            <g transform="translate(25, 25)">
+              <rect x="0" y="0" width="10" height="50" rx="2.5" fill="url(#grad1)" />
+              <rect x="40" y="0" width="10" height="50" rx="2.5" fill="url(#grad1)" />
+              <path d="M 10 50 L 50 0 L 50 10 L 20 50 Z" fill="url(#grad1)" opacity="0.9" />
+            </g>
+          </svg>
+          <span class="logo-text">Nexora</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="view-switcher">
+          <button class="view-button">📊 Board</button>
+          <button class="view-button">📝 List</button>
+          <button class="view-button">📅 Calendar</button>
+          <button class="view-button active">📈 Gantt</button>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="button button-primary">
+            ➕ Add Task
+          </button>
+        </div>
+      </header>
+
+      <!-- Gantt Content -->
+      <div class="gantt-container">
+        <div class="gantt-header">
+          <h1 class="gantt-title">Product Launch Q1</h1>
+          <div class="zoom-controls">
+            <button class="zoom-button">Day</button>
+            <button class="zoom-button active">Week</button>
+            <button class="zoom-button">Month</button>
+          </div>
+        </div>
+
+        <!-- Gantt Chart -->
+        <div class="gantt-chart">
+          <!-- Timeline Header -->
+          <div class="timeline-header">
+            <div class="task-list-header">Tasks</div>
+            <div class="timeline-dates">
+              <!-- 30 days -->
+              <div class="date-cell weekend">
+                <div class="day-number">29</div>
+                <div class="day-name">Sun</div>
+              </div>
+              <div class="date-cell weekend">
+                <div class="day-number">30</div>
+                <div class="day-name">Mon</div>
+              </div>
+              <div class="date-cell weekend">
+                <div class="day-number">31</div>
+                <div class="day-name">Tue</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">1</div>
+                <div class="day-name">Wed</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">2</div>
+                <div class="day-name">Thu</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">3</div>
+                <div class="day-name">Fri</div>
+              </div>
+              <div class="date-cell weekend">
+                <div class="day-number">4</div>
+                <div class="day-name">Sat</div>
+              </div>
+              <div class="date-cell weekend">
+                <div class="day-number">5</div>
+                <div class="day-name">Sun</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">6</div>
+                <div class="day-name">Mon</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">7</div>
+                <div class="day-name">Tue</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">8</div>
+                <div class="day-name">Wed</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">9</div>
+                <div class="day-name">Thu</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">10</div>
+                <div class="day-name">Fri</div>
+              </div>
+              <div class="date-cell weekend">
+                <div class="day-number">11</div>
+                <div class="day-name">Sat</div>
+              </div>
+              <div class="date-cell weekend">
+                <div class="day-number">12</div>
+                <div class="day-name">Sun</div>
+              </div>
+              <div class="date-cell today">
+                <div class="day-number">13</div>
+                <div class="day-name">Mon</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">14</div>
+                <div class="day-name">Tue</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">15</div>
+                <div class="day-name">Wed</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">16</div>
+                <div class="day-name">Thu</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">17</div>
+                <div class="day-name">Fri</div>
+              </div>
+              <div class="date-cell weekend">
+                <div class="day-number">18</div>
+                <div class="day-name">Sat</div>
+              </div>
+              <div class="date-cell weekend">
+                <div class="day-number">19</div>
+                <div class="day-name">Sun</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">20</div>
+                <div class="day-name">Mon</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">21</div>
+                <div class="day-name">Tue</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">22</div>
+                <div class="day-name">Wed</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">23</div>
+                <div class="day-name">Thu</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">24</div>
+                <div class="day-name">Fri</div>
+              </div>
+              <div class="date-cell weekend">
+                <div class="day-number">25</div>
+                <div class="day-name">Sat</div>
+              </div>
+              <div class="date-cell weekend">
+                <div class="day-number">26</div>
+                <div class="day-name">Sun</div>
+              </div>
+              <div class="date-cell">
+                <div class="day-number">27</div>
+                <div class="day-name">Mon</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Task Rows -->
+          <div class="gantt-row">
+            <div class="task-info">
+              <div class="task-checkbox"></div>
+              <div class="task-details">
+                <div class="task-name">Design System Setup</div>
+                <div class="task-meta">
+                  <span>🔴 High</span>
+                  <span>•</span>
+                  <span>Jan 1 - Jan 8</span>
+                </div>
+              </div>
+              <div class="avatar">MK</div>
+            </div>
+            <div class="timeline-bars">
+              <div class="grid-lines">
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+              </div>
+              <div class="task-bar high" style="left: 180px; width: 420px;">
+                Design System
+                <div class="progress-bar" style="width: 60%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gantt-row">
+            <div class="task-info">
+              <div class="task-checkbox checked"></div>
+              <div class="task-details">
+                <div class="task-name" style="text-decoration: line-through; color: var(--text-tertiary);">Color Palette</div>
+                <div class="task-meta">
+                  <span>✅ Done</span>
+                  <span>•</span>
+                  <span>Jan 1 - Jan 3</span>
+                </div>
+              </div>
+              <div class="avatar">MK</div>
+            </div>
+            <div class="timeline-bars">
+              <div class="grid-lines">
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+              </div>
+              <div class="task-bar completed" style="left: 180px; width: 180px;">
+                Color Palette
+                <div class="progress-bar" style="width: 100%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gantt-row">
+            <div class="task-info">
+              <div class="task-checkbox"></div>
+              <div class="task-details">
+                <div class="task-name">Backend API Development</div>
+                <div class="task-meta">
+                  <span>🔴 Urgent</span>
+                  <span>•</span>
+                  <span>Jan 3 - Jan 15</span>
+                </div>
+              </div>
+              <div class="avatar">JD</div>
+            </div>
+            <div class="timeline-bars">
+              <div class="grid-lines">
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+              </div>
+              <div class="task-bar urgent" style="left: 360px; width: 720px;">
+                Backend API
+                <div class="progress-bar" style="width: 45%;"></div>
+              </div>
+              <div class="dependency-line" style="left: 540px; width: 120px;"></div>
+            </div>
+          </div>
+
+          <div class="gantt-row">
+            <div class="task-info">
+              <div class="task-checkbox"></div>
+              <div class="task-details">
+                <div class="task-name">Authentication System</div>
+                <div class="task-meta">
+                  <span>🟠 High</span>
+                  <span>•</span>
+                  <span>Jan 3 - Jan 10</span>
+                </div>
+              </div>
+              <div class="avatar">JD</div>
+            </div>
+            <div class="timeline-bars">
+              <div class="grid-lines">
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+              </div>
+              <div class="task-bar high" style="left: 360px; width: 480px;">
+                Authentication
+                <div class="progress-bar" style="width: 80%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gantt-row">
+            <div class="task-info">
+              <div class="task-checkbox"></div>
+              <div class="task-details">
+                <div class="task-name">User Management</div>
+                <div class="task-meta">
+                  <span>🟡 Medium</span>
+                  <span>•</span>
+                  <span>Jan 10 - Jan 15</span>
+                </div>
+              </div>
+              <div class="avatar">AS</div>
+            </div>
+            <div class="timeline-bars">
+              <div class="grid-lines">
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+              </div>
+              <div class="task-bar medium" style="left: 780px; width: 300px;">
+                User Management
+                <div class="progress-bar" style="width: 30%;"></div>
+              </div>
+              <div class="dependency-line" style="left: 720px; width: 60px;"></div>
+            </div>
+          </div>
+
+          <div class="gantt-row">
+            <div class="task-info">
+              <div class="task-checkbox"></div>
+              <div class="task-details">
+                <div class="task-name">Marketing Campaign</div>
+                <div class="task-meta">
+                  <span>🟡 Medium</span>
+                  <span>•</span>
+                  <span>Jan 8 - Jan 20</span>
+                </div>
+              </div>
+              <div class="avatar">SM</div>
+            </div>
+            <div class="timeline-bars">
+              <div class="grid-lines">
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+              </div>
+              <div class="task-bar medium" style="left: 600px; width: 720px;">
+                Marketing
+                <div class="progress-bar" style="width: 25%;"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gantt-row">
+            <div class="task-info">
+              <div class="task-checkbox"></div>
+              <div class="task-details">
+                <div class="task-name">QA Testing Phase</div>
+                <div class="task-meta">
+                  <span>🟢 Low</span>
+                  <span>•</span>
+                  <span>Jan 15 - Jan 27</span>
+                </div>
+              </div>
+              <div class="avatar">JD</div>
+            </div>
+            <div class="timeline-bars">
+              <div class="grid-lines">
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+                <div class="grid-line"></div>
+              </div>
+              <div class="task-bar low" style="left: 1080px; width: 720px;">
+                QA Testing
+                <div class="progress-bar" style="width: 0%;"></div>
+              </div>
+              <div class="dependency-line" style="left: 1020px; width: 60px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Checkbox functionality
+    document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+      checkbox.addEventListener('click', (e) => {
+        e.stopPropagation();
+        checkbox.classList.toggle('checked');
+      });
+    });
+
+    // Task bar click
+    document.querySelectorAll('.task-bar').forEach(bar => {
+      bar.addEventListener('click', () => {
+        alert('Task clicked! In production, this would open task details.');
+      });
+    });
+
+    // Zoom control
+    document.querySelectorAll('.zoom-button').forEach(button => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('.zoom-button').forEach(b => b.classList.remove('active'));
+        button.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

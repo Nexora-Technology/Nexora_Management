@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexora - Task List View</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #FFFFFF;
+      --bg-secondary: #F8FAFC;
+      --bg-tertiary: #F1F5F9;
+      --border-default: #E2E8F0;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-tertiary: #94A3B8;
+      --primary: #0EA5E9;
+      --secondary: #14B8A6;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-primary);
+      border-right: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px 16px;
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 8px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .sidebar-section {
+      padding: 16px 12px;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0 8px;
+      margin-bottom: 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 150ms;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Bar */
+    .topbar {
+      height: 64px;
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .view-switcher {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      padding: 4px;
+    }
+
+    .view-button {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      background: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 150ms;
+      font-family: inherit;
+    }
+
+    .view-button.active {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .button {
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 200ms;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+    }
+
+    .button-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+    }
+
+    /* Task List Container */
+    .task-list-container {
+      padding: 24px 32px;
+    }
+
+    .list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .list-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .filters {
+      display: flex;
+      gap: 12px;
+    }
+
+    .filter-chip {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      background: var(--bg-primary);
+      cursor: pointer;
+      transition: all 150ms;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-chip:hover {
+      background: var(--bg-tertiary);
+    }
+
+    /* Task List Table */
+    .task-table {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .table-header {
+      display: grid;
+      grid-template-columns: 40px 4px 1fr 120px 120px 140px 100px 40px;
+      gap: 16px;
+      padding: 16px 24px;
+      background: var(--bg-tertiary);
+      border-bottom: 1px solid var(--border-default);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .table-row {
+      display: grid;
+      grid-template-columns: 40px 4px 1fr 120px 120px 140px 100px 40px;
+      gap: 16px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border-default);
+      align-items: center;
+      transition: all 150ms;
+      cursor: pointer;
+    }
+
+    .table-row:hover {
+      background: var(--bg-secondary);
+    }
+
+    .table-row:last-child {
+      border-bottom: none;
+    }
+
+    .task-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border-default);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 150ms;
+    }
+
+    .task-checkbox:hover {
+      border-color: var(--primary);
+    }
+
+    .task-checkbox.checked {
+      background: var(--primary);
+      border-color: var(--primary);
+      position: relative;
+    }
+
+    .task-checkbox.checked::after {
+      content: '✓';
+      position: absolute;
+      color: white;
+      font-size: 12px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .task-indent {
+      width: 4px;
+      height: 20px;
+      background: var(--border-default);
+      border-radius: 2px;
+    }
+
+    .task-indent.level-0 {
+      width: 0;
+    }
+
+    .task-indent.level-1 {
+      width: 20px;
+    }
+
+    .task-indent.level-2 {
+      width: 40px;
+    }
+
+    .task-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .task-name.completed {
+      text-decoration: line-through;
+      color: var(--text-tertiary);
+    }
+
+    .expand-icon {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: transform 150ms;
+    }
+
+    .expand-icon.expanded {
+      transform: rotate(90deg);
+    }
+
+    .task-status {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .status-todo {
+      background: #F1F5F9;
+      color: #475569;
+    }
+
+    .status-progress {
+      background: #E0F2FE;
+      color: #0EA5E9;
+    }
+
+    .status-review {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+
+    .status-done {
+      background: #D1FAE5;
+      color: #059669;
+    }
+
+    .task-priority {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .priority-urgent {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+
+    .priority-high {
+      background: #FED7AA;
+      color: #EA580C;
+    }
+
+    .priority-medium {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+
+    .priority-low {
+      background: #D1FAE5;
+      color: #059669;
+    }
+
+    .task-assignee {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 11px;
+    }
+
+    .assignee-name {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .task-due {
+      font-size: 13px;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .task-due.overdue {
+      color: #EF4444;
+      font-weight: 600;
+    }
+
+    .task-due.today {
+      color: #F59E0B;
+      font-weight: 600;
+    }
+
+    .task-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .action-icon {
+      font-size: 16px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: all 150ms;
+    }
+
+    .action-icon:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    /* Subtasks */
+    .subtasks {
+      display: none;
+    }
+
+    .subtasks.expanded {
+      display: block;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .table-header {
+        display: none;
+      }
+
+      .table-row {
+        grid-template-columns: 40px 1fr;
+        gap: 12px;
+      }
+
+      .task-status,
+      .task-priority,
+      .task-assignee,
+      .task-due,
+      .task-actions {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-area">
+          <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#0EA5E9;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#14B8A6;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="45" fill="url(#grad1)" opacity="0.1" />
+            <g transform="translate(25, 25)">
+              <rect x="0" y="0" width="10" height="50" rx="2.5" fill="url(#grad1)" />
+              <rect x="40" y="0" width="10" height="50" rx="2.5" fill="url(#grad1)" />
+              <path d="M 10 50 L 50 0 L 50 10 L 20 50 Z" fill="url(#grad1)" opacity="0.9" />
+            </g>
+          </svg>
+          <span class="logo-text">Nexora</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title">Main</div>
+        <div class="nav-item">
+          <span>📊</span>
+          Dashboard
+        </div>
+        <div class="nav-item active">
+          <span>📝</span>
+          List View
+        </div>
+        <div class="nav-item">
+          <span>📋</span>
+          Board View
+        </div>
+        <div class="nav-item">
+          <span>📅</span>
+          Calendar
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="section-title">Projects</div>
+        <div class="nav-item">
+          <span>🚀</span>
+          Product Launch
+        </div>
+        <div class="nav-item">
+          <span>💻</span>
+          Website Redesign
+        </div>
+        <div class="nav-item">
+          <span>📱</span>
+          Mobile App
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="view-switcher">
+          <button class="view-button">📊 Board</button>
+          <button class="view-button active">📝 List</button>
+          <button class="view-button">📅 Calendar</button>
+          <button class="view-button">📈 Gantt</button>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="filter-chip">
+            🔍 Filter
+          </div>
+          <div class="filter-chip">
+            👥 Assignee
+          </div>
+          <button class="button button-primary">
+            ➕ Add Task
+          </button>
+        </div>
+      </header>
+
+      <!-- Task List Content -->
+      <div class="task-list-container">
+        <div class="list-header">
+          <h1 class="list-title">Product Launch Q1</h1>
+          <div class="filters">
+            <div class="filter-chip">👤 All Members</div>
+            <div class="filter-chip">🏷️ All Tags</div>
+            <div class="filter-chip">📅 This Week</div>
+          </div>
+        </div>
+
+        <!-- Task Table -->
+        <div class="task-table">
+          <div class="table-header">
+            <div></div>
+            <div></div>
+            <div>Task Name</div>
+            <div>Status</div>
+            <div>Priority</div>
+            <div>Assignee</div>
+            <div>Due Date</div>
+            <div></div>
+          </div>
+
+          <!-- Parent Task 1 -->
+          <div class="table-row">
+            <div class="task-checkbox"></div>
+            <div class="task-indent level-0"></div>
+            <div class="task-name">
+              <span class="expand-icon" onclick="toggleSubtasks(this)">▶</span>
+              Design System Setup
+            </div>
+            <div><span class="task-status status-progress">In Progress</span></div>
+            <div><span class="task-priority priority-high">High</span></div>
+            <div class="task-assignee">
+              <div class="avatar">MK</div>
+              <span class="assignee-name">Mike K.</span>
+            </div>
+            <div class="task-due today">📅 Today</div>
+            <div class="task-actions">
+              <span class="action-icon">⋯</span>
+            </div>
+          </div>
+
+          <!-- Subtasks of Task 1 -->
+          <div class="subtasks" id="subtasks-1">
+            <div class="table-row">
+              <div class="task-checkbox"></div>
+              <div class="task-indent level-1"></div>
+              <div class="task-name">Create color palette documentation</div>
+              <div><span class="task-status status-done">Done</span></div>
+              <div><span class="task-priority priority-medium">Medium</span></div>
+              <div class="task-assignee">
+                <div class="avatar">MK</div>
+              </div>
+              <div class="task-due">✅</div>
+              <div class="task-actions">
+                <span class="action-icon">⋯</span>
+              </div>
+            </div>
+
+            <div class="table-row">
+              <div class="task-checkbox checked"></div>
+              <div class="task-indent level-1"></div>
+              <div class="task-name completed">Design button components</div>
+              <div><span class="task-status status-done">Done</span></div>
+              <div><span class="task-priority priority-medium">Medium</span></div>
+              <div class="task-assignee">
+                <div class="avatar">MK</div>
+              </div>
+              <div class="task-due">✅</div>
+              <div class="task-actions">
+                <span class="action-icon">⋯</span>
+              </div>
+            </div>
+
+            <div class="table-row">
+              <div class="task-checkbox"></div>
+              <div class="task-indent level-1"></div>
+              <div class="task-name">Create typography scale</div>
+              <div><span class="task-status status-todo">To Do</span></div>
+              <div><span class="task-priority priority-low">Low</span></div>
+              <div class="task-assignee">
+                <div class="avatar">JD</div>
+              </div>
+              <div class="task-due">Jan 5</div>
+              <div class="task-actions">
+                <span class="action-icon">⋯</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Parent Task 2 -->
+          <div class="table-row">
+            <div class="task-checkbox"></div>
+            <div class="task-indent level-0"></div>
+            <div class="task-name">
+              <span class="expand-icon" onclick="toggleSubtasks(this)">▶</span>
+              Backend API Development
+            </div>
+            <div><span class="task-status status-progress">In Progress</span></div>
+            <div><span class="task-priority priority-urgent">Urgent</span></div>
+            <div class="task-assignee">
+              <div class="avatar">JD</div>
+              <span class="assignee-name">John D.</span>
+            </div>
+            <div class="task-due overdue">🔴 Overdue</div>
+            <div class="task-actions">
+              <span class="action-icon">⋯</span>
+            </div>
+          </div>
+
+          <!-- Subtasks of Task 2 -->
+          <div class="subtasks" id="subtasks-2">
+            <div class="table-row">
+              <div class="task-checkbox"></div>
+              <div class="task-indent level-1"></div>
+              <div class="task-name">Set up authentication endpoints</div>
+              <div><span class="task-status status-done">Done</span></div>
+              <div><span class="task-priority priority-urgent">Urgent</span></div>
+              <div class="task-assignee">
+                <div class="avatar">JD</div>
+              </div>
+              <div class="task-due">✅</div>
+              <div class="task-actions">
+                <span class="action-icon">⋯</span>
+              </div>
+            </div>
+
+            <div class="table-row">
+              <div class="task-checkbox"></div>
+              <div class="task-indent level-1"></div>
+              <div class="task-name">Implement user management</div>
+              <div><span class="task-status status-review">Review</span></div>
+              <div><span class="task-priority priority-high">High</span></div>
+              <div class="task-assignee">
+                <div class="avatar">AS</div>
+              </div>
+              <div class="task-due today">📅 Today</div>
+              <div class="task-actions">
+                <span class="action-icon">⋯</span>
+              </div>
+            </div>
+
+            <div class="table-row">
+              <div class="task-checkbox"></div>
+              <div class="task-indent level-1"></div>
+              <div class="task-name">Database schema design</div>
+              <div><span class="task-status status-todo">To Do</span></div>
+              <div><span class="task-priority priority-high">High</span></div>
+              <div class="task-assignee">
+                <div class="avatar">JD</div>
+              </div>
+              <div class="task-due">Jan 6</div>
+              <div class="task-actions">
+                <span class="action-icon">⋯</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Task 3 -->
+          <div class="table-row">
+            <div class="task-checkbox"></div>
+            <div class="task-indent level-0"></div>
+            <div class="task-name">
+              <span class="expand-icon">▶</span>
+              Marketing Campaign
+            </div>
+            <div><span class="task-status status-todo">To Do</span></div>
+            <div><span class="task-priority priority-medium">Medium</span></div>
+            <div class="task-assignee">
+              <div class="avatar">SM</div>
+              <span class="assignee-name">Sarah M.</span>
+            </div>
+            <div class="task-due">Jan 10</div>
+            <div class="task-actions">
+              <span class="action-icon">⋯</span>
+            </div>
+          </div>
+
+          <!-- Task 4 -->
+          <div class="table-row">
+            <div class="task-checkbox checked"></div>
+            <div class="task-indent level-0"></div>
+            <div class="task-name completed">
+              <span class="expand-icon">▶</span>
+              User Research Interviews
+            </div>
+            <div><span class="task-status status-done">Done</span></div>
+            <div><span class="task-priority priority-low">Low</span></div>
+            <div class="task-assignee">
+              <div class="avatar">AS</div>
+              <span class="assignee-name">Alice S.</span>
+            </div>
+            <div class="task-due">✅ Completed</div>
+            <div class="task-actions">
+              <span class="action-icon">⋯</span>
+            </div>
+          </div>
+
+          <!-- Task 5 -->
+          <div class="table-row">
+            <div class="task-checkbox"></div>
+            <div class="task-indent level-0"></div>
+            <div class="task-name">
+              <span class="expand-icon">▶</span>
+              QA Testing Phase
+            </div>
+            <div><span class="task-status status-todo">To Do</span></div>
+            <div><span class="task-priority priority-high">High</span></div>
+            <div class="task-assignee">
+              <div class="avatar">JD</div>
+              <span class="assignee-name">John D.</span>
+            </div>
+            <div class="task-due">Jan 15</div>
+            <div class="task-actions">
+              <span class="action-icon">⋯</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function toggleSubtasks(icon) {
+      const row = icon.closest('.table-row');
+      const nextElement = row.nextElementSibling;
+
+      if (nextElement && nextElement.classList.contains('subtasks')) {
+        nextElement.classList.toggle('expanded');
+        icon.classList.toggle('expanded');
+      }
+    }
+
+    // Checkbox functionality
+    document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+      checkbox.addEventListener('click', (e) => {
+        e.stopPropagation();
+        checkbox.classList.toggle('checked');
+
+        const row = checkbox.closest('.table-row');
+        const taskName = row.querySelector('.task-name');
+        if (taskName) {
+          taskName.classList.toggle('completed');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

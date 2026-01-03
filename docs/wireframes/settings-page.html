@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexora - Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #FFFFFF;
+      --bg-secondary: #F8FAFC;
+      --bg-tertiary: #F1F5F9;
+      --border-default: #E2E8F0;
+      --text-primary: #0F172A;
+      --text-secondary: #475569;
+      --text-tertiary: #94A3B8;
+      --primary: #0EA5E9;
+      --secondary: #14B8A6;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--bg-primary);
+      border-right: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      left: 0;
+      top: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px 16px;
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 8px;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Bar */
+    .topbar {
+      height: 64px;
+      background: var(--bg-primary);
+      border-bottom: 1px solid var(--border-default);
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    /* Settings Container */
+    .settings-container {
+      padding: 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .settings-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 32px;
+    }
+
+    /* Settings Navigation */
+    .settings-nav {
+      position: sticky;
+      top: 96px;
+      height: fit-content;
+    }
+
+    .nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 150ms;
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.1) 0%, rgba(20, 184, 166, 0.1) 100%);
+      color: var(--primary);
+      font-weight: 600;
+    }
+
+    .nav-icon {
+      font-size: 18px;
+    }
+
+    /* Settings Content */
+    .settings-content {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .content-section {
+      display: none;
+    }
+
+    .content-section.active {
+      display: block;
+    }
+
+    .section-header {
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .section-description {
+      font-size: 14px;
+      color: var(--text-tertiary);
+    }
+
+    /* Card */
+    .card {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-default);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+    }
+
+    /* Form Groups */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      font-size: 14px;
+      border: 2px solid var(--border-default);
+      border-radius: 8px;
+      font-family: inherit;
+      transition: all 200ms;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .form-help {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      margin-top: 6px;
+    }
+
+    /* Avatar Upload */
+    .avatar-upload {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .avatar-preview {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 28px;
+      position: relative;
+    }
+
+    .avatar-button {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--primary);
+      color: white;
+      border: 2px solid var(--bg-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: all 150ms;
+    }
+
+    .avatar-button:hover {
+      transform: scale(1.1);
+    }
+
+    .avatar-info {
+      flex: 1;
+    }
+
+    .avatar-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .avatar-email {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    /* Toggle Switch */
+    .toggle-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .toggle-group:last-child {
+      border-bottom: none;
+    }
+
+    .toggle-info {
+      flex: 1;
+    }
+
+    .toggle-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .toggle-description {
+      font-size: 13px;
+      color: var(--text-tertiary);
+    }
+
+    .toggle-switch {
+      width: 48px;
+      height: 28px;
+      background: var(--bg-tertiary);
+      border-radius: 14px;
+      cursor: pointer;
+      position: relative;
+      transition: all 200ms;
+    }
+
+    .toggle-switch.active {
+      background: var(--primary);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: all 200ms;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .toggle-switch.active::after {
+      left: 22px;
+    }
+
+    /* Session List */
+    .session-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .session-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+    }
+
+    .session-info {
+      flex: 1;
+    }
+
+    .session-device {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .session-current {
+      background: #D1FAE5;
+      color: #059669;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .session-details {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .session-action {
+      padding: 8px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--border-default);
+      border-radius: 8px;
+      background: var(--bg-primary);
+      cursor: pointer;
+      transition: all 150ms;
+      color: #EF4444;
+    }
+
+    .session-action:hover {
+      background: #FEE2E2;
+      border-color: #EF4444;
+    }
+
+    /* Buttons */
+    .button {
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 200ms;
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .button-primary {
+      background: linear-gradient(135deg, #0EA5E9 0%, #14B8A6 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+    }
+
+    .button-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+    }
+
+    .button-secondary {
+      background: white;
+      border: 2px solid var(--border-default);
+      color: var(--text-secondary);
+    }
+
+    .button-secondary:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .button-danger {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+
+    .button-danger:hover {
+      background: #FECACA;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .settings-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .settings-nav {
+        position: static;
+        margin-bottom: 24px;
+      }
+
+      .nav-list {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 8px;
+      }
+
+      .nav-item {
+        flex-shrink: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-area">
+          <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#0EA5E9;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#14B8A6;stop-opacity:1" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="45" fill="url(#grad1)" opacity="0.1" />
+            <g transform="translate(25, 25)">
+              <rect x="0" y="0" width="10" height="50" rx="2.5" fill="url(#grad1)" />
+              <rect x="40" y="0" width="10" height="50" rx="2.5" fill="url(#grad1)" />
+              <path d="M 10 50 L 50 0 L 50 10 L 20 50 Z" fill="url(#grad1)" opacity="0.9" />
+            </g>
+          </svg>
+          <span class="logo-text">Nexora</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="topbar">
+        <h1 class="page-title">Settings</h1>
+      </header>
+
+      <!-- Settings Container -->
+      <div class="settings-container">
+        <div class="settings-layout">
+          <!-- Settings Navigation -->
+          <nav class="settings-nav">
+            <div class="nav-list">
+              <div class="nav-item active" onclick="showSection('profile')">
+                <span class="nav-icon">👤</span>
+                Profile
+              </div>
+              <div class="nav-item" onclick="showSection('workspace')">
+                <span class="nav-icon">🏢</span>
+                Workspace
+              </div>
+              <div class="nav-item" onclick="showSection('notifications')">
+                <span class="nav-icon">🔔</span>
+                Notifications
+              </div>
+              <div class="nav-item" onclick="showSection('security')">
+                <span class="nav-icon">🔒</span>
+                Security
+              </div>
+              <div class="nav-item" onclick="showSection('billing')">
+                <span class="nav-icon">💳</span>
+                Billing
+              </div>
+            </div>
+          </nav>
+
+          <!-- Settings Content -->
+          <div class="settings-content">
+            <!-- Profile Section -->
+            <div class="content-section active" id="profile">
+              <div class="section-header">
+                <h2 class="section-title">Profile Settings</h2>
+                <p class="section-description">Manage your personal information and preferences</p>
+              </div>
+
+              <div class="card">
+                <div class="avatar-upload">
+                  <div class="avatar-preview">JD</div>
+                  <button class="avatar-button">📷</button>
+                  <div class="avatar-info">
+                    <div class="avatar-name">John Doe</div>
+                    <div class="avatar-email">john@company.com</div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Full Name</label>
+                  <input type="text" class="form-input" value="John Doe" placeholder="Enter your full name">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Email Address</label>
+                  <input type="email" class="form-input" value="john@company.com" placeholder="you@example.com">
+                  <div class="form-help">Your email is used for notifications and account recovery</div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Timezone</label>
+                  <select class="form-input">
+                    <option>Pacific Time (PT) - UTC-8</option>
+                    <option>Mountain Time (MT) - UTC-7</option>
+                    <option>Central Time (CT) - UTC-6</option>
+                    <option>Eastern Time (ET) - UTC-5</option>
+                    <option selected>UTC - Coordinated Universal Time</option>
+                    <option>Central European Time (CET) - UTC+1</option>
+                    <option>Eastern European Time (EET) - UTC+2</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Language</label>
+                  <select class="form-input">
+                    <option selected>English (US)</option>
+                    <option>English (UK)</option>
+                    <option>Vietnamese</option>
+                    <option>Spanish</option>
+                    <option>French</option>
+                  </select>
+                </div>
+
+                <div class="actions">
+                  <button class="button button-secondary">Cancel</button>
+                  <button class="button button-primary">Save Changes</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Workspace Section -->
+            <div class="content-section" id="workspace">
+              <div class="section-header">
+                <h2 class="section-title">Workspace Settings</h2>
+                <p class="section-description">Configure your team workspace and preferences</p>
+              </div>
+
+              <div class="card">
+                <div class="form-group">
+                  <label class="form-label">Workspace Name</label>
+                  <input type="text" class="form-input" value="Product Team" placeholder="Enter workspace name">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Workspace URL</label>
+                  <div style="display: flex; gap: 8px;">
+                    <input type="text" class="form-input" value="product-team" placeholder="workspace-name">
+                    <button class="button button-secondary">Edit</button>
+                  </div>
+                  <div class="form-help">https://nexora.app/product-team</div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Default View</label>
+                  <select class="form-input">
+                    <option>Dashboard</option>
+                    <option selected>Board View</option>
+                    <option>List View</option>
+                    <option>Calendar View</option>
+                    <option>Gantt Chart</option>
+                  </select>
+                </div>
+
+                <div class="actions">
+                  <button class="button button-secondary">Cancel</button>
+                  <button class="button button-primary">Save Changes</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Notifications Section -->
+            <div class="content-section" id="notifications">
+              <div class="section-header">
+                <h2 class="section-title">Notification Preferences</h2>
+                <p class="section-description">Choose how you want to be notified</p>
+              </div>
+
+              <div class="card">
+                <h3 class="card-title">Email Notifications</h3>
+                <div class="toggle-group">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Task Assignments</div>
+                    <div class="toggle-description">Receive an email when you're assigned to a task</div>
+                  </div>
+                  <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                </div>
+                <div class="toggle-group">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Task Comments</div>
+                    <div class="toggle-description">Receive an email when someone comments on your tasks</div>
+                  </div>
+                  <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                </div>
+                <div class="toggle-group">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Task Due Reminders</div>
+                    <div class="toggle-description">Receive reminders before tasks are due</div>
+                  </div>
+                  <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                </div>
+                <div class="toggle-group">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Weekly Summary</div>
+                    <div class="toggle-description">Receive a weekly summary of your activity</div>
+                  </div>
+                  <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3 class="card-title">Push Notifications</h3>
+                <div class="toggle-group">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Enable Push Notifications</div>
+                    <div class="toggle-description">Receive push notifications in your browser</div>
+                  </div>
+                  <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                </div>
+                <div class="toggle-group">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Task Updates</div>
+                    <div class="toggle-description">Get notified when task status changes</div>
+                  </div>
+                  <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                </div>
+                <div class="toggle-group">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Mentions</div>
+                    <div class="toggle-description">Get notified when someone mentions you</div>
+                  </div>
+                  <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button class="button button-primary">Save Preferences</button>
+              </div>
+            </div>
+
+            <!-- Security Section -->
+            <div class="content-section" id="security">
+              <div class="section-header">
+                <h2 class="section-title">Security Settings</h2>
+                <p class="section-description">Manage your account security and sessions</p>
+              </div>
+
+              <div class="card">
+                <h3 class="card-title">Change Password</h3>
+                <div class="form-group">
+                  <label class="form-label">Current Password</label>
+                  <input type="password" class="form-input" placeholder="Enter current password">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">New Password</label>
+                  <input type="password" class="form-input" placeholder="Enter new password">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Confirm New Password</label>
+                  <input type="password" class="form-input" placeholder="Confirm new password">
+                </div>
+                <div class="actions">
+                  <button class="button button-primary">Update Password</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3 class="card-title">Two-Factor Authentication</h3>
+                <div class="toggle-group">
+                  <div class="toggle-info">
+                    <div class="toggle-label">Enable 2FA</div>
+                    <div class="toggle-description">Add an extra layer of security to your account</div>
+                  </div>
+                  <div class="toggle-switch" onclick="this.classList.toggle('active')"></div>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3 class="card-title">Active Sessions</h3>
+                <div class="session-list">
+                  <div class="session-item">
+                    <div class="session-info">
+                      <div class="session-device">
+                        💻 MacBook Pro - Chrome
+                        <span class="session-current">Current</span>
+                      </div>
+                      <div class="session-details">San Francisco, CA • Last active now</div>
+                    </div>
+                  </div>
+                  <div class="session-item">
+                    <div class="session-info">
+                      <div class="session-device">
+                        📱 iPhone 15 Pro - Safari
+                      </div>
+                      <div class="session-details">San Francisco, CA • Last active 2 hours ago</div>
+                    </div>
+                    <button class="session-action">Revoke</button>
+                  </div>
+                  <div class="session-item">
+                    <div class="session-info">
+                      <div class="session-device">
+                        🖥️ Windows PC - Edge
+                      </div>
+                      <div class="session-details">New York, NY • Last active 1 day ago</div>
+                    </div>
+                    <button class="session-action">Revoke</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Billing Section -->
+            <div class="content-section" id="billing">
+              <div class="section-header">
+                <h2 class="section-title">Billing & Plans</h2>
+                <p class="section-description">Manage your subscription and payment methods</p>
+              </div>
+
+              <div class="card">
+                <h3 class="card-title">Current Plan</h3>
+                <div style="padding: 20px; background: var(--bg-secondary); border-radius: 8px; margin-bottom: 20px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <div style="font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">Pro Plan</div>
+                      <div style="font-size: 14px; color: var(--text-tertiary);">$29/month • Renews on Feb 3, 2026</div>
+                    </div>
+                    <button class="button button-primary">Upgrade Plan</button>
+                  </div>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                  <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="font-size: 24px; font-weight: 700; color: var(--primary);">12</div>
+                    <div style="font-size: 12px; color: var(--text-tertiary);">Team Members</div>
+                  </div>
+                  <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="font-size: 24px; font-weight: 700; color: var(--primary);">50</div>
+                    <div style="font-size: 12px; color: var(--text-tertiary);">Projects</div>
+                  </div>
+                  <div style="text-align: center; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div style="font-size: 24px; font-weight: 700; color: var(--primary);">∞</div>
+                    <div style="font-size: 12px; color: var(--text-tertiary);">Storage</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3 class="card-title">Payment Method</h3>
+                <div style="display: flex; align-items: center; gap: 16px; padding: 16px; background: var(--bg-secondary); border-radius: 8px;">
+                  <div style="width: 48px; height: 32px; background: linear-gradient(135deg, #1A1F71 0%, #2D4AA8 100%); border-radius: 4px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 600;">VISA</div>
+                  <div style="flex: 1;">
+                    <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">•••• •••• •••• 4242</div>
+                    <div style="font-size: 12px; color: var(--text-tertiary);">Expires 12/2027</div>
+                  </div>
+                  <button class="button button-secondary">Update</button>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3 class="card-title">Billing History</h3>
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div>
+                      <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">January 2026</div>
+                      <div style="font-size: 12px; color: var(--text-tertiary);">Pro Plan - Monthly</div>
+                    </div>
+                    <div style="text-align: right;">
+                      <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">$29.00</div>
+                      <div style="font-size: 12px; color: var(--text-tertiary);">Paid</div>
+                    </div>
+                  </div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg-secondary); border-radius: 8px;">
+                    <div>
+                      <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">December 2025</div>
+                      <div style="font-size: 12px; color: var(--text-tertiary);">Pro Plan - Monthly</div>
+                    </div>
+                    <div style="text-align: right;">
+                      <div style="font-size: 14px; font-weight: 600; color: var(--text-primary);">$29.00</div>
+                      <div style="font-size: 12px; color: var(--text-tertiary);">Paid</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button class="button button-danger">Cancel Subscription</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function showSection(sectionId) {
+      // Update navigation
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      event.currentTarget.classList.add('active');
+
+      // Update content
+      document.querySelectorAll('.content-section').forEach(section => {
+        section.classList.remove('active');
+      });
+      document.getElementById(sectionId).classList.add('active');
+    }
+  </script>
+</body>
+</html>
