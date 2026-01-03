@@ -1,7 +1,7 @@
 # Documentation Index
 
-**Last Updated:** 2026-01-03
-**Version:** Phase 05 Views Complete (Multiple Views Implementation)
+**Last Updated:** 2026-01-04
+**Version:** Phase 06 Real-time Collaboration Complete
 
 ## Quick Links
 
@@ -225,6 +225,7 @@ The `docs/research/` directory contains research and investigation documents:
 - [x] **Security Fixes** - Path traversal protection, file size limits, type validation
 
 **Key Features:**
+
 - Comments with max 5000 chars and 5-level reply depth limit
 - Attachments with 100MB size limit and extension allowlist
 - Permission-based authorization on all endpoints
@@ -249,6 +250,7 @@ The `docs/research/` directory contains research and investigation documents:
 - [x] API endpoints: GET /api/tasks/views/{board|calendar|gantt}/{projectId}
 
 **Frontend Files Created:**
+
 - `src/features/views/ViewContext.tsx` - Context provider for view state
 - `src/features/views/ViewSwitcher.tsx` - Toggle buttons for view switching
 - `src/features/views/ViewLayout.tsx` - Layout wrapper routing to current view
@@ -258,6 +260,7 @@ The `docs/research/` directory contains research and investigation documents:
 - `src/features/views/gantt/GanttView.tsx` - Timeline with zoom
 
 **Backend Files Created:**
+
 - `Tasks/DTOs/ViewDTOs.cs` - View-specific DTOs
 - `Tasks/Queries/ViewQueries/BoardViewQuery.cs` - Tasks grouped by status
 - `Tasks/Queries/ViewQueries/CalendarViewQuery.cs` - Tasks by month/year
@@ -265,6 +268,7 @@ The `docs/research/` directory contains research and investigation documents:
 - `Tasks/Commands/UpdateTaskStatus/UpdateTaskStatusCommand.cs` - Status updates
 
 **Dependencies Added:**
+
 - `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/modifiers` - Modern drag-drop library
 
 **Documentation Deliverables:**
@@ -272,7 +276,59 @@ The `docs/research/` directory contains research and investigation documents:
 - Updated [codebase-summary.md](codebase-summary.md) with Views module structure
 - Code review report: `plans/reports/code-reviewer-260103-2040-phase05-multiple-views.md`
 
-### Phase 06-12: In Progress
+### Phase 06: Real-time Collaboration ✅
+
+**Completed:**
+
+- [x] **SignalR Hubs** - TaskHub, PresenceHub, NotificationHub
+- [x] **Real-time Task Updates** - TaskCreated, TaskUpdated, TaskDeleted, TaskStatusChanged events
+- [x] **User Presence Tracking** - Online/offline status with last seen timestamps
+- [x] **Typing Indicators** - Real-time collaborative editing awareness
+- [x] **Notification System** - NotificationCenter with bell icon, dropdown, unread badge
+- [x] **Notification Preferences** - Per-event type toggles, quiet hours
+- [x] **Project-based Messaging** - Efficient group broadcasting
+- [x] **Auto-reconnect** - Graceful connection handling with retry logic
+
+**Backend Files Created:**
+
+- `src/Nexora.Management.API/Hubs/TaskHub.cs` - Task real-time updates
+- `src/Nexora.Management.API/Hubs/PresenceHub.cs` - User presence tracking
+- `src/Nexora.Management.API/Hubs/NotificationHub.cs` - Notification delivery
+- `src/Nexora.Management.API/Services/PresenceService.cs` - Presence state management
+- `src/Nexora.Management.API/Services/NotificationService.cs` - Notification delivery
+- `Application/DTOs/SignalR/*.cs` - Message DTOs
+
+**Frontend Files Created:**
+
+- `src/lib/signalr/signalr-connection.ts` - Base connection class
+- `src/lib/signalr/task-hub.ts` - Task hub client
+- `src/lib/signalr/presence-hub.ts` - Presence hub client
+- `src/lib/signalr/notification-hub.ts` - Notification hub client
+- `src/hooks/signalr/useTaskHub.ts` - Task updates hook
+- `src/hooks/signalr/usePresenceHub.ts` - Presence tracking hook
+- `src/hooks/signalr/useNotificationHub.ts` - Notification hook
+- `src/features/users/OnlineStatus.tsx` - Avatar with status indicator
+- `src/features/tasks/ViewingAvatars.tsx` - Who is viewing component
+- `src/features/tasks/TypingIndicator.tsx` - Typing animation
+- `src/features/notifications/NotificationCenter.tsx` - Notification panel
+- `src/features/notifications/NotificationPreferences.tsx` - Preferences UI
+- `src/features/auth/providers/auth-provider.tsx` - Auth context
+
+**Dependencies Added:**
+
+- `@microsoft/signalr` - SignalR client for TypeScript
+- `react-hot-toast` - Toast notifications
+
+**Database:**
+
+- Migration: `AddRealtimeCollaborationTables`
+- Tables: `user_presence`, `notifications`, `notification_preferences`
+
+**Documentation Deliverables:**
+
+- Updated [codebase-summary.md](codebase-summary.md) with real-time architecture
+
+### Phase 07-12: In Progress
 
 See [project-roadmap.md](project-roadmap.md) for upcoming phases.
 

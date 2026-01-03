@@ -1,7 +1,7 @@
 # System Architecture
 
-**Last Updated:** 2026-01-03
-**Version:** Phase 03 Complete (Authentication & Authorization)
+**Last Updated:** 2026-01-04
+**Version:** Phase 06 Complete (Real-time Collaboration)
 
 ## Overview
 
@@ -42,7 +42,7 @@ Nexora Management implements **Clean Architecture** principles with clear separa
 
 ### Components
 
-#### Entities (14 Domain Models)
+#### Entities (17 Domain Models)
 
 All entities inherit from `BaseEntity` which provides:
 
@@ -67,7 +67,10 @@ BaseEntity (abstract)
 ├── TaskStatus
 ├── Comment
 ├── Attachment
-└── ActivityLog
+├── ActivityLog
+├── UserPresence
+├── Notification
+└── NotificationPreference
 ```
 
 **Key Entities:**
@@ -101,6 +104,24 @@ BaseEntity (abstract)
 6. **Attachment**
    - File attachments for tasks
    - Metadata: FileName, FilePath, FileSizeBytes, MimeType
+
+7. **UserPresence**
+   - Tracks user online/offline status
+   - Current view tracking (task/project being viewed)
+   - Last seen timestamp
+   - Connection ID for SignalR
+
+8. **Notification**
+   - User notifications
+   - Types: task_assigned, comment_mentioned, status_changed, due_date_reminder
+   - Read status tracking
+   - JSONB data field for metadata
+
+9. **NotificationPreference**
+   - User notification settings
+   - Per-event type toggles
+   - In-app vs email preferences
+   - Quiet hours configuration
 
 #### Common Abstractions
 
@@ -484,6 +505,7 @@ Implemented CQRS operations for task management:
    ```
 
 7. **Infrastructure Services:**
+
    ```csharp
    builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
    builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
@@ -557,6 +579,67 @@ USING (
 );
 ```
 
+#### SignalR Hubs
+
+**Location:** `/apps/backend/src/Nexora.Management.API/Hubs/`
+
+**Purpose:** Real-time WebSocket communication for live updates
+
+**Components:**
+
+1. **TaskHub** - Task real-time updates
+   - Broadcasts: TaskCreated, TaskUpdated, TaskDeleted, TaskStatusChanged
+   - Project-based groups for efficient messaging
+   - Authenticated via JWT Bearer token
+
+2. **PresenceHub** - User presence tracking
+   - Broadcasts: UserPresence (online/offline/typing)
+   - Tracks current view (task/project being viewed)
+   - Manages connection lifecycle (connect/disconnect)
+
+3. **NotificationHub** - Notification delivery
+   - Sends: NotificationReceived events
+   - Respects user notification preferences
+   - Marks notifications as read
+
+**SignalR Configuration:**
+
+```csharp
+builder.Services.AddSignalR();
+
+app.MapHub<TaskHub>("/hubs/tasks");
+app.MapHub<PresenceHub>("/hubs/presence");
+app.MapHub<NotificationHub>("/hubs/notifications");
+```
+
+**Hub Authentication:**
+
+All hubs require JWT authentication:
+
+```csharp
+builder.Services.AddAuthentication()
+    .AddJwtBearer(options =>
+    {
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                if (!string.IsNullOrEmpty(accessToken))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
+    });
+```
+
+**Services:**
+
+- **PresenceService** - In-memory user presence tracking with auto-cleanup
+- **NotificationService** - Notification creation and delivery with preference filtering
+
 **Endpoints:**
 
 - `GET /` - Welcome message with API info
@@ -575,7 +658,7 @@ USING (
 
 **Location:** `/Persistence/Migrations/`
 
-**Three Migration Files:**
+**Four Migration Files:**
 
 1. **InitialCreate (20260103071610)**
    - Creates all 14 tables
@@ -593,6 +676,12 @@ USING (
    - Seeds system roles (Admin, Member, Guest)
    - Seeds base permissions (Create, Read, Update, Delete per resource)
    - Creates initial role-permission assignments
+
+4. **AddRealtimeCollaborationTables (20260103171029)**
+   - Creates `user_presence` table for online/offline tracking
+   - Creates `notifications` table for notification history
+   - Creates `notification_preferences` table for user settings
+   - Adds indexes for presence and notification queries
 
 **Model Snapshot:**
 
@@ -648,6 +737,7 @@ Nexora Management implements a comprehensive security model with three layers:
 **Implementation:**
 
 1. **RequirePermission Attribute:**
+
    ```csharp
    [RequirePermission("tasks", "create")]
    [HttpPost]
@@ -936,9 +1026,11 @@ Comment (ParentCommentId) → Comment (self)
 ```
 Frontend (Next.js) :3000
     ↓ HTTP/WebSocket
-Backend API (.NET) :5000
+Backend API (.NET) :5001
     ↓ SQL
 PostgreSQL :5432
+    ↓ SignalR (WebSocket)
+/hubs/tasks, /hubs/presence, /hubs/notifications
 ```
 
 ### Docker Compose (Planned)
@@ -951,7 +1043,7 @@ services:
 
   backend:
     image: nexora-backend
-    ports: ['5000:5000']
+    ports: ['5001:8080']
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;...
 

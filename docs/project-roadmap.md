@@ -1,6 +1,6 @@
 # Project Roadmap
 
-**Last Updated:** 2026-01-03
+**Last Updated:** 2026-01-04
 
 ## Project Phases
 
@@ -222,43 +222,51 @@
 
 ---
 
-### Phase 06: Real-time Updates via SignalR ⏳ **PLANNED**
+### Phase 06: Real-time Collaboration ✅ **COMPLETE**
 
-**Timeline:** Q1 2026
-**Status:** 📋 Planned
+**Timeline:** Completed 2026-01-04
+**Status:** ✅ Done
 
-**Planned Deliverables:**
+**Deliverables:**
 
-- [ ] Create project endpoint
-- [ ] Update project endpoint
-- [ ] Delete project endpoint
-- [ ] Get project by ID
-- [ ] List workspace projects
-- [ ] Project status management
-- [ ] Project color/icon customization
-- [ ] Project settings
-- [ ] Archive/restore projects
+- [x] SignalR hub setup (TaskHub, PresenceHub, NotificationHub)
+- [x] Task update notifications (TaskCreated, TaskUpdated, TaskDeleted, TaskStatusChanged)
+- [x] Comment notifications (CommentAdded, CommentUpdated, CommentDeleted)
+- [x] Attachment notifications (AttachmentUploaded, AttachmentDeleted)
+- [x] Member activity feed (online/offline status)
+- [x] Online presence indicators with last seen timestamps
+- [x] Typing indicators for collaborative editing
+- [x] Real-time collaboration across views
+- [x] Notification center with bell icon and dropdown
+- [x] Notification preferences with per-event toggles
+- [x] Auto-reconnect with graceful handling
 
-**Endpoints:**
+**Events:**
 
-- `POST /api/workspaces/{workspaceId}/projects`
-- `GET /api/workspaces/{workspaceId}/projects`
-- `GET /api/projects/{id}`
-- `PUT /api/projects/{id}`
-- `DELETE /api/projects/{id}`
-- `PATCH /api/projects/{id}/status`
+- TaskCreated, TaskUpdated, TaskDeleted, TaskStatusChanged
+- CommentAdded, CommentUpdated, CommentDeleted
+- AttachmentUploaded, AttachmentDeleted
+- UserPresence (online/offline/typing)
+- NotificationReceived
 
 **Features:**
 
-- Project CRUD operations
-- Custom statuses per project
-- Color and icon customization
-- Project archiving
-- Project cloning (future)
+- WebSocket connections via SignalR
+- JWT authentication on hubs
+- Group membership by project
+- Automatic reconnection with exponential backoff
+- Connection management and lifecycle
+- Message queuing for offline users (future)
+
+**Database Tables:**
+
+- `user_presence` - Tracks user online status and current view
+- `notifications` - Stores notification history
+- `notification_preferences` - User notification settings
 
 ---
 
-### Phase 07: Project Management ⏳ **PLANNED**
+### Phase 07: Document & Wiki System ⏳ **PLANNED**
 
 **Timeline:** Q1 2026
 **Status:** 📋 Planned
