@@ -53,10 +53,10 @@ jobs:
         run: npm ci
 
       - name: Run frontend tests
-        run: turbo run test --filter=@nexora/frontend
+        run: npx turbo run test --filter=@nexora/frontend
 
       - name: Build frontend
-        run: turbo run build --filter=@nexora/frontend
+        run: npx turbo run build --filter=@nexora/frontend
 
       - name: Upload frontend build artifacts
         uses: actions/upload-artifact@v4
