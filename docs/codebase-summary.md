@@ -1,7 +1,7 @@
 # Codebase Summary
 
-**Last Updated:** 2026-01-03
-**Version:** Phase 05 Complete (Multiple Views Implementation)
+**Last Updated:** 2026-01-04
+**Version:** Phase 06 Complete (Real-time Collaboration)
 
 ## Project Overview
 
@@ -16,6 +16,7 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 - **Database:** PostgreSQL 16
 - **Language:** C# 12
 - **Architecture:** Clean Architecture (Domain, Infrastructure, Application, API layers)
+- **Real-time:** SignalR
 
 ### Frontend
 
@@ -25,6 +26,7 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 - **Components:** shadcn/ui
 - **State Management:** Zustand
 - **Data Fetching:** React Query
+- **Real-time:** @microsoft/signalr
 
 ## Architecture
 
@@ -36,7 +38,7 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 
 **Components:**
 
-- **Entities** (14 domain models):
+- **Entities** (17 domain models):
   - `User` - User accounts and authentication
   - `Role` - User roles (Admin, Member, Guest)
   - `Permission` - Granular permissions (Create, Read, Update, Delete)
@@ -411,22 +413,32 @@ apps/backend/
   - GanttView: Timeline with zoom levels
   - Backend view-specific query handlers
   - UpdateTaskStatusCommand for drag-drop operations
-- [ ] **Phase 06:** Real-time updates via SignalR
-- [ ] **Phase 07:** Bulk operations
-- [ ] **Phase 08:** Activity logging
-- [ ] **Phase 09:** Advanced filtering and search
-- [ ] **Phase 10:** Mobile responsive design
-- [ ] **Phase 11:** Performance optimization
-- [ ] **Phase 12:** Deployment to production
+- [x] **Phase 06:** Real-time Collaboration
+  - SignalR hubs: TaskHub, PresenceHub, NotificationHub
+  - Real-time task updates across all connected clients
+  - User presence tracking (online/offline status)
+  - Typing indicators for collaborative editing
+  - Real-time notifications with toast integration
+  - Notification preferences with per-event type toggles
+  - Project-based messaging groups for efficiency
+  - Auto-reconnect with graceful connection handling
+- [ ] **Phase 07:** Document & Wiki System
+- [ ] **Phase 08:** Goal Tracking & OKRs
+- [ ] **Phase 09:** Time Tracking
+- [ ] **Phase 10:** Dashboards & Reporting
+- [ ] **Phase 11:** Automation & Workflow Engine
+- [ ] **Phase 12:** Mobile Responsive Design
 
 ## API Endpoints Summary
 
 ### Authentication (`/api/auth`)
+
 - `POST /register` - User registration
 - `POST /login` - User login (returns access/refresh tokens)
 - `POST /refresh` - Refresh access token
 
 ### Tasks (`/api/tasks`)
+
 - `GET /` - List tasks with filtering and pagination
 - `GET /{id}` - Get task by ID
 - `POST /` - Create new task
@@ -438,6 +450,7 @@ apps/backend/
 - `GET /views/gantt/{projectId}` - Get gantt view data (hierarchical tasks)
 
 ### Comments (`/api/comments`)
+
 - `POST /` - Add comment to task
 - `GET /task/{taskId}` - Get comments for task
 - `GET /{commentId}/replies` - Get replies to comment
@@ -445,6 +458,7 @@ apps/backend/
 - `DELETE /{commentId}` - Delete comment (owner only)
 
 ### Attachments (`/api/attachments`)
+
 - `POST /upload/{taskId}` - Upload file attachment (100MB max)
 - `GET /task/{taskId}` - List attachments for task
 - `GET /{attachmentId}/download` - Download file
