@@ -24,7 +24,7 @@ Before contributing, ensure your development environment is properly configured:
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/Nexora-Technology/Nexora_Management.git
 cd Nexora_Management
 
 # Install dependencies

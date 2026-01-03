@@ -44,7 +44,7 @@ A powerful, ClickUp-inspired project management platform built with modern techn
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/Nexora-Technology/Nexora_Management.git
 cd Nexora_Management
 
 # Start all services
@@ -228,7 +228,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For questions, issues, or suggestions:
 
-- Open an issue on GitHub
+- Open an issue on [GitHub](https://github.com/Nexora-Technology/Nexora_Management/issues)
 - Check existing documentation
 - Contact the maintainers
 
