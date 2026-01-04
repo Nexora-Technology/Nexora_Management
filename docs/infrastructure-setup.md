@@ -1,7 +1,7 @@
 # Infrastructure Setup
 
-**Last Updated:** 2026-01-03
-**Version:** Phase 01 Complete
+**Last Updated:** 2026-01-04
+**Version:** Phase 06 Complete (Real-time Collaboration)
 
 ## Overview
 
@@ -28,10 +28,16 @@ Nexora_Management/
 │   │   │   └── API/            # Controllers
 │   │   └── tests/              # Unit/integration tests
 │   └── frontend/               # Next.js 15 application
-│       ├── app/                # App Router pages
-│       ├── components/         # React components
-│       ├── lib/                # Utilities
-│       └── public/             # Static assets
+│       ├── src/
+│       │   ├── app/            # App Router pages (⚠️ NOT `app/` at root)
+│       │   ├── components/     # React components
+│       │   ├── features/       # Feature modules
+│       │   ├── lib/            # Utilities
+│       │   └── hooks/          # Custom hooks
+│       ├── public/             # Static assets
+│       ├── tailwind.config.ts  # Tailwind CSS v3.4.0 config
+│       ├── postcss.config.mjs  # PostCSS v3 config
+│       └── next.config.ts      # Next.js config (standalone mode)
 ├── docker/                     # Docker configurations
 │   ├── docker-compose.yml      # Production compose
 │   ├── docker-compose.override.yml # Development overrides
@@ -632,6 +638,144 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Nexora.Management.API.dll"]
 ```
+
+**Dockerfile:** `Dockerfile.frontend`
+
+**Multi-stage Build with Standalone Output:**
+
+```dockerfile
+# Dependencies stage
+FROM node:20-alpine AS deps
+WORKDIR /app
+COPY package*.json ./
+COPY apps/frontend/package*.json ./apps/frontend/
+COPY packages/*/package*.json ./packages/*/
+RUN npm ci
+
+# Builder stage
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+WORKDIR /app/apps/frontend
+RUN npm run build
+
+# Runner stage
+FROM node:20-alpine AS runner
+WORKDIR /app
+RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+COPY --from=builder /app/apps/frontend/public ./apps/frontend/public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/static ./apps/frontend/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/server ./apps/frontend/.next/server
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone ./
+
+USER nextjs
+EXPOSE 3000
+CMD ["node", "apps/frontend/server.js"]
+```
+
+### Frontend Build Configuration
+
+**⚠️ CRITICAL:** Next.js App Router requires specific directory structure and configuration.
+
+**Directory Structure:**
+
+```
+apps/frontend/
+├── src/
+│   └── app/              # ✅ App Router pages here
+└── app/                  # ❌ NEVER create empty directory at root
+```
+
+**Issue:** Empty `apps/frontend/app` directory blocks Next.js from detecting `src/app`, causing 404 errors.
+
+**Solution:** Only use `src/app` for App Router pages.
+
+**Tailwind CSS Configuration:**
+
+**File:** `apps/frontend/tailwind.config.ts`
+
+```typescript
+import type { Config } from 'tailwindcss';
+import tailwindcssAnimate from 'tailwindcss-animate';
+
+const config: Config = {
+  darkMode: 'class',
+  content: [
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/features/**/*.{js,ts,jsx,tsx,mdx}', // Required for feature modules
+  ],
+  theme: {
+    extend: {
+      colors: {
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        // ... more shadcn/ui colors
+      },
+    },
+  },
+  plugins: [tailwindcssAnimate],
+};
+
+export default config;
+```
+
+**PostCSS Configuration:**
+
+**File:** `apps/frontend/postcss.config.mjs`
+
+```javascript
+const config = {
+  plugins: {
+    tailwindcss: {}, // v3 format (NOT "@tailwindcss/postcss")
+    autoprefixer: {},
+  },
+};
+
+export default config;
+```
+
+**⚠️ IMPORTANT:** Project uses Tailwind CSS v3.4.0, NOT v4.
+
+**Dependencies:**
+
+```json
+{
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0",
+    "tailwindcss-animate": "^1.0.7"
+  }
+}
+```
+
+**Build Verification:**
+
+```bash
+cd apps/frontend
+npm run build
+
+# Should output:
+# Route (app)                                 Size  First Load JS
+# ┌ ○ /                                    X kB          XX kB
+# ├ ○ /dashboard                           X kB          XX kB
+# └ ƒ /projects/[id]                        XX kB         XXX kB
+```
+
+If build shows `Route (pages)` instead of `Route (app)`, App Router is not being detected.
 
 **Docker Ignore:** `.dockerignore`
 

@@ -1,9 +1,9 @@
 # Codebase Summary
 
-**Last Updated:** 2026-01-04 22:10
-**Version:** Phase 07 In Progress (Document & Wiki System - 60% Complete)
+**Last Updated:** 2026-01-05
+**Version:** Phase 04 Complete (View Components - Task Management UI)
 **Backend Files:** 144 files
-**Frontend Lines:** ~6,200 lines
+**Frontend Lines:** ~7,300 lines (+1,100 lines from Phase 04.1)
 
 ## Project Overview
 
@@ -25,11 +25,12 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 - **Framework:** Next.js 15 (App Router)
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
-- **Components:** shadcn/ui
+- **Components:** shadcn/ui (16 components)
 - **Rich Text:** TipTap (for document editor)
 - **State Management:** Zustand
-- **Data Fetching:** React Query
+- **Data Fetching:** React Query (@tanstack/react-table)
 - **Real-time:** @microsoft/signalr
+- **Drag-Drop:** @dnd-kit
 
 ## Architecture
 
@@ -116,6 +117,7 @@ Nexora Management is a ClickUp-inspired project management platform built with .
   - MediatR setup for CQRS pattern
 
 **CQRS Modules Summary (59 files across 8 feature modules):**
+
 - **Authentication:** 3 Commands, 3 DTOs (9 files)
 - **Authorization:** 4 components (Handler, Provider, Attribute, Requirement) (4 files)
 - **Tasks:** 4 Commands, 5 Queries, 5 DTOs (14 files)
@@ -431,22 +433,25 @@ apps/backend/
 #### Color System
 
 **Primary Brand Colors (ClickUp Purple):**
+
 ```css
---primary: 250 73% 68%;        /* #7B68EE - ClickUp Purple */
---primary-hover: 250 73% 76%;  /* #A78BFA - Light Purple */
+--primary: 250 73% 68%; /* #7B68EE - ClickUp Purple */
+--primary-hover: 250 73% 76%; /* #A78BFA - Light Purple */
 --primary-active: 250 62% 55%; /* #5B4BC4 - Dark Purple */
---primary-bg: 250 100% 97%;    /* #F5F3FF - Purple Tint */
+--primary-bg: 250 100% 97%; /* #F5F3FF - Purple Tint */
 ```
 
 **Semantic Colors:**
+
 - `--success: 158 64% 42%` - Green (#10B981)
 - `--warning: 38 92% 50%` - Yellow (#F59E0B)
 - `--error: 0 72% 51%` - Red (#EF4444)
 - `--info: 217 91% 60%` - Blue (#3B82F6)
 
 **Gray Scale (HSL format for consistent theming):**
+
 ```css
---gray-50: 220 20% 98%;   /* Lightest */
+--gray-50: 220 20% 98%; /* Lightest */
 --gray-100: 220 15% 95%;
 --gray-200: 220 10% 90%;
 --gray-300: 220 10% 75%;
@@ -455,10 +460,11 @@ apps/backend/
 --gray-600: 220 10% 35%;
 --gray-700: 220 15% 25%;
 --gray-800: 220 20% 15%;
---gray-900: 220 25% 10%;  /* Darkest */
+--gray-900: 220 25% 10%; /* Darkest */
 ```
 
 **Component Colors (shadcn/ui mapping):**
+
 - Background: White (0 0% 100%)
 - Foreground: Gray 900 (220 25% 10%)
 - Border: Gray 200 (220 10% 90%)
@@ -468,6 +474,7 @@ apps/backend/
 #### Typography System
 
 **Font Families:**
+
 - **Primary:** Inter (Google Fonts)
   - Subsets: latin, latin-ext, vietnamese
   - Display: swap
@@ -477,28 +484,31 @@ apps/backend/
   - Variable: --font-jetbrains-mono
 
 **Type Scale (ClickUp-inspired):**
+
 ```css
---text-xs: 0.6875rem;   /* 11px - Tiny/Timestamps */
---text-sm: 0.75rem;     /* 12px - Small/Captions */
---text-base: 0.875rem;  /* 14px - Body text */
---text-md: 1rem;        /* 16px - H3/Subsection */
---text-lg: 1.25rem;     /* 20px - H2/Card titles */
---text-xl: 1.5rem;      /* 24px - H1/Section headers */
---text-2xl: 2rem;       /* 32px - Display/Page titles */
+--text-xs: 0.6875rem; /* 11px - Tiny/Timestamps */
+--text-sm: 0.75rem; /* 12px - Small/Captions */
+--text-base: 0.875rem; /* 14px - Body text */
+--text-md: 1rem; /* 16px - H3/Subsection */
+--text-lg: 1.25rem; /* 20px - H2/Card titles */
+--text-xl: 1.5rem; /* 24px - H1/Section headers */
+--text-2xl: 2rem; /* 32px - Display/Page titles */
 ```
 
 **Font Weights:**
+
 ```css
---font-regular: 400;    /* Body text */
---font-medium: 500;     /* Emphasized text, labels */
---font-semibold: 600;   /* Headings, important UI */
---font-bold: 700;       /* Strong headings, CTAs */
+--font-regular: 400; /* Body text */
+--font-medium: 500; /* Emphasized text, labels */
+--font-semibold: 600; /* Headings, important UI */
+--font-bold: 700; /* Strong headings, CTAs */
 ```
 
 **Line Heights:**
+
 ```css
---leading-tight: 1.25;   /* Headings, compact text */
---leading-normal: 1.5;   /* Body text */
+--leading-tight: 1.25; /* Headings, compact text */
+--leading-normal: 1.5; /* Body text */
 ```
 
 #### Spacing System
@@ -507,29 +517,30 @@ apps/backend/
 
 ```css
 --space-0: 0;
---space-1: 0.25rem;   /* 4px - Tight gaps */
---space-2: 0.5rem;    /* 8px - Icon padding */
---space-3: 0.75rem;   /* 12px - Compact padding */
---space-4: 1rem;      /* 16px - Standard spacing */
---space-5: 1.25rem;   /* 20px - Component gaps */
---space-6: 1.5rem;    /* 24px - Section spacing */
---space-8: 2rem;      /* 32px - Large gaps */
---space-10: 2.5rem;   /* 40px - XL spacing */
---space-12: 3rem;     /* 48px - XXL spacing */
---space-16: 4rem;     /* 64px - Huge spacing */
+--space-1: 0.25rem; /* 4px - Tight gaps */
+--space-2: 0.5rem; /* 8px - Icon padding */
+--space-3: 0.75rem; /* 12px - Compact padding */
+--space-4: 1rem; /* 16px - Standard spacing */
+--space-5: 1.25rem; /* 20px - Component gaps */
+--space-6: 1.5rem; /* 24px - Section spacing */
+--space-8: 2rem; /* 32px - Large gaps */
+--space-10: 2.5rem; /* 40px - XL spacing */
+--space-12: 3rem; /* 48px - XXL spacing */
+--space-16: 4rem; /* 64px - Huge spacing */
 ```
 
 #### Border Radius Scale
 
 ```css
---radius-sm: 4px;      /* Small badges, dots */
---radius-md: 6px;      /* Buttons, inputs (default) */
---radius-lg: 8px;      /* Cards, panels */
---radius-xl: 12px;     /* Modals, large cards */
---radius-2xl: 16px;    /* Hero sections */
+--radius-sm: 4px; /* Small badges, dots */
+--radius-md: 6px; /* Buttons, inputs (default) */
+--radius-lg: 8px; /* Cards, panels */
+--radius-xl: 12px; /* Modals, large cards */
+--radius-2xl: 16px; /* Hero sections */
 ```
 
 **Component-Specific Usage:**
+
 - Buttons (Primary/Secondary/Icon): 6px (0.375rem)
 - Buttons (Ghost): 4px (0.25rem)
 - Task Cards: 8px (0.5rem)
@@ -540,16 +551,18 @@ apps/backend/
 #### Shadow System
 
 **Elevation Levels (5 levels):**
+
 ```css
 --shadow-none: none;
---shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
---shadow-md: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
---shadow-lg: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
---shadow-xl: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
---shadow-2xl: 0 20px 25px rgba(0,0,0,0.15), 0 10px 10px rgba(0,0,0,0.04);
+--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+--shadow-md: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+--shadow-lg: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+--shadow-xl: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+--shadow-2xl: 0 20px 25px rgba(0, 0, 0, 0.15), 0 10px 10px rgba(0, 0, 0, 0.04);
 ```
 
 **Component Usage:**
+
 - Buttons: sm (subtle lift)
 - Cards: sm → md on hover
 - Dropdowns: md
@@ -559,21 +572,24 @@ apps/backend/
 #### Transition System
 
 **Durations:**
+
 ```css
---transition-fast: 150ms;   /* Buttons, toggles */
---transition-base: 200ms;   /* Dropdowns, sidebar */
---transition-slow: 300ms;   /* Modals, page */
+--transition-fast: 150ms; /* Buttons, toggles */
+--transition-base: 200ms; /* Dropdowns, sidebar */
+--transition-slow: 300ms; /* Modals, page */
 ```
 
 **Easing Functions:**
+
 ```css
---ease-out: cubic-bezier(0, 0, 0.2, 1);      /* Deceleration */
+--ease-out: cubic-bezier(0, 0, 0.2, 1); /* Deceleration */
 --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1); /* Smooth in/out */
 ```
 
 #### Accessibility Features
 
 **WCAG 2.1 AA Compliance:**
+
 - Color contrast ratio: 4.7:1 (exceeds AA standard)
 - Focus-visible states with 2px purple outline
 - Reduced motion support via `@media (prefers-reduced-motion: reduce)`
@@ -581,6 +597,7 @@ apps/backend/
 - Keyboard navigation support
 
 **Focus Styles:**
+
 ```css
 *:focus-visible {
   outline: 2px solid hsl(var(--primary));
@@ -590,6 +607,7 @@ apps/backend/
 ```
 
 **Reduced Motion:**
+
 ```css
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -605,6 +623,7 @@ apps/backend/
 #### Dark Mode Support
 
 **Primary Color Adjustment:**
+
 ```css
 .dark {
   --primary: 250 73% 70%; /* #A78BFA - Lighter purple for dark mode */
@@ -615,6 +634,7 @@ apps/backend/
 ```
 
 **Dark Mode Benefits:**
+
 - Lighter purple (#A78BFA) provides better contrast on dark backgrounds
 - All component colors automatically invert
 - Maintains visual hierarchy
@@ -623,6 +643,7 @@ apps/backend/
 #### Component Utility Classes
 
 **Button Classes:**
+
 ```css
 .clickup-button-primary    /* Purple gradient with lift effect */
 .clickup-button-secondary  /* White with border */
@@ -630,16 +651,19 @@ apps/backend/
 ```
 
 **Input Classes:**
+
 ```css
 .clickup-input             /* 40px height, purple focus ring */
 ```
 
 **Card Classes:**
+
 ```css
 .clickup-card              /* White background, shadow on hover */
 ```
 
 **Badge Classes:**
+
 ```css
 .clickup-badge-complete    /* Green for success */
 .clickup-badge-progress    /* Amber for in progress */
@@ -649,6 +673,7 @@ apps/backend/
 #### Tailwind Configuration
 
 **Extended Theme:**
+
 ```typescript
 colors: {
   primary: {
@@ -693,18 +718,21 @@ transitionDuration: {
 ### Design Token Files
 
 **Implementation Files:**
+
 - `/apps/frontend/src/app/globals.css` - 260+ lines of ClickUp design tokens
 - `/apps/frontend/tailwind.config.ts` - Tailwind extensions for ClickUp tokens
 - `/apps/frontend/src/app/layout.tsx` - Inter font integration
 - `/apps/frontend/next.config.ts` - typedRoutes experiment
 
 **Documentation Files:**
+
 - `/docs/design-guidelines.md` - Complete ClickUp design system reference (v2.0)
 - `/docs/codebase-summary.md` - This file
 
 ### Design Token Usage
 
 **CSS Variables (recommended for custom components):**
+
 ```css
 .my-component {
   color: hsl(var(--foreground));
@@ -717,6 +745,7 @@ transitionDuration: {
 ```
 
 **Tailwind Classes (recommended for layout):**
+
 ```tsx
 <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
   <h2 className="text-xl font-semibold text-gray-900">Title</h2>
@@ -725,6 +754,7 @@ transitionDuration: {
 ```
 
 **Component Classes (recommended for consistent UI):**
+
 ```tsx
 <button className="clickup-button-primary">Create Task</button>
 <input className="clickup-input" placeholder="Enter task name..." />
@@ -746,13 +776,15 @@ transitionDuration: {
 **Purpose:** Main application wrapper providing consistent layout structure
 
 **Props:**
+
 ```typescript
 interface AppLayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 ```
 
 **Features:**
+
 - Full-screen flex container (h-screen)
 - Fixed header (56px)
 - Collapsible sidebar (240px → 64px)
@@ -760,6 +792,7 @@ interface AppLayoutProps {
 - Responsive background colors
 
 **Layout Structure:**
+
 ```
 AppLayout (flex-col, h-screen)
 ├── AppHeader (h-14, fixed)
@@ -769,11 +802,12 @@ AppLayout (flex-col, h-screen)
 ```
 
 **Usage:**
+
 ```tsx
-import { AppLayout } from "@/components/layout/app-layout"
+import { AppLayout } from '@/components/layout/app-layout';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <AppLayout>{children}</AppLayout>
+  return <AppLayout>{children}</AppLayout>;
 }
 ```
 
@@ -782,14 +816,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 **Purpose:** Top navigation bar with logo, search, notifications, and profile
 
 **Props:**
+
 ```typescript
 interface AppHeaderProps {
-  sidebarCollapsed: boolean
-  onToggleSidebar: () => void
+  sidebarCollapsed: boolean;
+  onToggleSidebar: () => void;
 }
 ```
 
 **Features:**
+
 - 56px height (h-14)
 - Logo with gradient background
 - Global search bar (hidden on mobile)
@@ -799,19 +835,19 @@ interface AppHeaderProps {
 - Sidebar collapse button
 
 **Sections:**
+
 - **Left:** Menu toggle, Logo, Search
 - **Right:** Notifications, Settings, Profile
 
 **Responsive Behavior:**
+
 - Search hidden on mobile (< 768px)
 - All icons remain visible
 
 **Usage:**
+
 ```tsx
-<AppHeader
-  sidebarCollapsed={collapsed}
-  onToggleSidebar={() => setCollapsed(!collapsed)}
-/>
+<AppHeader sidebarCollapsed={collapsed} onToggleSidebar={() => setCollapsed(!collapsed)} />
 ```
 
 #### 3. AppSidebar Component (`src/components/layout/app-sidebar.tsx`)
@@ -819,13 +855,15 @@ interface AppHeaderProps {
 **Purpose:** Collapsible navigation sidebar
 
 **Props:**
+
 ```typescript
 interface AppSidebarProps {
-  collapsed?: boolean
+  collapsed?: boolean;
 }
 ```
 
 **Features:**
+
 - 240px expanded (w-60)
 - 64px collapsed (w-16)
 - Smooth 200ms transition
@@ -834,11 +872,13 @@ interface AppSidebarProps {
 - Vertical scroll for overflow
 
 **Dimensions:**
+
 - Expanded: 240px
 - Collapsed: 64px
 - Transition: 200ms ease
 
 **Usage:**
+
 ```tsx
 <AppSidebar collapsed={collapsed} />
 ```
@@ -848,13 +888,15 @@ interface AppSidebarProps {
 **Purpose:** Navigation items with active state highlighting
 
 **Props:**
+
 ```typescript
 interface SidebarNavProps {
-  collapsed?: boolean
+  collapsed?: boolean;
 }
 ```
 
 **Features:**
+
 - 6 navigation items (Home, Tasks, Projects, Team, Calendar, Settings)
 - Active route highlighting
 - Hover effects
@@ -862,23 +904,26 @@ interface SidebarNavProps {
 - Icon-only mode when collapsed
 
 **Navigation Items:**
+
 ```typescript
 const navItems = [
-  { title: "Home", href: "/", icon: Home },
-  { title: "Tasks", href: "/tasks", icon: CheckSquare },
-  { title: "Projects", href: "/projects", icon: Folder },
-  { title: "Team", href: "/team", icon: Users },
-  { title: "Calendar", href: "/calendar", icon: Calendar },
-  { title: "Settings", href: "/settings", icon: Settings },
-]
+  { title: 'Home', href: '/', icon: Home },
+  { title: 'Tasks', href: '/tasks', icon: CheckSquare },
+  { title: 'Projects', href: '/projects', icon: Folder },
+  { title: 'Team', href: '/team', icon: Users },
+  { title: 'Calendar', href: '/calendar', icon: Calendar },
+  { title: 'Settings', href: '/settings', icon: Settings },
+];
 ```
 
 **Active State:**
+
 - Purple background (bg-primary/10)
 - Purple text (text-primary)
 - Chevron right icon
 
 **Usage:**
+
 ```tsx
 <SidebarNav collapsed={collapsed} />
 ```
@@ -888,19 +933,21 @@ const navItems = [
 **Purpose:** Navigation path indicator with chevron separators
 
 **Props:**
+
 ```typescript
 interface BreadcrumbItem {
-  label: string
-  href?: string  // Optional link
+  label: string;
+  href?: string; // Optional link
 }
 
 interface BreadcrumbProps {
-  items: BreadcrumbItem[]
-  className?: string
+  items: BreadcrumbItem[];
+  className?: string;
 }
 ```
 
 **Features:**
+
 - ChevronRight separators
 - Links for clickable items
 - Plain text for current page
@@ -908,17 +955,19 @@ interface BreadcrumbProps {
 - ARIA label for accessibility
 
 **Usage:**
+
 ```tsx
 <Breadcrumb
   items={[
-    { label: "Home", href: "/" },
-    { label: "Tasks", href: "/tasks" },
-    { label: "Task Detail" },
+    { label: 'Home', href: '/' },
+    { label: 'Tasks', href: '/tasks' },
+    { label: 'Task Detail' },
   ]}
 />
 ```
 
 **Styling:**
+
 - Text color: gray-500
 - Hover color: gray-900
 - Dark mode: gray-400 → gray-200
@@ -928,31 +977,35 @@ interface BreadcrumbProps {
 **Purpose:** Responsive content container with max-width constraints
 
 **Props:**
+
 ```typescript
 interface ContainerProps {
-  children: React.ReactNode
-  size?: "sm" | "md" | "lg" | "xl" | "full"
-  className?: string
+  children: React.ReactNode;
+  size?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  className?: string;
 }
 ```
 
 **Size Variants:**
+
 ```typescript
 const sizeClasses = {
-  sm: "max-w-3xl",   // 768px
-  md: "max-w-4xl",   // 896px
-  lg: "max-w-6xl",   // 1152px (ClickUp default)
-  xl: "max-w-7xl",   // 1280px
-  full: "max-w-full",
-}
+  sm: 'max-w-3xl', // 768px
+  md: 'max-w-4xl', // 896px
+  lg: 'max-w-6xl', // 1152px (ClickUp default)
+  xl: 'max-w-7xl', // 1280px
+  full: 'max-w-full',
+};
 ```
 
 **Responsive Padding:**
+
 - Mobile: px-4 (16px)
 - Tablet: sm:px-6 (24px)
 - Desktop: lg:px-8 (32px)
 
 **Usage:**
+
 ```tsx
 <Container size="lg">
   <h1>Page Title</h1>
@@ -965,24 +1018,27 @@ const sizeClasses = {
 **Purpose:** Kanban board layout with horizontal scrolling columns
 
 **BoardLayout Props:**
+
 ```typescript
 interface BoardLayoutProps {
-  children: React.ReactNode
-  className?: string
+  children: React.ReactNode;
+  className?: string;
 }
 ```
 
 **BoardColumn Props:**
+
 ```typescript
 interface BoardColumnProps {
-  title: string
-  count?: number
-  children: React.ReactNode
-  className?: string
+  title: string;
+  count?: number;
+  children: React.ReactNode;
+  className?: string;
 }
 ```
 
 **Features:**
+
 - Horizontal scroll container
 - Snap scrolling (snap-x snap-mandatory)
 - Column width: 280px
@@ -991,6 +1047,7 @@ interface BoardColumnProps {
 - Column count badge
 
 **Usage:**
+
 ```tsx
 <BoardLayout>
   <BoardColumn title="To Do" count={5}>
@@ -1006,6 +1063,7 @@ interface BoardColumnProps {
 ```
 
 **Styling:**
+
 - Gap between columns: 24px
 - Column width: 280px (fixed)
 - Scroll padding bottom: 16px
@@ -1014,15 +1072,17 @@ interface BoardColumnProps {
 ### Responsive Behavior
 
 **Breakpoints:**
+
 ```css
---breakpoint-xs: 375px;   /* Small mobile */
---breakpoint-sm: 640px;   /* Mobile */
---breakpoint-md: 768px;   /* Tablet */
---breakpoint-lg: 1024px;  /* Desktop */
---breakpoint-xl: 1280px;  /* Large desktop */
+--breakpoint-xs: 375px; /* Small mobile */
+--breakpoint-sm: 640px; /* Mobile */
+--breakpoint-md: 768px; /* Tablet */
+--breakpoint-lg: 1024px; /* Desktop */
+--breakpoint-xl: 1280px; /* Large desktop */
 ```
 
 **Layout Adaptations:**
+
 - **Mobile (< 768px):** Search hidden, sidebar defaults to collapsed
 - **Tablet (768px - 1024px):** Search visible, sidebar toggleable
 - **Desktop (> 1024px):** Full layout, all features visible
@@ -1030,6 +1090,7 @@ interface BoardColumnProps {
 ### Dark Mode Support
 
 All layout components support dark mode with automatic color inversion:
+
 - Background: white → gray-800
 - Border: gray-200 → gray-700
 - Text: gray-900 → white
@@ -1038,6 +1099,7 @@ All layout components support dark mode with automatic color inversion:
 ### Accessibility Features
 
 **Semantic HTML:**
+
 - `<header>` for app header
 - `<nav>` for sidebar navigation
 - `<main>` for content area
@@ -1045,11 +1107,13 @@ All layout components support dark mode with automatic color inversion:
 - `<nav aria-label="Breadcrumb">` for breadcrumbs
 
 **Keyboard Navigation:**
+
 - Tab through navigation items
 - Enter to activate links
 - Escape to close (future enhancement)
 
 **ARIA Labels:**
+
 - Breadcrumb navigation label
 - Icon buttons have clear labels
 - Navigation structure is semantic
@@ -1072,6 +1136,536 @@ apps/frontend/src/components/layout/
 
 ---
 
+## ClickUp View Components (Phase 04.1) ✅
+
+**Status:** Complete (2026-01-05)
+**Components:** 16 task components, 3 task pages, 4 UI primitives
+**Dependencies:** @tanstack/react-table, @dnd-kit/core, @radix-ui/react-dialog, @radix-ui/react-select, @radix-ui/react-checkbox
+
+### Task Components Library
+
+#### 1. Task Data Model (`src/components/tasks/types.ts`)
+
+**Purpose:** TypeScript interfaces for task management
+
+**Interfaces:**
+
+```typescript
+interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  status: 'todo' | 'inProgress' | 'complete' | 'overdue';
+  priority: 'urgent' | 'high' | 'medium' | 'low';
+  assignee?: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
+  dueDate?: string;
+  commentCount: number;
+  attachmentCount: number;
+  projectId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+type TaskStatus = 'todo' | 'inProgress' | 'complete' | 'overdue';
+type TaskPriority = 'urgent' | 'high' | 'medium' | 'low';
+
+interface TaskFilter {
+  status?: TaskStatus;
+  priority?: TaskPriority;
+  search?: string;
+}
+```
+
+#### 2. Mock Data (`src/components/tasks/mock-data.ts`)
+
+**Purpose:** Sample tasks for development and testing
+
+**Features:**
+
+- 5 sample tasks with varied statuses and priorities
+- Realistic assignee data with avatars
+- Due dates and comment/attachment counts
+- Covers all status types (todo, inProgress, complete, overdue)
+- Covers all priority levels (urgent, high, medium, low)
+
+#### 3. TaskCard Component (`src/components/tasks/task-card.tsx`)
+
+**Purpose:** Board view task card with drag handle
+
+**Features:**
+
+- Drag handle icon for @dnd-kit integration
+- Priority dot with color coding (urgent: red, high: orange, medium: yellow, low: blue)
+- Status badge with semantic colors
+- Assignee avatar with initials fallback
+- Comment and attachment counts with icons
+- Due date display with overdue highlighting
+- Hover effect with shadow elevation
+
+**Props:**
+
+```typescript
+interface TaskCardProps {
+  task: Task;
+}
+```
+
+**Usage:**
+
+```tsx
+<TaskCard task={task} />
+```
+
+#### 4. TaskToolbar Component (`src/components/tasks/task-toolbar.tsx`)
+
+**Purpose:** Search, filter, and view toggle controls
+
+**Features:**
+
+- Search input with magnifying glass icon
+- Status filter dropdown (All, To Do, In Progress, Complete, Overdue)
+- Priority filter dropdown (All, Urgent, High, Medium, Low)
+- View toggle buttons (List icon / Board icon)
+- "Add Task" button with plus icon
+- Responsive layout (filters hidden on mobile)
+
+**Props:**
+
+```typescript
+interface TaskToolbarProps {
+  view: 'list' | 'board';
+  onViewChange: (view: 'list' | 'board') => void;
+  onAddTask: () => void;
+  filter: TaskFilter;
+  onFilterChange: (filter: TaskFilter) => void;
+}
+```
+
+#### 5. TaskBoard Component (`src/components/tasks/task-board.tsx`)
+
+**Purpose:** Kanban board wrapper using BoardLayout
+
+**Features:**
+
+- 4 columns: To Do, In Progress, Complete, Overdue
+- Drag-and-drop with @dnd-kit
+- Task cards in each column
+- Column count badges
+- Horizontal scroll container
+- Snap scrolling for smooth navigation
+
+**Props:**
+
+```typescript
+interface TaskBoardProps {
+  tasks: Task[];
+}
+```
+
+**Column Configuration:**
+
+```typescript
+const columns = [
+  { id: 'todo', title: 'To Do' },
+  { id: 'inProgress', title: 'In Progress' },
+  { id: 'complete', title: 'Complete' },
+  { id: 'overdue', title: 'Overdue' },
+];
+```
+
+#### 6. TaskRow Component (`src/components/tasks/task-row.tsx`)
+
+**Purpose:** Table row for list view with checkbox
+
+**Features:**
+
+- Checkbox for multi-select
+- Task title with truncation
+- Status badge with semantic colors
+- Priority dot with color coding
+- Assignee avatar
+- Due date with overdue highlighting
+- Comment and attachment counts
+- Hover state for visual feedback
+
+**Props:**
+
+```typescript
+interface TaskRowProps {
+  task: Task;
+  selected: boolean;
+  onSelectChange: (selected: boolean) => void;
+}
+```
+
+#### 7. TaskModal Component (`src/components/tasks/task-modal.tsx`)
+
+**Purpose:** Create/edit task modal with form validation
+
+**Features:**
+
+- Dialog component from Radix UI
+- Form fields: Title, Description, Status, Priority, Assignee, Due Date
+- Form validation with error messages
+- Submit and cancel buttons
+- Controlled inputs with state management
+- Dark mode support
+
+**Props:**
+
+```typescript
+interface TaskModalProps {
+  task?: Task;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (task: Partial<Task>) => void;
+}
+```
+
+**Form Validation:**
+
+- Title: Required, max 200 characters
+- Description: Optional, max 1000 characters
+- Status: Required (todo, inProgress, complete, overdue)
+- Priority: Required (urgent, high, medium, low)
+- Due Date: Optional, ISO 8601 format
+
+#### 8. Task Index (`src/components/tasks/index.ts`)
+
+**Purpose:** Centralized exports for task components
+
+**Exports:**
+
+```typescript
+export * from './types';
+export * from './mock-data';
+export { TaskCard } from './task-card';
+export { TaskToolbar } from './task-toolbar';
+export { TaskBoard } from './task-board';
+export { TaskRow } from './task-row';
+export { TaskModal } from './task-modal';
+```
+
+### Task Pages
+
+#### 1. Tasks List Page (`src/app/tasks/page.tsx`)
+
+**Route:** `/tasks`
+
+**Purpose:** List view with table and multi-select
+
+**Features:**
+
+- TanStack Table for sorting and filtering
+- Multi-select checkboxes for bulk operations
+- TaskToolbar for search and filters
+- TaskRow components for each task
+- Pagination (to be implemented)
+- Responsive table layout
+
+**State Management:**
+
+```typescript
+const [view, setView] = useState<'list' | 'board'>('list');
+const [filter, setFilter] = useState<TaskFilter>({});
+const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
+```
+
+#### 2. Tasks Board Page (`src/app/tasks/board/page.tsx`)
+
+**Route:** `/tasks/board`
+
+**Purpose:** Kanban board view with drag-and-drop
+
+**Features:**
+
+- TaskBoard component with columns
+- Drag-and-drop with @dnd-kit
+- TaskToolbar for search and filters
+- Real-time task status updates
+- Responsive board layout
+
+**Drag-and-Drop:**
+
+```typescript
+const sensors = useSensors(
+  useSensor(PointerSensor),
+  useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates,
+  })
+);
+```
+
+#### 3. Task Detail Page (`src/app/tasks/[id]/page.tsx`)
+
+**Route:** `/tasks/[id]`
+
+**Purpose:** Individual task detail with breadcrumb
+
+**Features:**
+
+- Breadcrumb navigation (Home > Tasks > Task Title)
+- Task information display
+- Assignee avatar and details
+- Status and priority badges
+- Comment section (to be implemented)
+- Attachment section (to be implemented)
+- Activity log (to be implemented)
+
+**Breadcrumb:**
+
+```typescript
+<Breadcrumb
+  items={[
+    { label: "Home", href: "/" },
+    { label: "Tasks", href: "/tasks" },
+    { label: task.title },
+  ]}
+/>
+```
+
+### UI Primitives (Radix UI)
+
+#### 1. Dialog Component (`src/components/ui/dialog.tsx`)
+
+**Purpose:** Modal/Dialog primitives for overlays
+
+**Exports:**
+
+- Dialog - Root container
+- DialogTrigger - Trigger button/link
+- DialogPortal - Portal to body
+- DialogClose - Close button
+- DialogOverlay - Dimmed backdrop
+- DialogContent - Modal content
+- DialogHeader - Header section
+- DialogFooter - Footer section
+- DialogTitle - Title text
+- DialogDescription - Description text
+
+**Features:**
+
+- Dismissible on escape key
+- Dismissible on outside click
+- Focus trap for accessibility
+- Scrollable content when too tall
+- Animation on open/close
+- Dark mode support
+
+**Usage:**
+
+```tsx
+<Dialog open={open} onOpenChange={setOpen}>
+  <DialogContent className="sm:max-w-[425px]">
+    <DialogHeader>
+      <DialogTitle>Create Task</DialogTitle>
+      <DialogDescription>Enter the task details below.</DialogDescription>
+    </DialogHeader>
+    {/* Form content */}
+    <DialogFooter>
+      <Button type="submit">Save</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+```
+
+#### 2. Table Component (`src/components/ui/table.tsx`)
+
+**Purpose:** Table components for list views
+
+**Exports:**
+
+- Table - Root table element
+- TableHeader - Thead section
+- TableBody - Tbody section
+- TableFooter - Tfoot section
+- TableRow - Tr element
+- TableHead - Th element
+- TableCell - Td element
+- TableCaption - Caption element
+
+**Features:**
+
+- Semantic table structure
+- Border bottom dividers
+- Sticky header (optional)
+- Hover state on rows
+- Responsive width
+- Dark mode support
+
+**Usage:**
+
+```tsx
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Title</TableHead>
+      <TableHead>Status</TableHead>
+      <TableHead>Priority</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {tasks.map((task) => (
+      <TableRow key={task.id}>
+        <TableCell>{task.title}</TableCell>
+        <TableCell>
+          <Badge status={task.status}>{task.status}</Badge>
+        </TableCell>
+        <TableCell>
+          <Badge priority={task.priority}>{task.priority}</Badge>
+        </TableCell>
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
+```
+
+#### 3. Checkbox Component (`src/components/ui/checkbox.tsx`)
+
+**Purpose:** Checkbox input with Check icon
+
+**Features:**
+
+- Radix UI Checkbox primitive
+- Check icon from lucide-react
+- Indeterminate state support
+- Form integration
+- Focus visible ring
+- Dark mode support
+
+**Props:**
+
+```typescript
+interface CheckboxProps extends React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root> {
+  asChild?: boolean;
+}
+```
+
+**Usage:**
+
+```tsx
+<Checkbox id="terms" checked={checked} onCheckedChange={setChecked} />
+<label htmlFor="terms">Accept terms and conditions</label>
+```
+
+#### 4. Select Component (`src/components/ui/select.tsx`)
+
+**Purpose:** Select dropdown for single choice
+
+**Exports:**
+
+- Select - Root container
+- SelectTrigger - Trigger button
+- SelectValue - Display value
+- SelectContent - Dropdown content
+- SelectGroup - Option group
+- SelectLabel - Group label
+- SelectItem - Option item
+- SelectSeparator - Visual separator
+- SelectScrollUpButton - Scroll up button
+- SelectScrollDownButton - Scroll down button
+
+**Features:**
+
+- Keyboard navigation
+- Portal to body
+- Animation on open/close
+- Scrollable content
+- Grouped options
+- Search/filter (future)
+- Dark mode support
+
+**Usage:**
+
+```tsx
+<Select value={value} onValueChange={setValue}>
+  <SelectTrigger>
+    <SelectValue placeholder="Select status" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="todo">To Do</SelectItem>
+    <SelectItem value="inProgress">In Progress</SelectItem>
+    <SelectItem value="complete">Complete</SelectItem>
+    <SelectItem value="overdue">Overdue</SelectItem>
+  </SelectContent>
+</Select>
+```
+
+### Dependencies
+
+**New in Phase 04.1:**
+
+```json
+{
+  "@tanstack/react-table": "^8.11.2",
+  "@dnd-kit/core": "^6.1.0",
+  "@radix-ui/react-dialog": "^1.0.5",
+  "@radix-ui/react-select": "^2.0.0",
+  "@radix-ui/react-checkbox": "^1.0.4"
+}
+```
+
+### Build Status
+
+**TypeScript Compilation:** ✅ Passed
+**Static Pages Generated:** 13 pages
+**Bundle Size:** Optimized
+**Code Splitting:** Enabled
+**Tree Shaking:** Enabled
+
+### Accessibility
+
+**WCAG 2.1 Level AA:**
+
+- Semantic HTML structure
+- ARIA labels for icons
+- Keyboard navigation support
+- Focus visible indicators
+- Screen reader support
+- Color contrast ratios met
+
+**Keyboard Shortcuts:**
+
+- Tab: Navigate through interactive elements
+- Enter/Space: Activate buttons and checkboxes
+- Escape: Close modals and dropdowns
+- Arrow keys: Navigate options in selects
+
+### Component Files
+
+```
+apps/frontend/src/components/tasks/
+├── types.ts           # Task interfaces (50 lines)
+├── mock-data.ts       # Sample tasks (80 lines)
+├── task-card.tsx      # Board card (60 lines)
+├── task-toolbar.tsx   # Search/filter (120 lines)
+├── task-board.tsx     # Kanban board (90 lines)
+├── task-row.tsx       # Table row (80 lines)
+├── task-modal.tsx     # Create/edit (150 lines)
+└── index.ts           # Exports (10 lines)
+
+apps/frontend/src/app/tasks/
+├── page.tsx           # List view (100 lines)
+├── board/
+│   └── page.tsx       # Board view (80 lines)
+└── [id]/
+    └── page.tsx       # Task detail (70 lines)
+
+apps/frontend/src/components/ui/
+├── dialog.tsx         # Dialog primitives (110 lines)
+├── table.tsx          # Table components (80 lines)
+├── checkbox.tsx       # Checkbox input (40 lines)
+└── select.tsx         # Select dropdown (100 lines)
+```
+
+**Total:** 16 components, 3 pages, ~1,100 lines of code
+
+---
+
 ## ClickUp Components (Phase 02) ✅
 
 **Status:** Complete (2026-01-04)
@@ -1085,6 +1679,7 @@ All components use `class-variance-authority` for type-safe variant management a
 #### 1. Button Component (`src/components/ui/button.tsx`)
 
 **Variants:** 6 types
+
 - `primary` - Purple background with shadow and scale transform on hover
 - `secondary` - White background with 2px border
 - `ghost` - Transparent background with gray hover
@@ -1093,12 +1688,14 @@ All components use `class-variance-authority` for type-safe variant management a
 - `link` - Text-only with underline
 
 **Sizes:** 4 options
+
 - `sm` - 36px height, small text
 - `md` - 40px height, standard (default)
 - `lg` - 44px height, large text
 - `icon` - 40px × 40px square
 
 **Features:**
+
 - Scale transform on hover (`hover:scale-[1.02]`)
 - Active scale down (`active:scale-[0.98]`)
 - Icon support via children
@@ -1106,6 +1703,7 @@ All components use `class-variance-authority` for type-safe variant management a
 - Full ref forwarding
 
 **Usage:**
+
 ```tsx
 <Button variant="primary" size="md" className="gap-2">
   <CheckCircle2 className="h-4 w-4" />
@@ -1116,6 +1714,7 @@ All components use `class-variance-authority` for type-safe variant management a
 #### 2. Badge Component (`src/components/ui/badge.tsx`)
 
 **Status Variants:** 5 types
+
 - `complete` - Green (emerald-100/700)
 - `inProgress` - Yellow (amber-100/700)
 - `overdue` - Red (red-100/700)
@@ -1123,16 +1722,19 @@ All components use `class-variance-authority` for type-safe variant management a
 - `default` - Primary purple
 
 **Sizes:** 3 options
+
 - `sm` - 10px text, compact padding
 - `md` - 12px text, standard (default)
 - `lg` - 14px text, large padding
 
 **Features:**
+
 - Icon prop support
 - Dark mode variants
 - Semantic status naming
 
 **Usage:**
+
 ```tsx
 <Badge status="complete" icon={<CheckCircle2 className="h-3 w-3" />}>
   Complete
@@ -1142,21 +1744,25 @@ All components use `class-variance-authority` for type-safe variant management a
 #### 3. Input Component (`src/components/ui/input.tsx`)
 
 **Props:**
+
 - `error?: boolean` - Red border and focus ring when true
 
 **Styling:**
+
 - 40px height
 - 2px border (gray-200 → error red)
 - Purple focus ring (`ring-primary/20`)
 - Full width by default
 
 **Features:**
+
 - TypeScript extends HTML input attributes
 - Error state styling
 - Disabled state support
 - Ref forwarding
 
 **Usage:**
+
 ```tsx
 <Input placeholder="Enter your name..." />
 <Input error placeholder="This field has an error" />
@@ -1165,9 +1771,11 @@ All components use `class-variance-authority` for type-safe variant management a
 #### 4. Textarea Component (`src/components/ui/textarea.tsx`)
 
 **Props:**
+
 - `error?: boolean` - Red border and focus ring when true
 
 **Styling:**
+
 - 80px minimum height
 - 2px border (matches Input)
 - Purple focus ring
@@ -1175,11 +1783,13 @@ All components use `class-variance-authority` for type-safe variant management a
 - Full width by default
 
 **Features:**
+
 - New component (created in Phase 02)
 - Matches Input component styles
 - Error state support
 
 **Usage:**
+
 ```tsx
 <Textarea placeholder="Enter a description..." />
 <Textarea error placeholder="This field has an error" />
@@ -1188,28 +1798,43 @@ All components use `class-variance-authority` for type-safe variant management a
 #### 5. Avatar Component (`src/components/ui/avatar.tsx`)
 
 **Components:**
+
 - `Avatar` - Root container
 - `AvatarImage` - Image display
 - `AvatarFallback` - Initials fallback
 
 **Features:**
+
 - Initials generation (first 2 characters)
 - Hash-based color from 16-color palette
 - Radix UI primitives for accessibility
 - Name prop for automatic initials
 
 **Color Palette:**
+
 ```tsx
 const colors = [
-  "bg-red-500", "bg-orange-500", "bg-amber-500", "bg-yellow-500",
-  "bg-green-500", "bg-emerald-500", "bg-teal-500", "bg-cyan-500",
-  "bg-sky-500", "bg-blue-500", "bg-indigo-500", "bg-violet-500",
-  "bg-purple-500", // ClickUp purple
-  "bg-fuchsia-500", "bg-pink-500", "bg-rose-500",
-]
+  'bg-red-500',
+  'bg-orange-500',
+  'bg-amber-500',
+  'bg-yellow-500',
+  'bg-green-500',
+  'bg-emerald-500',
+  'bg-teal-500',
+  'bg-cyan-500',
+  'bg-sky-500',
+  'bg-blue-500',
+  'bg-indigo-500',
+  'bg-violet-500',
+  'bg-purple-500', // ClickUp purple
+  'bg-fuchsia-500',
+  'bg-pink-500',
+  'bg-rose-500',
+];
 ```
 
 **Usage:**
+
 ```tsx
 <Avatar>
   <AvatarImage src="https://..." />
@@ -1220,22 +1845,26 @@ const colors = [
 #### 6. Tooltip Component (`src/components/ui/tooltip.tsx`)
 
 **Components:**
+
 - `Tooltip` - Provider with mouse events
 - `TooltipTrigger` - Trigger element
 - `TooltipContent` - Dark tooltip content
 
 **Styling:**
+
 - Dark theme (`bg-gray-900`, `text-white`)
 - 200ms hover delay
 - Zoom/fade animation
 - Rounded corners
 
 **Features:**
+
 - Mouse enter/leave handling
 - Auto-positioning
 - Controlled/uncontrolled open state
 
 **Usage:**
+
 ```tsx
 <Tooltip delayDuration={200}>
   <TooltipTrigger asChild>
@@ -1250,6 +1879,7 @@ const colors = [
 **Location:** `/src/app/components/showcase/page.tsx`
 
 Features:
+
 - All component variants displayed
 - Dark mode toggle
 - Real-world task card example
@@ -1272,6 +1902,7 @@ apps/frontend/src/components/ui/
 ### Dependencies
 
 **New in Phase 02:**
+
 ```json
 {
   "class-variance-authority": "^0.7.1",
@@ -1282,6 +1913,7 @@ apps/frontend/src/components/ui/
 ### TypeScript Types
 
 All components use strict TypeScript with:
+
 - Forwarded refs (React.forwardRef)
 - Extended HTML attributes
 - CVA variant props (VariantProps)
@@ -1292,14 +1924,15 @@ All components use strict TypeScript with:
 - **Framework:** Next.js 15 with App Router
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS v3.4.0
-- **Components:** shadcn/ui (12 components)
+- **Components:** shadcn/ui (16 components)
 - **Rich Text:** TipTap editor
 - **State:** Zustand
-- **Data Fetching:** React Query
+- **Data Fetching:** React Query (@tanstack/react-table)
 - **Real-time:** @microsoft/signalr
 - **Drag-Drop:** @dnd-kit
+- **UI Primitives:** @radix-ui (Dialog, Select, Checkbox)
 
-### Route Pages (8 routes)
+### Route Pages (11 routes)
 
 ```
 apps/frontend/src/app/
@@ -1308,10 +1941,18 @@ apps/frontend/src/app/
 ├── (auth)/
 │   ├── login/
 │   │   └── page.tsx        # Login page
-│   └── register/
-│       └── page.tsx        # Register page
+│   ├── register/
+│   │   └── page.tsx        # Register page
+│   └── forgot-password/
+│       └── page.tsx        # Forgot password page (NEW Phase 04.1)
 ├── dashboard/
 │   └── page.tsx            # Dashboard page
+├── tasks/
+│   ├── page.tsx            # Tasks list view (NEW Phase 04.1)
+│   ├── board/
+│   │   └── page.tsx        # Tasks board view (NEW Phase 04.1)
+│   └── [id]/
+│       └── page.tsx        # Task detail (NEW Phase 04.1)
 ├── workspaces/
 │   └── page.tsx            # Workspaces list
 └── projects/
@@ -1322,16 +1963,19 @@ apps/frontend/src/app/
 ### Feature Modules (5 modules)
 
 #### 1. Auth Module
+
 - `features/auth/auth-provider.tsx` - Authentication context
 - `features/auth/LoginForm.tsx` - Login form
 - `features/auth/RegisterForm.tsx` - Register form
 
 #### 2. Tasks Module
+
 - `features/tasks/TaskDetailWithRealtime.tsx` - Task detail with SignalR
 - `features/tasks/TypingIndicator.tsx` - Typing animation
 - `features/tasks/ViewingAvatars.tsx` - Who is viewing component
 
 #### 3. Documents Module (7 components) - Phase 07
+
 - `features/documents/DocumentEditor.tsx` - TipTap rich text editor
 - `features/documents/EditorToolbar.tsx` - Formatting toolbar
 - `features/documents/PageTree.tsx` - Hierarchical page tree
@@ -1341,14 +1985,17 @@ apps/frontend/src/app/
 - `features/documents/api.ts` - Document API client
 
 #### 4. Notifications Module
+
 - `features/notifications/NotificationCenter.tsx` - Notification panel
 - `features/notifications/NotificationPreferences.tsx` - Settings UI
 
 #### 5. Users Module
+
 - `features/users/OnlineStatus.tsx` - Avatar with online indicator
 - `features/users/UserAvatar.tsx` - User avatar component
 
 #### 6. Views Module (4 views)
+
 - `features/views/ViewContext.tsx` - View state context
 - `features/views/ViewSwitcher.tsx` - View toggle buttons
 - `features/views/list/ListView.tsx` - Sortable table view
@@ -1365,7 +2012,7 @@ src/hooks/signalr/
 └── useNotificationHub.ts   # Notification delivery
 ```
 
-### shadcn/ui Components (12)
+### shadcn/ui Components (16)
 
 ```
 src/components/ui/
@@ -1373,13 +2020,17 @@ src/components/ui/
 ├── badge.tsx               # Status badges
 ├── button.tsx              # Button component
 ├── card.tsx                # Card container
+├── checkbox.tsx            # Checkbox input (NEW Phase 04.1)
+├── dialog.tsx              # Modal/dialog (NEW Phase 04.1)
 ├── dropdown-menu.tsx       # Dropdown menus
 ├── input.tsx               # Form inputs
 ├── label.tsx               # Form labels
 ├── scroll-area.tsx         # Custom scrollbar
+├── select.tsx              # Select dropdown (NEW Phase 04.1)
 ├── separator.tsx           # Visual separator
 ├── sonner.tsx              # Toast notifications
 ├── switch.tsx              # Toggle switch
+├── table.tsx               # Table components (NEW Phase 04.1)
 └── tooltip.tsx             # Tooltip component
 ```
 
@@ -1445,6 +2096,13 @@ apps/frontend/
   - Attachments module with security hardening
   - UserContext for authenticated user access
   - Security fixes: path traversal, file size limits, type validation
+- [x] **Phase 04.1:** View Components (Task Management UI)
+  - Task components: 8 components (types, mock-data, task-card, task-toolbar, task-board, task-row, task-modal, index)
+  - Task pages: 3 pages (list view, board view, task detail)
+  - UI primitives: 4 components (dialog, table, checkbox, select)
+  - Dependencies: @tanstack/react-table, @dnd-kit/core, @radix-ui/\* (dialog, select, checkbox)
+  - Features: List view with TanStack Table, Board view with drag-and-drop, Task detail with breadcrumb, Create/edit modal
+  - Build Status: ✅ Passed (TypeScript compilation, 13 static pages)
 - [x] **Phase 05:** Multiple Views Implementation
   - ViewContext with localStorage persistence
   - ListView: Sortable table with expandable rows
@@ -1527,6 +2185,6 @@ apps/frontend/
 
 ---
 
-**Documentation Version:** 1.2
-**Last Updated:** 2026-01-04
+**Documentation Version:** 1.3
+**Last Updated:** 2026-01-05
 **Maintained By:** Development Team

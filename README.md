@@ -213,16 +213,43 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Roadmap
 
 - [x] Project setup and architecture
-- [ ] Authentication & authorization
-- [ ] Core workspace functionality
-- [ ] Task management (CRUD)
-- [ ] Real-time updates via SignalR
-- [ ] File attachments
-- [ ] Comments and collaboration
+- [x] Authentication & authorization (JWT, permissions, RLS)
+- [x] Core workspace functionality
+- [x] Task management (CRUD, hierarchy, multiple views)
+- [x] Real-time updates via SignalR
+- [x] File attachments
+- [x] Comments and collaboration
+- [ ] Document & Wiki system (60% complete)
 - [ ] Advanced filtering and search
 - [ ] Mobile responsive design
 - [ ] Performance optimization
 - [ ] Deployment to production
+
+## Current Phase: Document & Wiki System (Phase 07 - 60% Complete)
+
+### Backend Implementation ✅
+
+- 4 Domain entities: Page, PageVersion, PageCollaborator, PageComment
+- 6 CQRS Commands: CreatePage, UpdatePage, DeletePage, ToggleFavorite, MovePage, RestorePageVersion
+- 4 CQRS Queries: GetPageById, GetPageTree, GetPageHistory, SearchPages
+- 10 API endpoints at `/api/documents`
+- Unique slug generation and auto-versioning
+
+### Frontend Implementation ✅
+
+- TipTap rich text editor with toolbar
+- Page tree component with search
+- Page list with favorites and recent views
+- Version history component
+- 7 document components exported
+
+### Pending ⏳
+
+- Database migration application
+- Route integration
+- Backend API integration
+- Collaboration UI
+- Testing
 
 ## Support
 

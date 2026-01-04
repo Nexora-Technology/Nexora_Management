@@ -1,7 +1,7 @@
 # Deployment Guide
 
-**Last Updated:** 2026-01-03
-**Version:** Phase 05 Complete (Multiple Views Implementation)
+**Last Updated:** 2026-01-04
+**Version:** Phase 07 In Progress (Document & Wiki System - 60% Complete)
 
 ## Overview
 
@@ -665,6 +665,85 @@ npm run format
 
 ```bash
 npm run type-check
+```
+
+#### Frontend Shows 404 or Missing Styles
+
+**Symptom:** Frontend loads but shows 404 error or styles not applying
+
+**Root Causes & Solutions:**
+
+**1. Empty `app` directory blocking App Router:**
+
+```bash
+# Check for empty app directory
+ls -la apps/frontend/app
+
+# If empty, remove it
+rm -rf apps/frontend/app
+
+# Rebuild
+docker-compose down
+docker-compose build --no-cache frontend
+docker-compose up -d
+```
+
+**2. Tailwind CSS v4 incompatibility:**
+
+The project uses Tailwind CSS v3.4.0. If you see build errors about `tailwindcss/plugin`:
+
+```bash
+# Check package.json
+cat apps/frontend/package.json | grep tailwindcss
+
+# Should show: "tailwindcss": "^3.4.0"
+# If shows v4, downgrade:
+cd apps/frontend
+npm install tailwindcss@^3.4.0 postcss@^8.4.0 autoprefixer@^10.4.0 --save-dev
+```
+
+**3. PostCSS configuration issues:**
+
+Ensure `apps/frontend/postcss.config.mjs` has v3 format:
+
+```javascript
+const config = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};
+
+export default config;
+```
+
+**4. Tailwind content paths missing:**
+
+Check `apps/frontend/tailwind.config.ts` includes:
+
+```typescript
+content: [
+  "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+  "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+  "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+  "./src/features/**/*.{js,ts,jsx,tsx,mdx}",  // Required
+],
+```
+
+**5. Verify App Router build:**
+
+```bash
+cd apps/frontend
+npm run build
+
+# Should show:
+# Route (app)                                 Size  First Load JS
+# ┌ ○ /                                    X kB          XX kB
+# └ ƒ /projects/[id]                        XX kB         XXX kB
+#
+# NOT:
+# Route (pages)                                Size  First Load JS
+# ─ ○ /404                                    180 B        96.2 kB
 ```
 
 #### Hot Reloading Not Working

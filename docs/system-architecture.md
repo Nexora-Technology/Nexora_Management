@@ -1,7 +1,7 @@
 # System Architecture
 
-**Last Updated:** 2026-01-04
-**Version:** Phase 06 Complete (Real-time Collaboration)
+**Last Updated:** 2026-01-05
+**Version:** Phase 04 Complete (View Components - Task Management UI)
 
 ## Overview
 
@@ -42,7 +42,7 @@ Nexora Management implements **Clean Architecture** principles with clear separa
 
 ### Components
 
-#### Entities (17 Domain Models)
+#### Entities (21 Domain Models)
 
 All entities inherit from `BaseEntity` which provides:
 
@@ -70,7 +70,11 @@ BaseEntity (abstract)
 ├── ActivityLog
 ├── UserPresence
 ├── Notification
-└── NotificationPreference
+├── NotificationPreference
+├── Page (NEW Phase 07)
+├── PageVersion (NEW Phase 07)
+├── PageCollaborator (NEW Phase 07)
+└── PageComment (NEW Phase 07)
 ```
 
 **Key Entities:**
@@ -123,6 +127,32 @@ BaseEntity (abstract)
    - In-app vs email preferences
    - Quiet hours configuration
 
+10. **Page** (NEW Phase 07)
+    - Wiki/document pages with hierarchical structure
+    - Self-referencing via `ParentPageId` for nested pages
+    - Unique slug for URLs
+    - Rich text content storage
+    - Favorite and recent view tracking
+    - Workspace-scoped with RLS
+
+11. **PageVersion** (NEW Phase 07)
+    - Version history for page restore capability
+    - Auto-created on content changes
+    - Composite key (PageId + VersionNumber)
+    - Stores full content snapshot
+    - Created by tracking
+
+12. **PageCollaborator** (NEW Phase 07)
+    - Page collaboration with role-based access
+    - Roles: Owner, Editor, Viewer
+    - Composite key (PageId + UserId)
+    - Workspace membership validation
+
+13. **PageComment** (NEW Phase 07)
+    - Threaded comments on document pages
+    - Self-referencing via `ParentCommentId` for nested replies
+    - Similar to Task comments but for pages
+
 #### Common Abstractions
 
 - **BaseEntity:** Base class for all entities with audit fields
@@ -149,10 +179,28 @@ BaseEntity (abstract)
 ```csharp
 public class AppDbContext : DbContext, IAppDbContext
 {
-    // 13 DbSets for all entities
+    // 21 DbSets for all entities
     public DbSet<User> Users => Set<User>();
     public DbSet<Role> Roles => Set<Role>();
-    // ... (11 more)
+    public DbSet<Permission> Permissions => Set<Permission>();
+    public DbSet<UserRole> UserRoles => Set<UserRole>();
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<Workspace> Workspaces => Set<Workspace>();
+    public DbSet<WorkspaceMember> WorkspaceMembers => Set<WorkspaceMember>();
+    public DbSet<Project> Projects => Set<Project>();
+    public DbSet<Task> Tasks => Set<Task>();
+    public DbSet<TaskStatus> TaskStatuses => Set<TaskStatus>();
+    public DbSet<Comment> Comments => Set<Comment>();
+    public DbSet<Attachment> Attachments => Set<Attachment>();
+    public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
+    public DbSet<UserPresence> UserPresences => Set<UserPresence>();
+    public DbSet<Notification> Notifications => Set<Notification>();
+    public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
+    public DbSet<Page> Pages => Set<Page>();
+    public DbSet<PageVersion> PageVersions => Set<PageVersion>();
+    public DbSet<PageCollaborator> PageCollaborators => Set<PageCollaborator>();
+    public DbSet<PageComment> PageComments => Set<PageComment>();
 
     // Auto-audit on SaveChangesAsync
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -208,7 +256,7 @@ public async Task<T> SqlQuerySingleAsync<T>(string sql, params object[] paramete
 - **Permission Queries:** `SqlQuerySingleAsync<bool>` checks user permissions efficiently
 - **Custom Queries:** `SqlQueryRawAsync<T>` for complex database queries
 
-#### EF Core Configurations (14 Files)
+#### EF Core Configurations (25 Files)
 
 Each entity has a dedicated `IEntityTypeConfiguration<T>` implementation:
 
@@ -653,15 +701,26 @@ builder.Services.AddAuthentication()
 - `GET /api/tasks` - List tasks with filters
 - `PUT /api/tasks/{id}` - Update task
 - `DELETE /api/tasks/{id}` - Delete task
+- **Document Endpoints (Phase 07):**
+  - `POST /api/documents` - Create page
+  - `GET /api/documents/{id}` - Get page by ID
+  - `PUT /api/documents/{id}` - Update page
+  - `DELETE /api/documents/{id}` - Soft delete page
+  - `GET /api/documents/tree/{workspaceId}` - Get page tree
+  - `POST /api/documents/{id}/favorite` - Toggle favorite
+  - `GET /api/documents/{id}/versions` - Get version history
+  - `POST /api/documents/{id}/restore` - Restore version
+  - `POST /api/documents/{id}/move` - Move page
+  - `GET /api/documents/search` - Search pages
 
 #### Database Migrations
 
 **Location:** `/Persistence/Migrations/`
 
-**Four Migration Files:**
+**Six Migration Files:**
 
 1. **InitialCreate (20260103071610)**
-   - Creates all 14 tables
+   - Creates all 17 base tables (Users, Roles, Permissions, Workspaces, Projects, Tasks, etc.)
    - Defines primary keys, foreign keys, indexes
    - Sets up PostgreSQL extensions (uuid-ossp, pg_trgm)
    - Creates 30+ indexes for performance
@@ -682,6 +741,15 @@ builder.Services.AddAuthentication()
    - Creates `notifications` table for notification history
    - Creates `notification_preferences` table for user settings
    - Adds indexes for presence and notification queries
+
+5. **AddDocumentTables (20260104112014)** (Phase 07)
+   - Creates `Pages` table for wiki/document pages
+   - Creates `PageVersions` table for version history
+   - Creates `PageCollaborators` table for collaboration management
+   - Creates `PageComments` table for threaded comments
+   - Adds unique constraints on PageId + VersionNumber
+   - Adds indexes for workspace, parent page, slug queries
+   - Enables RLS on document tables
 
 **Model Snapshot:**
 
@@ -1099,5 +1167,6 @@ services:
 
 ---
 
-**Documentation Version:** 1.0
+**Documentation Version:** 1.2
+**Last Updated:** 2026-01-05
 **Maintained By:** Development Team
