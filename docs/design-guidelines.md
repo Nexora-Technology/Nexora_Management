@@ -1096,9 +1096,383 @@ View all components in action:
 
 ---
 
-**Document Status:** Updated for ClickUp Design
-**Version:** 2.1 (Purple Edition + Components)
-**Last Updated:** 2026-01-04 22:10
+## 16. LAYOUT PATTERNS (Phase 03) ✅
+
+All layout components provide responsive, accessible structure for application views with ClickUp-inspired dimensions and spacing.
+
+### Layout Component Structure
+
+```
+apps/frontend/src/components/layout/
+├── app-layout.tsx       # Main layout wrapper
+├── app-header.tsx       # Top header (56px)
+├── app-sidebar.tsx      # Collapsible sidebar
+├── sidebar-nav.tsx      # Navigation items
+├── breadcrumb.tsx       # Breadcrumb component
+├── container.tsx        # Responsive container
+└── board-layout.tsx     # Board view layout
+```
+
+### Main Application Layout
+
+**File:** `src/components/layout/app-layout.tsx`
+
+**Purpose:** Root layout wrapper providing consistent structure
+
+**Props:**
+```typescript
+interface AppLayoutProps {
+  children: React.ReactNode
+}
+```
+
+**Layout Structure:**
+```
+AppLayout (flex-col, h-screen)
+├── AppHeader (h-14, 56px)
+└── div.flex-1 (flex row, overflow-hidden)
+    ├── AppSidebar (w-60 → w-16)
+    └── main (flex-1, overflow-auto)
+```
+
+**Features:**
+- Full viewport height (h-screen)
+- Fixed header with collapse toggle
+- Collapsible sidebar (240px → 64px)
+- Scrollable main content
+- Responsive background (gray-50 dark:gray-900)
+
+**Usage:**
+```tsx
+import { AppLayout } from "@/components/layout/app-layout"
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <AppLayout>{children}</AppLayout>
+}
+```
+
+### App Header
+
+**File:** `src/components/layout/app-header.tsx`
+
+**Purpose:** Top navigation bar with global controls
+
+**Props:**
+```typescript
+interface AppHeaderProps {
+  sidebarCollapsed: boolean
+  onToggleSidebar: () => void
+}
+```
+
+**Dimensions:**
+- Height: 56px (h-14)
+- Padding: 16px horizontal (px-4)
+
+**Sections:**
+- **Left:** Menu toggle, Logo, Search
+- **Right:** Notifications, Settings, Profile
+
+**Features:**
+- Logo with gradient background (primary → primary-hover)
+- Global search bar (256px width, hidden on mobile)
+- Notification bell icon
+- Settings gear icon
+- User avatar (36px × 36px)
+- Sidebar collapse button
+
+**Responsive Behavior:**
+- Search hidden below 768px (hidden md:block)
+- All icons remain visible at all breakpoints
+
+**Usage:**
+```tsx
+<AppHeader
+  sidebarCollapsed={collapsed}
+  onToggleSidebar={() => setCollapsed(!collapsed)}
+/>
+```
+
+### App Sidebar
+
+**File:** `src/components/layout/app-sidebar.tsx`
+
+**Purpose:** Collapsible navigation sidebar
+
+**Props:**
+```typescript
+interface AppSidebarProps {
+  collapsed?: boolean
+}
+```
+
+**Dimensions:**
+- Expanded: 240px (w-60)
+- Collapsed: 64px (w-16)
+- Transition: 200ms (duration-200)
+
+**Styling:**
+- Background: white (dark: gray-800)
+- Border: 1px solid gray-200 (dark: gray-700)
+- Padding: 16px vertical (py-4)
+
+**Features:**
+- Smooth collapse animation
+- Vertical scroll for overflow
+- Border separator
+- Dark mode support
+
+**Usage:**
+```tsx
+<AppSidebar collapsed={collapsed} />
+```
+
+### Sidebar Navigation
+
+**File:** `src/components/layout/sidebar-nav.tsx`
+
+**Purpose:** Navigation items with active state highlighting
+
+**Props:**
+```typescript
+interface SidebarNavProps {
+  collapsed?: boolean
+}
+```
+
+**Navigation Items:**
+```typescript
+const navItems = [
+  { title: "Home", href: "/", icon: Home },
+  { title: "Tasks", href: "/tasks", icon: CheckSquare },
+  { title: "Projects", href: "/projects", icon: Folder },
+  { title: "Team", href: "/team", icon: Users },
+  { title: "Calendar", href: "/calendar", icon: Calendar },
+  { title: "Settings", href: "/settings", icon: Settings },
+]
+```
+
+**Item Styling:**
+- Height: 40px (py-2)
+- Padding: 12px horizontal (px-3)
+- Icon size: 20px (h-5 w-5)
+- Border radius: 8px (rounded-lg)
+
+**States:**
+- **Active:** bg-primary/10, text-primary
+- **Hover:** bg-gray-100 dark:bg-gray-700
+- **Default:** text-gray-600 dark:text-gray-400
+
+**Collapsed Mode:**
+- Icons centered (justify-center)
+- Text hidden
+- Chevron hidden
+
+**Usage:**
+```tsx
+<SidebarNav collapsed={collapsed} />
+```
+
+### Breadcrumb
+
+**File:** `src/components/layout/breadcrumb.tsx`
+
+**Purpose:** Navigation path indicator
+
+**Props:**
+```typescript
+interface BreadcrumbItem {
+  label: string
+  href?: string
+}
+
+interface BreadcrumbProps {
+  items: BreadcrumbItem[]
+  className?: string
+}
+```
+
+**Features:**
+- ChevronRight separators (h-4 w-4)
+- Links for clickable items
+- Plain text for current page
+- Hover effects (text-gray-900 dark:text-gray-200)
+- ARIA label for accessibility
+
+**Styling:**
+- Font size: 14px (text-sm)
+- Color: gray-500 (dark: gray-400)
+- Gap: 8px (gap-2)
+
+**Usage:**
+```tsx
+<Breadcrumb
+  items={[
+    { label: "Home", href: "/" },
+    { label: "Tasks", href: "/tasks" },
+    { label: "Task Detail" },
+  ]}
+/>
+```
+
+### Container
+
+**File:** `src/components/layout/container.tsx`
+
+**Purpose:** Responsive content container with max-width
+
+**Props:**
+```typescript
+interface ContainerProps {
+  children: React.ReactNode
+  size?: "sm" | "md" | "lg" | "xl" | "full"
+  className?: string
+}
+```
+
+**Size Variants:**
+```typescript
+const sizeClasses = {
+  sm: "max-w-3xl",   // 768px
+  md: "max-w-4xl",   // 896px
+  lg: "max-w-6xl",   // 1152px (ClickUp default)
+  xl: "max-w-7xl",   // 1280px
+  full: "max-w-full",
+}
+```
+
+**Responsive Padding:**
+- Mobile: px-4 (16px)
+- Tablet: sm:px-6 (24px)
+- Desktop: lg:px-8 (32px)
+
+**Usage:**
+```tsx
+<Container size="lg">
+  <h1>Page Title</h1>
+  <p>Content</p>
+</Container>
+```
+
+### Board Layout
+
+**File:** `src/components/layout/board-layout.tsx`
+
+**Purpose:** Kanban board layout with horizontal scrolling
+
+**BoardLayout Props:**
+```typescript
+interface BoardLayoutProps {
+  children: React.ReactNode
+  className?: string
+}
+```
+
+**BoardColumn Props:**
+```typescript
+interface BoardColumnProps {
+  title: string
+  count?: number
+  children: React.ReactNode
+  className?: string
+}
+```
+
+**Features:**
+- Horizontal scroll (overflow-x-auto)
+- Snap scrolling (snap-x snap-mandatory)
+- Column width: 280px (w-[280px])
+- Column gap: 24px (gap-6)
+- Prevents column shrink (flex-shrink-0)
+- Column header with count badge
+
+**Column Structure:**
+```
+BoardColumn (280px)
+├── Header (mb-3)
+│   ├── Title (text-sm, font-semibold)
+│   └── Count (text-xs, gray-500)
+└── Content (space-y-2)
+    └── Task cards
+```
+
+**Usage:**
+```tsx
+<BoardLayout>
+  <BoardColumn title="To Do" count={5}>
+    {/* Task cards */}
+  </BoardColumn>
+  <BoardColumn title="In Progress" count={3}>
+    {/* Task cards */}
+  </BoardColumn>
+  <BoardColumn title="Done" count={8}>
+    {/* Task cards */}
+  </BoardColumn>
+</BoardLayout>
+```
+
+### Responsive Breakpoints
+
+```css
+--breakpoint-xs: 375px;   /* Small mobile */
+--breakpoint-sm: 640px;   /* Mobile */
+--breakpoint-md: 768px;   /* Tablet */
+--breakpoint-lg: 1024px;  /* Desktop */
+--breakpoint-xl: 1280px;  /* Large desktop */
+--breakpoint-2xl: 1536px; /* Extra large */
+```
+
+**Layout Behavior:**
+- **Mobile (< 768px):** Sidebar defaults to collapsed, search hidden
+- **Tablet (768px - 1024px):** Sidebar toggleable, search visible
+- **Desktop (> 1024px):** Full layout, all features
+
+### Accessibility
+
+**Semantic HTML:**
+- `<header>` for app header
+- `<nav>` for sidebar navigation
+- `<main>` for content area
+- `<aside>` for sidebar
+- `<nav aria-label="Breadcrumb">` for breadcrumbs
+
+**Keyboard Navigation:**
+- Tab through navigation items
+- Enter to activate links
+- Proper focus management
+
+**ARIA Support:**
+- Breadcrumb navigation label
+- Icon button labels
+- Semantic structure
+
+### Dark Mode
+
+All layouts support dark mode with automatic color inversion:
+- Background: white → gray-800
+- Border: gray-200 → gray-700
+- Text: gray-900 → white
+- Hover: gray-100 → gray-700
+
+**Usage:**
+```tsx
+<html className="dark">
+  {/* All layouts adapt automatically */}
+</html>
+```
+
+---
+
+**Document Status:** Updated for ClickUp Design + Layouts
+**Version:** 2.2 (Purple Edition + Components + Layouts)
+**Last Updated:** 2026-01-05
+
+**Key Changes from v2.1:**
+- Added Layout Patterns documentation (Section 16)
+- Documented 7 layout components with full props reference
+- Added responsive behavior and dark mode support
+- Included accessibility features (semantic HTML, ARIA)
+- Added usage examples for all layout components
 
 **Key Changes from v2.0:**
 - Added ClickUp Components API documentation (Section 15)
