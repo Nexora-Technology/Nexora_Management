@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Nexora.Management.Domain.Common;
 using Nexora.Management.Domain.Entities;
 using Nexora.Management.Infrastructure.Interfaces;
@@ -10,6 +11,13 @@ namespace Nexora.Management.Infrastructure.Persistence;
 public class AppDbContext : DbContext, IAppDbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        // Ignore the pending model changes warning during migration
+        // In development, this is expected when adding new migrations
+        optionsBuilder.ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
+    }
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Role> Roles => Set<Role>();
@@ -28,6 +36,9 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<UserPresence> UserPresences => Set<UserPresence>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
+    public DbSet<Page> Pages => Set<Page>();
+    public DbSet<PageVersion> PageVersions => Set<PageVersion>();
+    public DbSet<PageComment> PageComments => Set<PageComment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

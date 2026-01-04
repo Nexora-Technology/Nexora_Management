@@ -33,7 +33,7 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
             .HasDatabaseName("idx_comments_task");
 
         builder.HasIndex(c => c.ParentCommentId)
-            .HasFilter("parent_comment_id IS NOT NULL")
+            .HasFilter("\"ParentCommentId\" IS NOT NULL")
             .HasDatabaseName("idx_comments_parent");
 
         // Relationships

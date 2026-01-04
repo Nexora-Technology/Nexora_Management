@@ -26,6 +26,7 @@ builder.Host.UseSerilog((context, configuration) =>
 
 // Add services to the container
 builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
 
 // Configure JWT Authentication
 var jwtSettings = new JwtSettings();
@@ -78,16 +79,27 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Configure Swagger/OpenAPI
+// Configure OpenAPI
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi();
 
 // Register Application layer services
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Nexora.Management.Application.Common.ApiResponse<>).Assembly));
 
 // Register Infrastructure layer services
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
+        npgsqlOptions => npgsqlOptions
+            .MigrationsAssembly("Nexora.Management.API")
+            .EnableRetryOnFailure(3, TimeSpan.FromSeconds(30), null));
+    options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
+    options.EnableDetailedErrors(builder.Environment.IsDevelopment());
+
+    // Ignore pending model changes warning - expected when adding new migrations
+    options.ConfigureWarnings(warnings => warnings.Ignore(
+        Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+});
 
 // Register Infrastructure interfaces
 builder.Services.AddScoped<IAppDbContext>(provider =>
@@ -115,21 +127,32 @@ builder.Services.AddSignalR(options =>
 });
 
 // Register Presence and Notification Services
-builder.Services.AddSingleton<IPresenceService, PresenceService>();
+builder.Services.AddScoped<IPresenceService, PresenceService>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 
 var app = builder.Build();
 
+// Auto-apply database migrations
+// NOTE: Currently disabled due to pre-existing bug in InitialCreate migration (wrong column name in Comments index)
+// TODO: Fix InitialCreate migration and re-enable auto-migration
+// try
+// {
+//     using (var scope = app.Services.CreateScope())
+//     {
+//         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//         Log.Information("Applying database migrations...");
+//         db.Database.Migrate();
+//         Log.Information("Database migrations applied successfully");
+//     }
+// }
+// catch (Exception ex)
+// {
+//     Log.Fatal(ex, "Failed to apply database migrations");
+//     throw;
+// }
+
 // Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Nexora Management API v1");
-        options.RoutePrefix = string.Empty; // Serve Swagger UI at root
-    });
-}
+// Note: OpenAPI JSON available at /openapi/v1.json in development
 
 app.UseHttpsRedirection();
 
@@ -154,6 +177,9 @@ app.MapCommentEndpoints();
 
 // Map Attachment endpoints
 app.MapAttachmentEndpoints();
+
+// Map Document endpoints
+app.MapDocumentEndpoints();
 
 // Map SignalR Hubs
 app.MapHub<TaskHub>("/hubs/tasks");

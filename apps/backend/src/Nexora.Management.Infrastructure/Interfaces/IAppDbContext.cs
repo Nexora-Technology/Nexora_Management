@@ -24,6 +24,9 @@ public interface IAppDbContext
     DbSet<UserPresence> UserPresences { get; }
     DbSet<Notification> Notifications { get; }
     DbSet<NotificationPreference> NotificationPreferences { get; }
+    DbSet<Page> Pages { get; }
+    DbSet<PageVersion> PageVersions { get; }
+    DbSet<PageComment> PageComments { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 
