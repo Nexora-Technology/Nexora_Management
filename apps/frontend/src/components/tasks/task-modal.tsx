@@ -100,6 +100,9 @@ export const TaskModal = memo(function TaskModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogOverlay className="bg-black/50 backdrop-blur-sm" />
+      <div aria-live="assertive" aria-atomic="true" className="sr-only">
+        {open ? (mode === "create" ? "Create task dialog opened" : "Edit task dialog opened") : ""}
+      </div>
       <DialogContent
         className={cn(
           "bg-white dark:bg-gray-800 rounded-lg shadow-lg max-w-md w-full mx-4",
@@ -114,6 +117,7 @@ export const TaskModal = memo(function TaskModal({
           </DialogTitle>
           <button
             onClick={() => onOpenChange?.(false)}
+            aria-label="Close dialog"
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           >
             <X className="h-5 w-5" />
@@ -254,5 +258,15 @@ export const TaskModal = memo(function TaskModal({
         </form>
       </DialogContent>
     </Dialog>
+  )
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.open === nextProps.open &&
+    prevProps.mode === nextProps.mode &&
+    prevProps.isLoading === nextProps.isLoading &&
+    prevProps.task?.id === nextProps.task?.id &&
+    prevProps.task?.title === nextProps.task?.title &&
+    prevProps.onOpenChange === nextProps.onOpenChange &&
+    prevProps.onSubmit === nextProps.onSubmit
   )
 })

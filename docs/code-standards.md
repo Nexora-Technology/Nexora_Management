@@ -1,7 +1,7 @@
 # Code Standards & Development Guidelines
 
 **Last Updated:** 2026-01-05
-**Version:** Phase 05 Partial Complete (Code Quality & Component Consistency)
+**Version:** Phase 05A Complete (Performance Optimization & Accessibility)
 **Document Status:** Active
 
 ## Table of Contents
@@ -227,6 +227,261 @@ public async Task<IActionResult> CreateTask(CreateTaskRequest request)
 ```
 
 ## Frontend Standards (TypeScript / React)
+
+### Performance Optimization Patterns
+
+**React.memo with Custom Comparison Functions:**
+
+```typescript
+// ✅ Good: React.memo with custom comparison for granular control
+import { memo } from "react"
+
+export const TaskCard = memo(function TaskCard({ task, onClick, className }: TaskCardProps) {
+  return (
+    <div onClick={onClick} className={className}>
+      <h4>{task.title}</h4>
+      <Badge status={task.status}>{task.status}</Badge>
+    </div>
+  )
+}, (prevProps, nextProps) => {
+  // Only re-render if specific props change
+  return (
+    prevProps.task.id === nextProps.task.id &&
+    prevProps.task.title === nextProps.task.title &&
+    prevProps.task.status === nextProps.task.status &&
+    prevProps.task.priority === nextProps.task.priority &&
+    prevProps.onClick === nextProps.onClick &&
+    prevProps.className === nextProps.className
+  )
+})
+
+// ✅ Good: React.memo for array-based props
+export const TaskBoard = memo(function TaskBoard({ tasks, onTaskClick }: TaskBoardProps) {
+  // ... component implementation
+}, (prevProps, nextProps) => {
+  // Compare array length and item properties
+  return (
+    prevProps.tasks.length === nextProps.tasks.length &&
+    prevProps.tasks.every((t, i) => t.id === nextProps.tasks[i]?.id) &&
+    prevProps.tasks.every((t, i) => t.status === nextProps.tasks[i]?.status) &&
+    prevProps.onTaskClick === nextProps.onTaskClick
+  )
+})
+
+// ❌ Bad: React.memo without comparison function
+// Shallow comparison may cause unnecessary re-renders for complex objects
+export const TaskCard = memo(function TaskCard({ task, onClick }) {
+  return <div onClick={onClick}>{task.title}</div>
+})
+
+// ❌ Bad: Not using memo at all
+// Component re-renders on every parent update
+export const TaskCard = function TaskCard({ task, onClick }) {
+  return <div onClick={onClick}>{task.title}</div>
+}
+```
+
+**Benefits of Custom Comparison Functions:**
+- Prevent unnecessary re-renders by comparing only relevant properties
+- Handle complex objects (arrays, nested objects) correctly
+- Fine-grained control over when components update
+- Improved performance for lists and frequently updated data
+- Reduced memory allocations from avoiding re-renders
+
+**useCallback for Stable Function References:**
+
+```typescript
+// ✅ Good: useCallback with proper dependencies
+export const TaskBoard = memo(function TaskBoard({ tasks, onTaskClick }: TaskBoardProps) {
+  // Stable handler with useCallback
+  const handleCardClick = useCallback((task: Task) => {
+    onTaskClick?.(task)
+  }, [onTaskClick])
+
+  // Create stable click handlers for each task
+  const createClickHandler = useCallback((task: Task) => () => {
+    handleCardClick(task)
+  }, [handleCardClick])
+
+  return (
+    <div>
+      {tasks.map((task) => (
+        <TaskCard key={task.id} task={task} onClick={createClickHandler(task)} />
+      ))}
+    </div>
+  )
+})
+
+// ✅ Good: useCallback for event handlers passed to memoized components
+function TaskList({ tasks }: TaskListProps) {
+  const dispatch = useTaskDispatch()
+
+  const handleSelect = useCallback((id: string) => {
+    dispatch({ type: "SELECT_TASK", payload: id })
+  }, [dispatch])
+
+  return (
+    <div>
+      {tasks.map((task) => (
+        <TaskRow key={task.id} task={task} onSelect={handleSelect} />
+      ))}
+    </div>
+  )
+}
+
+// ❌ Bad: Not using useCallback, creating new functions on every render
+function TaskBoard({ tasks, onTaskClick }: TaskBoardProps) {
+  return (
+    <div>
+      {tasks.map((task) => (
+        <TaskCard
+          key={task.id}
+          task={task}
+          // New function created on every render - breaks memoization
+          onClick={() => onTaskClick?.(task)}
+        />
+      ))}
+    </div>
+  )
+}
+```
+
+**useMemo for Expensive Computations:**
+
+```typescript
+// ✅ Good: useMemo for derived state and expensive computations
+export const TaskBoard = memo(function TaskBoard({ tasks }: TaskBoardProps) {
+  // Group tasks by status - only recompute when tasks change
+  const tasksByStatus = useMemo(() => {
+    const result: Record<string, Task[]> = {
+      todo: [],
+      inProgress: [],
+      complete: [],
+      overdue: [],
+    }
+    for (const task of tasks) {
+      if (result[task.status]) {
+        result[task.status].push(task)
+      }
+    }
+    return result
+  }, [tasks])
+
+  // Memoize derived values
+  const totalTasks = useMemo(() => tasks.length, [tasks])
+
+  return (
+    <div>
+      <div aria-live="polite">{totalTasks} tasks loaded</div>
+      {Object.entries(tasksByStatus).map(([status, tasks]) => (
+        <BoardColumn key={status} title={status} tasks={tasks} />
+      ))}
+    </div>
+  )
+})
+
+// ❌ Bad: Computing on every render
+export const TaskBoard = function TaskBoard({ tasks }: TaskBoardProps) {
+  // Re-computed on every render, even if tasks haven't changed
+  const tasksByStatus = {
+    todo: tasks.filter(t => t.status === "todo"),
+    inProgress: tasks.filter(t => t.status === "inProgress"),
+    // ...
+  }
+
+  return <div>{/* ... */}</div>
+}
+```
+
+**aria-live Regions for Accessibility:**
+
+```typescript
+// ✅ Good: Using aria-live for dynamic content announcements
+export const TaskBoard = memo(function TaskBoard({ tasks }: TaskBoardProps) {
+  const totalTasks = useMemo(() => tasks.length, [tasks])
+
+  return (
+    <BoardLayout>
+      {/* Screen reader announcement for task count changes */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {totalTasks} tasks loaded
+      </div>
+
+      {/* Board columns */}
+    </BoardLayout>
+  )
+})
+
+// ✅ Good: aria-live with assertive for critical state changes
+export const TaskModal = memo(function TaskModal({ open, mode }: TaskModalProps) {
+  return (
+    <Dialog open={open}>
+      {/* Assertive announcement for dialog state */}
+      <div aria-live="assertive" aria-atomic="true" className="sr-only">
+        {open ? (mode === "create" ? "Create task dialog opened" : "Edit task dialog opened") : ""}
+      </div>
+
+      <DialogContent>
+        {/* Modal content */}
+      </DialogContent>
+    </Dialog>
+  )
+})
+
+// aria-live values:
+// - "polite": Announces when user is idle (use for status updates, counts)
+// - "assertive": Announces immediately (use for errors, critical state changes)
+// - "off": Does not announce (default)
+// aria-atomic="true": Announces entire region as one message
+
+// ❌ Bad: Missing screen reader announcements
+export const TaskBoard = function TaskBoard({ tasks }: TaskBoardProps) {
+  return (
+    <div>
+      {/* Screen readers won't announce task count changes */}
+      {tasks.map((task) => <TaskCard key={task.id} task={task} />)}
+    </div>
+  )
+}
+```
+
+**Accessibility Best Practices:**
+
+```typescript
+// ✅ Good: Proper aria-labels for interactive elements
+<button
+  onClick={() => onOpenChange?.(false)}
+  aria-label="Close dialog"
+  className="close-button"
+>
+  <X className="h-5 w-5" />
+</button>
+
+// ✅ Good: Descriptive link/button text with aria-label
+<button
+  aria-label="Drag to reorder task"
+  className="drag-handle"
+>
+  <GripVertical className="h-4 w-4" />
+</button>
+
+// ❌ Bad: Icon-only buttons without aria-label
+<button onClick={onClose}>
+  <X className="h-5 w-5" />
+  {/* Screen reader says "button" with no context */}
+</button>
+```
+
+**Performance Optimization Checklist:**
+
+- [ ] Wrap list items in `React.memo` with custom comparison functions
+- [ ] Use `useCallback` for event handlers passed to memoized children
+- [ ] Use `useMemo` for expensive computations and derived state
+- [ ] Add `aria-live` regions for dynamic content announcements
+- [ ] Provide `aria-label` for icon-only buttons and interactive elements
+- [ ] Use `aria-atomic="true"` for complete region announcements
+- [ ] Choose appropriate `aria-live` politeness level (polite vs assertive)
+- [ ] Test with screen readers to verify announcements work correctly
 
 ### TypeScript Code Style
 
@@ -1356,7 +1611,7 @@ Fixes #456
 
 ---
 
-**Document Version:** 1.1
+**Document Version:** 1.2
 **Last Updated:** 2026-01-05
 **Maintained By:** Development Team
 **Review Frequency:** Quarterly

@@ -60,4 +60,12 @@ export const TaskRow = memo(function TaskRow({ task, isSelected, onSelect }: Tas
       </td>
     </tr>
   )
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.task.id === nextProps.task.id &&
+    prevProps.task.title === nextProps.task.title &&
+    prevProps.task.status === nextProps.task.status &&
+    prevProps.isSelected === nextProps.isSelected &&
+    prevProps.onSelect === nextProps.onSelect
+  )
 })

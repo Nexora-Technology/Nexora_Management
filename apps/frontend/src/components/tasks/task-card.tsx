@@ -101,4 +101,13 @@ export const TaskCard = memo(function TaskCard({ task, onClick, className }: Tas
       </div>
     </div>
   )
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.task.id === nextProps.task.id &&
+    prevProps.task.title === nextProps.task.title &&
+    prevProps.task.status === nextProps.task.status &&
+    prevProps.task.priority === nextProps.task.priority &&
+    prevProps.onClick === nextProps.onClick &&
+    prevProps.className === nextProps.className
+  )
 })
