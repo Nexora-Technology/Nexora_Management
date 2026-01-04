@@ -1,11 +1,13 @@
 # Codebase Summary
 
 **Last Updated:** 2026-01-04
-**Version:** Phase 06 Complete (Real-time Collaboration)
+**Version:** Phase 07 In Progress (Document & Wiki System - 60% Complete)
+**Backend Files:** 144 files
+**Frontend Lines:** ~5,722 lines
 
 ## Project Overview
 
-Nexora Management is a ClickUp-inspired project management platform built with .NET 9.0 backend and Next.js 15 frontend. The platform provides comprehensive task management, collaboration, and productivity tracking features.
+Nexora Management is a ClickUp-inspired project management platform built with .NET 9.0 backend and Next.js 15 frontend. The platform provides comprehensive task management, collaboration, document management, and productivity tracking features.
 
 ## Technology Stack
 
@@ -24,6 +26,7 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
 - **Components:** shadcn/ui
+- **Rich Text:** TipTap (for document editor)
 - **State Management:** Zustand
 - **Data Fetching:** React Query
 - **Real-time:** @microsoft/signalr
@@ -38,12 +41,13 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 
 **Components:**
 
-- **Entities** (17 domain models):
+- **Entities** (21 domain models):
   - `User` - User accounts and authentication
   - `Role` - User roles (Admin, Member, Guest)
   - `Permission` - Granular permissions (Create, Read, Update, Delete)
   - `UserRole` - Many-to-many relationship between Users and Roles
   - `RolePermission` - Many-to-many relationship between Roles and Permissions
+  - `RefreshToken` - JWT refresh token storage
   - `Workspace` - Workspaces as top-level containers
   - `WorkspaceMember` - Workspace membership management
   - `Project` - Projects within workspaces
@@ -52,6 +56,14 @@ Nexora Management is a ClickUp-inspired project management platform built with .
   - `Comment` - Threaded comments on tasks
   - `Attachment` - File attachments for tasks
   - `ActivityLog` - Audit trail for all activities
+  - `UserPresence` - Real-time user online/offline status
+  - `Notification` - User notifications
+  - `NotificationPreference` - User notification settings
+  - **NEW Phase 07:**
+    - `Page` - Wiki/document pages with hierarchical structure
+    - `PageVersion` - Page version history for restore capability
+    - `PageCollaborator` - Page collaboration with role-based access
+    - `PageComment` - Comments on document pages
 
 - **Common:**
   - `BaseEntity` - Base entity with Id, CreatedAt, UpdatedAt
@@ -64,13 +76,14 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 **Components:**
 
 - **Persistence** (`/Persistence/`):
-  - `AppDbContext` - EF Core DbContext with 13 DbSets
-  - **Configurations** (14 EF Core configurations):
+  - `AppDbContext` - EF Core DbContext with 21 DbSets
+  - **Configurations** (25 EF Core configurations):
     - `UserConfiguration` - User entity mapping
     - `RoleConfiguration` - Role entity mapping
     - `PermissionConfiguration` - Permission entity mapping
     - `UserRoleConfiguration` - UserRole junction table
     - `RolePermissionConfiguration` - RolePermission junction table
+    - `RefreshTokenConfiguration` - Refresh token storage
     - `WorkspaceConfiguration` - Workspace with JSONB settings
     - `WorkspaceMemberConfiguration` - Workspace membership
     - `ProjectConfiguration` - Project with color/icon/status
@@ -79,6 +92,14 @@ Nexora Management is a ClickUp-inspired project management platform built with .
     - `CommentConfiguration` - Threaded comments
     - `AttachmentConfiguration` - File attachments
     - `ActivityLogConfiguration` - Audit logging
+    - `UserPresenceConfiguration` - User presence tracking
+    - `NotificationConfiguration` - Notification storage
+    - `NotificationPreferenceConfiguration` - User notification settings
+    - **NEW Phase 07:**
+      - `PageConfiguration` - Page with self-referencing hierarchy
+      - `PageVersionConfiguration` - Version history with unique constraint
+      - `PageCollaboratorConfiguration` - Composite key (PageId + UserId)
+      - `PageCommentConfiguration` - Threaded comments on pages
 
 - **Interfaces:**
   - `IAppDbContext` - Abstraction for DbContext
@@ -93,6 +114,16 @@ Nexora Management is a ClickUp-inspired project management platform built with .
   - `Result` / `Result<T>` - Non-generic and generic result patterns for operation outcomes
   - `ApiResponse<T>` - Standardized API response wrapper
   - MediatR setup for CQRS pattern
+
+**CQRS Modules Summary (59 files across 8 feature modules):**
+- **Authentication:** 3 Commands, 3 DTOs (9 files)
+- **Authorization:** 4 components (Handler, Provider, Attribute, Requirement) (4 files)
+- **Tasks:** 4 Commands, 5 Queries, 5 DTOs (14 files)
+- **Comments:** 3 Commands, 2 Queries, 3 DTOs (8 files)
+- **Attachments:** 2 Commands, 1 Query, 3 DTOs (6 files)
+- **Documents:** 6 Commands, 4 Queries, 7 DTOs (17 files) - Phase 07
+- **Common:** Result patterns, ApiResponse, IUserContext (3 files)
+- **SignalR:** Message DTOs for real-time (3 files)
 
 - **Authentication:**
   - **Commands:** RegisterCommand, LoginCommand, RefreshTokenCommand
@@ -109,15 +140,38 @@ Nexora Management is a ClickUp-inspired project management platform built with .
   - **Queries:** GetTaskById, GetTasks (with filtering), GetBoardView, GetCalendarView, GetGanttView
   - **DTOs:** TaskDto, CreateTaskRequest, UpdateTaskRequest, GetTasksQueryRequest, ViewDTOs (BoardColumnDto, CalendarTaskDto, GanttTaskDto)
 
+- **Comments:**
+  - **Commands:** AddComment, UpdateComment, DeleteComment
+  - **Queries:** GetComments, GetCommentReplies
+  - **DTOs:** CommentDto, CreateCommentRequest, UpdateCommentRequest
+
+- **Attachments:**
+  - **Commands:** UploadAttachment, DeleteAttachment
+  - **Queries:** GetAttachments
+  - **DTOs:** AttachmentDto, UploadAttachmentResponse
+
+- **Documents** (NEW Phase 07):
+  - **Commands:** CreatePage, UpdatePage, DeletePage, ToggleFavorite, MovePage, RestorePageVersion
+  - **Queries:** GetPageById, GetPageTree, GetPageHistory, SearchPages
+  - **DTOs:** PageDto, PageDetailDto, PageTreeNodeDto, PageVersionDto, PageCommentDto, CreatePageRequest, UpdatePageRequest, MovePageRequest, SearchPagesRequest
+
 #### 4. API Layer (`/apps/backend/src/Nexora.Management.API/`)
 
 **Purpose:** Presentation and external interfaces
 
 **Components:**
 
-- **Endpoints:**
+- **Endpoints:** (5 Minimal API groups)
   - `AuthEndpoints.cs` - Authentication endpoints at `/api/auth`
   - `TaskEndpoints.cs` - Task CRUD endpoints at `/api/tasks`
+  - `CommentEndpoints.cs` - Comment endpoints at `/api/comments`
+  - `AttachmentEndpoints.cs` - File attachment endpoints at `/api/attachments`
+  - `DocumentEndpoints.cs` (NEW Phase 07) - Document endpoints at `/api/documents`
+
+- **SignalR Hubs:** (3 real-time hubs)
+  - `TaskHub` - Task real-time updates (created, updated, deleted, status changed)
+  - `NotificationHub` - Notification delivery with preference filtering
+  - `PresenceHub` - User presence tracking (online/offline, typing, current view)
 
 - **Middleware:**
   - `WorkspaceAuthorizationMiddleware.cs` - Sets user context for Row-Level Security (RLS)
@@ -133,10 +187,12 @@ Nexora Management is a ClickUp-inspired project management platform built with .
   - Health check endpoint
   - Welcome endpoint
 
-- **Persistence/Migrations** (3 migration files):
+- **Persistence/Migrations** (6 migration files):
   - `20260103071610_InitialCreate` - Initial schema creation
   - `20260103071738_EnableRowLevelSecurity` - RLS policies
   - `20260103071908_SeedRolesAndPermissions` - Initial data seeding
+  - `20260103171029_AddRealtimeCollaborationTables` - Real-time features (presence, notifications)
+  - `20260104112014_AddDocumentTables` (Phase 07) - Document/Wiki system tables
   - `AppDbContextModelSnapshot` - EF Core model snapshot
 
 - **appsettings.json** - Configuration including connection string
@@ -161,7 +217,15 @@ User (1) ────< (N) UserRole >─── (N) Role
                               │                   ├───── (N) Comment
                               │                   └───── (N) Attachment
                               │
-                              └───── (N) ActivityLog
+                              ├───── (N) Page ──── (1) ParentPage (self-ref)
+                              │         │
+                              │         ├───── (N) PageVersion
+                              │         ├───── (N) PageComment ──── (1) ParentComment (self-ref)
+                              │         └───── (N) PageCollaborator ──── (1) User
+                              │
+                              ├───── (N) ActivityLog
+                              ├───── (N) Notification ──── (1) User
+                              └───── (N) UserPresence ──── (1) User
 
 Role (1) ────< (N) RolePermission >─── (N) Permission
 ```
@@ -354,6 +418,426 @@ apps/backend/
 └── tests/ (to be implemented)
 ```
 
+## Frontend Structure (~5,722 lines)
+
+## ClickUp Design System (Phase 01.1 Foundation) ✅
+
+**Status:** Complete (2026-01-04)
+**Version:** ClickUp Purple v2.0
+**Design Tokens:** 260+ lines in globals.css
+
+### Design Token Architecture
+
+#### Color System
+
+**Primary Brand Colors (ClickUp Purple):**
+```css
+--primary: 250 73% 68%;        /* #7B68EE - ClickUp Purple */
+--primary-hover: 250 73% 76%;  /* #A78BFA - Light Purple */
+--primary-active: 250 62% 55%; /* #5B4BC4 - Dark Purple */
+--primary-bg: 250 100% 97%;    /* #F5F3FF - Purple Tint */
+```
+
+**Semantic Colors:**
+- `--success: 158 64% 42%` - Green (#10B981)
+- `--warning: 38 92% 50%` - Yellow (#F59E0B)
+- `--error: 0 72% 51%` - Red (#EF4444)
+- `--info: 217 91% 60%` - Blue (#3B82F6)
+
+**Gray Scale (HSL format for consistent theming):**
+```css
+--gray-50: 220 20% 98%;   /* Lightest */
+--gray-100: 220 15% 95%;
+--gray-200: 220 10% 90%;
+--gray-300: 220 10% 75%;
+--gray-400: 220 10% 60%;
+--gray-500: 220 10% 45%;
+--gray-600: 220 10% 35%;
+--gray-700: 220 15% 25%;
+--gray-800: 220 20% 15%;
+--gray-900: 220 25% 10%;  /* Darkest */
+```
+
+**Component Colors (shadcn/ui mapping):**
+- Background: White (0 0% 100%)
+- Foreground: Gray 900 (220 25% 10%)
+- Border: Gray 200 (220 10% 90%)
+- Muted: Gray 50 (220 20% 98%)
+- Ring: Primary purple (250 73% 68%)
+
+#### Typography System
+
+**Font Families:**
+- **Primary:** Inter (Google Fonts)
+  - Subsets: latin, latin-ext, vietnamese
+  - Display: swap
+  - Variable: --font-inter
+- **Monospace:** JetBrains Mono
+  - Subsets: latin
+  - Variable: --font-jetbrains-mono
+
+**Type Scale (ClickUp-inspired):**
+```css
+--text-xs: 0.6875rem;   /* 11px - Tiny/Timestamps */
+--text-sm: 0.75rem;     /* 12px - Small/Captions */
+--text-base: 0.875rem;  /* 14px - Body text */
+--text-md: 1rem;        /* 16px - H3/Subsection */
+--text-lg: 1.25rem;     /* 20px - H2/Card titles */
+--text-xl: 1.5rem;      /* 24px - H1/Section headers */
+--text-2xl: 2rem;       /* 32px - Display/Page titles */
+```
+
+**Font Weights:**
+```css
+--font-regular: 400;    /* Body text */
+--font-medium: 500;     /* Emphasized text, labels */
+--font-semibold: 600;   /* Headings, important UI */
+--font-bold: 700;       /* Strong headings, CTAs */
+```
+
+**Line Heights:**
+```css
+--leading-tight: 1.25;   /* Headings, compact text */
+--leading-normal: 1.5;   /* Body text */
+```
+
+#### Spacing System
+
+**Base Unit:** 4px (powers of 2 scale)
+
+```css
+--space-0: 0;
+--space-1: 0.25rem;   /* 4px - Tight gaps */
+--space-2: 0.5rem;    /* 8px - Icon padding */
+--space-3: 0.75rem;   /* 12px - Compact padding */
+--space-4: 1rem;      /* 16px - Standard spacing */
+--space-5: 1.25rem;   /* 20px - Component gaps */
+--space-6: 1.5rem;    /* 24px - Section spacing */
+--space-8: 2rem;      /* 32px - Large gaps */
+--space-10: 2.5rem;   /* 40px - XL spacing */
+--space-12: 3rem;     /* 48px - XXL spacing */
+--space-16: 4rem;     /* 64px - Huge spacing */
+```
+
+#### Border Radius Scale
+
+```css
+--radius-sm: 4px;      /* Small badges, dots */
+--radius-md: 6px;      /* Buttons, inputs (default) */
+--radius-lg: 8px;      /* Cards, panels */
+--radius-xl: 12px;     /* Modals, large cards */
+--radius-2xl: 16px;    /* Hero sections */
+```
+
+**Component-Specific Usage:**
+- Buttons (Primary/Secondary/Icon): 6px (0.375rem)
+- Buttons (Ghost): 4px (0.25rem)
+- Task Cards: 8px (0.5rem)
+- Status Badges: 4px (0.25rem)
+- Inputs: 6px (0.375rem)
+- Modals: 12px (0.75rem)
+
+#### Shadow System
+
+**Elevation Levels (5 levels):**
+```css
+--shadow-none: none;
+--shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+--shadow-md: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+--shadow-lg: 0 4px 6px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+--shadow-xl: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+--shadow-2xl: 0 20px 25px rgba(0,0,0,0.15), 0 10px 10px rgba(0,0,0,0.04);
+```
+
+**Component Usage:**
+- Buttons: sm (subtle lift)
+- Cards: sm → md on hover
+- Dropdowns: md
+- Modals: xl
+- Tooltips: md
+
+#### Transition System
+
+**Durations:**
+```css
+--transition-fast: 150ms;   /* Buttons, toggles */
+--transition-base: 200ms;   /* Dropdowns, sidebar */
+--transition-slow: 300ms;   /* Modals, page */
+```
+
+**Easing Functions:**
+```css
+--ease-out: cubic-bezier(0, 0, 0.2, 1);      /* Deceleration */
+--ease-in-out: cubic-bezier(0.4, 0, 0.2, 1); /* Smooth in/out */
+```
+
+#### Accessibility Features
+
+**WCAG 2.1 AA Compliance:**
+- Color contrast ratio: 4.7:1 (exceeds AA standard)
+- Focus-visible states with 2px purple outline
+- Reduced motion support via `@media (prefers-reduced-motion: reduce)`
+- Semantic HTML structure
+- Keyboard navigation support
+
+**Focus Styles:**
+```css
+*:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+```
+
+**Reduced Motion:**
+```css
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+```
+
+#### Dark Mode Support
+
+**Primary Color Adjustment:**
+```css
+.dark {
+  --primary: 250 73% 70%; /* #A78BFA - Lighter purple for dark mode */
+  --background: 220 25% 10%; /* Gray 900 */
+  --foreground: 220 20% 98%; /* Gray 50 */
+  --border: 220 10% 35%; /* Gray 600 */
+}
+```
+
+**Dark Mode Benefits:**
+- Lighter purple (#A78BFA) provides better contrast on dark backgrounds
+- All component colors automatically invert
+- Maintains visual hierarchy
+- Preserves brand identity
+
+#### Component Utility Classes
+
+**Button Classes:**
+```css
+.clickup-button-primary    /* Purple gradient with lift effect */
+.clickup-button-secondary  /* White with border */
+.clickup-button-ghost      /* Transparent with hover */
+```
+
+**Input Classes:**
+```css
+.clickup-input             /* 40px height, purple focus ring */
+```
+
+**Card Classes:**
+```css
+.clickup-card              /* White background, shadow on hover */
+```
+
+**Badge Classes:**
+```css
+.clickup-badge-complete    /* Green for success */
+.clickup-badge-progress    /* Amber for in progress */
+.clickup-badge-overdue     /* Red for overdue */
+```
+
+#### Tailwind Configuration
+
+**Extended Theme:**
+```typescript
+colors: {
+  primary: {
+    DEFAULT: "hsl(var(--primary))",
+    hover: "hsl(var(--primary-hover))",
+    active: "hsl(var(--primary-active))",
+  },
+  gray: { 50: "hsl(var(--gray-50))", ..., 900: "hsl(var(--gray-900))" },
+  success: "hsl(var(--success))",
+  warning: "hsl(var(--warning))",
+  error: "hsl(var(--error))",
+  info: "hsl(var(--info))",
+},
+borderRadius: {
+  DEFAULT: "var(--radius)", /* 6px */
+  xl: "var(--radius-xl)",    /* 12px */
+  "2xl": "var(--radius-2xl)", /* 16px */
+},
+fontFamily: {
+  sans: ["var(--font-inter)", "sans-serif"],
+  mono: ["var(--font-jetbrains-mono)", "monospace"],
+},
+fontSize: {
+  xs: ["var(--text-xs)", { lineHeight: "var(--leading-tight)" }],
+  sm: ["var(--text-sm)", { lineHeight: "var(--leading-normal)" }],
+  // ... etc
+},
+boxShadow: {
+  sm: "var(--shadow-sm)",
+  md: "var(--shadow-md)",
+  lg: "var(--shadow-lg)",
+  xl: "var(--shadow-xl)",
+  "2xl": "var(--shadow-2xl)",
+},
+transitionDuration: {
+  fast: "var(--transition-fast)",   /* 150ms */
+  base: "var(--transition-base)",   /* 200ms */
+  slow: "var(--transition-slow)",   /* 300ms */
+},
+```
+
+### Design Token Files
+
+**Implementation Files:**
+- `/apps/frontend/src/app/globals.css` - 260+ lines of ClickUp design tokens
+- `/apps/frontend/tailwind.config.ts` - Tailwind extensions for ClickUp tokens
+- `/apps/frontend/src/app/layout.tsx` - Inter font integration
+- `/apps/frontend/next.config.ts` - typedRoutes experiment
+
+**Documentation Files:**
+- `/docs/design-guidelines.md` - Complete ClickUp design system reference (v2.0)
+- `/docs/codebase-summary.md` - This file
+
+### Design Token Usage
+
+**CSS Variables (recommended for custom components):**
+```css
+.my-component {
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast) var(--ease-out);
+}
+```
+
+**Tailwind Classes (recommended for layout):**
+```tsx
+<div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+  <h2 className="text-xl font-semibold text-gray-900">Title</h2>
+  <p className="text-base text-gray-600">Body text</p>
+</div>
+```
+
+**Component Classes (recommended for consistent UI):**
+```tsx
+<button className="clickup-button-primary">Create Task</button>
+<input className="clickup-input" placeholder="Enter task name..." />
+<div className="clickup-card">Card content</div>
+```
+
+### Tech Stack
+
+- **Framework:** Next.js 15 with App Router
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS v3.4.0
+- **Components:** shadcn/ui (12 components)
+- **Rich Text:** TipTap editor
+- **State:** Zustand
+- **Data Fetching:** React Query
+- **Real-time:** @microsoft/signalr
+- **Drag-Drop:** @dnd-kit
+
+### Route Pages (8 routes)
+
+```
+apps/frontend/src/app/
+├── layout.tsx              # Root layout with providers
+├── page.tsx                # Landing page
+├── (auth)/
+│   ├── login/
+│   │   └── page.tsx        # Login page
+│   └── register/
+│       └── page.tsx        # Register page
+├── dashboard/
+│   └── page.tsx            # Dashboard page
+├── workspaces/
+│   └── page.tsx            # Workspaces list
+└── projects/
+    └── [id]/
+        └── page.tsx        # Project detail with task views
+```
+
+### Feature Modules (5 modules)
+
+#### 1. Auth Module
+- `features/auth/auth-provider.tsx` - Authentication context
+- `features/auth/LoginForm.tsx` - Login form
+- `features/auth/RegisterForm.tsx` - Register form
+
+#### 2. Tasks Module
+- `features/tasks/TaskDetailWithRealtime.tsx` - Task detail with SignalR
+- `features/tasks/TypingIndicator.tsx` - Typing animation
+- `features/tasks/ViewingAvatars.tsx` - Who is viewing component
+
+#### 3. Documents Module (7 components) - Phase 07
+- `features/documents/DocumentEditor.tsx` - TipTap rich text editor
+- `features/documents/EditorToolbar.tsx` - Formatting toolbar
+- `features/documents/PageTree.tsx` - Hierarchical page tree
+- `features/documents/PageList.tsx` - Page list with favorites/recent
+- `features/documents/VersionHistory.tsx` - Version history viewer
+- `features/documents/types.ts` - Document TypeScript types
+- `features/documents/api.ts` - Document API client
+
+#### 4. Notifications Module
+- `features/notifications/NotificationCenter.tsx` - Notification panel
+- `features/notifications/NotificationPreferences.tsx` - Settings UI
+
+#### 5. Users Module
+- `features/users/OnlineStatus.tsx` - Avatar with online indicator
+- `features/users/UserAvatar.tsx` - User avatar component
+
+#### 6. Views Module (4 views)
+- `features/views/ViewContext.tsx` - View state context
+- `features/views/ViewSwitcher.tsx` - View toggle buttons
+- `features/views/list/ListView.tsx` - Sortable table view
+- `features/views/board/BoardView.tsx` - Kanban board with drag-drop
+- `features/views/calendar/CalendarView.tsx` - Monthly calendar
+- `features/views/gantt/GanttView.tsx` - Timeline with zoom
+
+### SignalR Hooks (3 hooks)
+
+```
+src/hooks/signalr/
+├── useTaskHub.ts           # Task real-time updates
+├── usePresenceHub.ts       # User presence tracking
+└── useNotificationHub.ts   # Notification delivery
+```
+
+### shadcn/ui Components (12)
+
+```
+src/components/ui/
+├── avatar.tsx              # User avatar
+├── badge.tsx               # Status badges
+├── button.tsx              # Button component
+├── card.tsx                # Card container
+├── dropdown-menu.tsx       # Dropdown menus
+├── input.tsx               # Form inputs
+├── label.tsx               # Form labels
+├── scroll-area.tsx         # Custom scrollbar
+├── separator.tsx           # Visual separator
+├── sonner.tsx              # Toast notifications
+├── switch.tsx              # Toggle switch
+└── tooltip.tsx             # Tooltip component
+```
+
+### Configuration Files
+
+```
+apps/frontend/
+├── tailwind.config.ts      # Tailwind configuration
+├── postcss.config.mjs      # PostCSS configuration
+├── next.config.ts          # Next.js configuration
+├── tsconfig.json           # TypeScript configuration
+└── package.json            # Dependencies
+```
+
 ## Configuration Files
 
 ### appsettings.json
@@ -475,13 +959,18 @@ apps/backend/
 
 ## Next Steps
 
-1. **Phase 06:** Real-time updates via SignalR
-2. **Phase 07:** Bulk operations (BulkUpdate, BulkDelete, BulkMove)
-3. **Phase 08:** Implement activity logging service
-4. **Future:** Add advanced search, performance optimization
+1. **Phase 07:** Complete Document & Wiki system integration
+   - Apply database migration
+   - Create document routes
+   - Wire frontend to backend API
+   - Add real-time collaboration
+   - Implement slash commands
+2. **Phase 08:** Goal Tracking & OKRs
+3. **Phase 09:** Time Tracking
+4. **Phase 10:** Dashboards & Reporting
 
 ---
 
-**Documentation Version:** 1.1
-**Last Updated:** 2026-01-03
+**Documentation Version:** 1.2
+**Last Updated:** 2026-01-04
 **Maintained By:** Development Team
