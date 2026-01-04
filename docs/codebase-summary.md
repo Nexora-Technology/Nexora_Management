@@ -1,9 +1,9 @@
 # Codebase Summary
 
 **Last Updated:** 2026-01-05
-**Version:** Phase 04 Complete (View Components - Task Management UI)
+**Version:** Phase 05 Partial Complete (Code Quality & Component Consistency)
 **Backend Files:** 144 files
-**Frontend Lines:** ~7,300 lines (+1,100 lines from Phase 04.1)
+**Frontend Lines:** ~7,300 lines (+1,100 lines from Phase 04.1, +~50 lines from Phase 05)
 
 ## Project Overview
 
@@ -1179,6 +1179,43 @@ interface TaskFilter {
   search?: string;
 }
 ```
+
+#### 1.1. Task Constants (`src/components/tasks/constants.ts`) - NEW Phase 05
+
+**Purpose:** Shared constants for task management to ensure consistency
+
+**Constants:**
+```typescript
+// Status options for filters and selects
+export const TASK_STATUSES = [
+  { value: "todo", label: "To Do" },
+  { value: "inProgress", label: "In Progress" },
+  { value: "complete", label: "Complete" },
+  { value: "overdue", label: "Overdue" },
+] as const;
+
+// Priority levels
+export const TASK_PRIORITIES = [
+  { value: "urgent", label: "Urgent" },
+  { value: "high", label: "High" },
+  { value: "medium", label: "Medium" },
+  { value: "low", label: "Low" },
+] as const;
+
+// Column configuration for board view
+export const BOARD_COLUMNS = [
+  { id: "todo", title: "To Do" },
+  { id: "inProgress", title: "In Progress" },
+  { id: "complete", title: "Complete" },
+  { id: "overdue", title: "Overdue" },
+] as const;
+```
+
+**Benefits:**
+- Single source of truth for status/priority values
+- Prevents typos and inconsistencies
+- Easier to maintain and update
+- Type-safe with `as const` assertions
 
 #### 2. Mock Data (`src/components/tasks/mock-data.ts`)
 
