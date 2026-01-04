@@ -12,6 +12,7 @@ COPY packages/*/package*.json ./packages/*/
 RUN npm ci
 
 # Stage 2: Build
+# Force cache invalidate: 2026-01-04-01:44-webpack-build
 FROM node:20-alpine AS builder
 WORKDIR /app
 
@@ -28,6 +29,7 @@ WORKDIR /app/apps/frontend
 RUN npm run build
 
 # Stage 3: Production runner
+# Force cache invalidate: 2026-01-04-01:43
 FROM node:20-alpine AS runner
 WORKDIR /app
 
@@ -40,8 +42,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy built application
 COPY --from=builder /app/apps/frontend/public ./apps/frontend/public
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/static ./apps/frontend/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/server ./apps/frontend/.next/server
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone ./
 
 USER nextjs
 

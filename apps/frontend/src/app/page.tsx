@@ -1,10 +1,32 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Home() {
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-teal-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      <div className="container mx-auto px-4 py-16">
+      {/* Header */}
+      <div className="container mx-auto px-4 py-4">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-sky-500 to-teal-500 bg-clip-text text-transparent">
+            Nexora
+          </h1>
+          <div className="flex gap-3">
+            <Button variant="ghost" onClick={() => router.push("/login")}>
+              Sign In
+            </Button>
+            <Button onClick={() => router.push("/register")}>
+              Get Started
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-8">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-6xl font-extrabold mb-6 bg-gradient-to-r from-sky-500 to-teal-500 bg-clip-text text-transparent">
@@ -14,11 +36,11 @@ export default function Home() {
             Team management, task tracking, and project coordination platform for modern teams.
           </p>
           <div className="flex gap-4 justify-center">
-            <Button size="lg" className="bg-gradient-to-r from-sky-500 to-teal-500 hover:from-sky-600 hover:to-teal-600 text-white font-semibold">
+            <Button size="lg" className="bg-gradient-to-r from-sky-500 to-teal-500 hover:from-sky-600 hover:to-teal-600 text-white font-semibold" onClick={() => router.push("/dashboard")}>
               Get Started
             </Button>
-            <Button size="lg" variant="outline">
-              Documentation
+            <Button size="lg" variant="outline" onClick={() => router.push("/workspaces")}>
+              View Workspaces
             </Button>
           </div>
         </div>

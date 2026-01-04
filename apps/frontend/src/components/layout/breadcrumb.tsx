@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import type { Route } from "next"
 import { ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 

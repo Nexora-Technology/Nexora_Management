@@ -49,7 +49,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ASPNETCORE_URLS: http://+:8080
-      ConnectionStrings__PostgreSQL: "Host=postgres;Port=5432;Database=nexora_dev;Username=nexora;Password=nexora_dev"
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=nexora_dev;Username=nexora;Password=nexora_dev"
       ConnectionStrings__Redis: "redis:6379,password=nexora_dev"
     depends_on:
       postgres:

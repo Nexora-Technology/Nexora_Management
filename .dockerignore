@@ -9,6 +9,9 @@ apps/backend/.vscode/
 apps/backend/Tests/
 apps/backend/TestResults/
 
+# Claude skills
+.claude/
+
 # Files
 *.user
 *.suo
