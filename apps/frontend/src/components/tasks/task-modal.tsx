@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { memo } from "react"
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -46,7 +47,7 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
   { value: "low", label: "Low" },
 ]
 
-export function TaskModal({
+export const TaskModal = memo(function TaskModal({
   open,
   onOpenChange,
   task,
@@ -105,6 +106,7 @@ export function TaskModal({
           "animate-in fade-in-0 zoom-in-95",
           className
         )}
+        aria-describedby="task-modal-description"
       >
         <div className="flex items-center justify-between mb-4">
           <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -253,4 +255,4 @@ export function TaskModal({
       </DialogContent>
     </Dialog>
   )
-}
+})

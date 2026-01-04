@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { memo } from "react"
 import { GripVertical, MessageSquare, Paperclip } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -14,13 +15,23 @@ interface TaskCardProps {
   className?: string
 }
 
-export function TaskCard({ task, onClick, className }: TaskCardProps) {
+export const TaskCard = memo(function TaskCard({ task, onClick, className }: TaskCardProps) {
   return (
     <div
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault()
+          onClick?.()
+        }
+      }}
+      role="button"
+      tabIndex={0}
       className={cn(
         "group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700",
-        "p-4 hover:shadow-md transition-shadow cursor-pointer",
+        "p-4 hover:shadow-md transition-all duration-200 cursor-pointer",
+        "focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2",
+        "animate-fade-in",
         className
       )}
     >
@@ -30,6 +41,8 @@ export function TaskCard({ task, onClick, className }: TaskCardProps) {
         <button
           className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity mt-1"
           onClick={(e) => e.stopPropagation()}
+          aria-label="Drag to reorder task"
+          type="button"
         >
           <GripVertical className="h-4 w-4 text-gray-400" />
         </button>
@@ -88,4 +101,4 @@ export function TaskCard({ task, onClick, className }: TaskCardProps) {
       </div>
     </div>
   )
-}
+})

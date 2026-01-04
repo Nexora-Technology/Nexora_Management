@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { memo } from "react"
 import { Task } from "./types"
 import { cn } from "@/lib/utils"
 import { PRIORITY_COLORS, STATUS_LABELS } from "./constants"
@@ -11,7 +12,7 @@ interface TaskRowProps {
   onSelect?: (id: string) => void
 }
 
-export function TaskRow({ task, isSelected, onSelect }: TaskRowProps) {
+export const TaskRow = memo(function TaskRow({ task, isSelected, onSelect }: TaskRowProps) {
   return (
     <tr
       className={cn(
@@ -59,4 +60,4 @@ export function TaskRow({ task, isSelected, onSelect }: TaskRowProps) {
       </td>
     </tr>
   )
-}
+})

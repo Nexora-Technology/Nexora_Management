@@ -69,12 +69,14 @@ export function TaskToolbar({
       <div className="flex items-center gap-2">
         {/* View Toggle */}
         {onViewModeChange && (
-          <div className="hidden sm:flex items-center border border-gray-200 dark:border-gray-700 rounded-md">
+          <div className="hidden sm:flex items-center border border-gray-200 dark:border-gray-700 rounded-md" role="group" aria-label="View mode">
             <Button
               variant={viewMode === "list" ? "secondary" : "ghost"}
               size="icon"
               onClick={() => onViewModeChange("list")}
               className="rounded-r-none border-0"
+              aria-label="List view"
+              aria-pressed={viewMode === "list"}
             >
               <List className="h-4 w-4" />
             </Button>
@@ -83,6 +85,8 @@ export function TaskToolbar({
               size="icon"
               onClick={() => onViewModeChange("board")}
               className="rounded-l-none border-0"
+              aria-label="Board view"
+              aria-pressed={viewMode === "board"}
             >
               <Grid className="h-4 w-4" />
             </Button>

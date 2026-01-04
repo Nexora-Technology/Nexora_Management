@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { memo } from "react"
 import { Task } from "./types"
 import { TaskCard } from "./task-card"
 import { BoardLayout, BoardColumn } from "@/components/layout/board-layout"
@@ -11,7 +12,7 @@ interface TaskBoardProps {
   className?: string
 }
 
-export function TaskBoard({ tasks, onTaskClick, className }: TaskBoardProps) {
+export const TaskBoard = memo(function TaskBoard({ tasks, onTaskClick, className }: TaskBoardProps) {
   const tasksByStatus = React.useMemo(() => {
     return {
       todo: tasks.filter((t) => t.status === "todo"),
@@ -52,4 +53,4 @@ export function TaskBoard({ tasks, onTaskClick, className }: TaskBoardProps) {
       </BoardColumn>
     </BoardLayout>
   )
-}
+})

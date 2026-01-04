@@ -1,7 +1,7 @@
 # Code Standards & Development Guidelines
 
 **Last Updated:** 2026-01-05
-**Version:** Phase 04 Complete (View Components - Task Management UI)
+**Version:** Phase 05 Partial Complete (Code Quality & Component Consistency)
 **Document Status:** Active
 
 ## Table of Contents
@@ -296,6 +296,72 @@ export class TaskCard extends React.Component {
   }
 }
 ```
+
+**Shared Constants Pattern:**
+
+```typescript
+// ✅ Good: Centralized constants file for shared values
+// src/components/tasks/constants.ts
+import { TASK_STATUSES, TASK_PRIORITIES, BOARD_COLUMNS } from "@/components/tasks/constants";
+
+// Type-safe with `as const` assertion
+export const TASK_STATUSES = [
+  { value: "todo", label: "To Do" },
+  { value: "inProgress", label: "In Progress" },
+  { value: "complete", label: "Complete" },
+  { value: "overdue", label: "Overdue" },
+] as const;
+
+export const TASK_PRIORITIES = [
+  { value: "urgent", label: "Urgent" },
+  { value: "high", label: "High" },
+  { value: "medium", label: "Medium" },
+  { value: "low", label: "Low" },
+] as const;
+
+export const BOARD_COLUMNS = [
+  { id: "todo", title: "To Do" },
+  { id: "inProgress", title: "In Progress" },
+  { id: "complete", title: "Complete" },
+  { id: "overdue", title: "Overdue" },
+] as const;
+
+// Usage in components
+import { TASK_STATUSES, TASK_PRIORITIES } from "@/components/tasks/constants";
+
+function TaskFilter() {
+  return (
+    <Select>
+      {TASK_STATUSES.map((status) => (
+        <SelectItem key={status.value} value={status.value}>
+          {status.label}
+        </SelectItem>
+      ))}
+    </Select>
+  );
+}
+
+// ❌ Bad: Hardcoded values scattered across components
+function TaskFilter() {
+  return (
+    <Select>
+      <SelectItem value="todo">To Do</SelectItem>
+      <SelectItem value="inProgress">In Progress</SelectItem>
+      <SelectItem value="complete">Complete</SelectItem>
+      <SelectItem value="overdue">Overdue</SelectItem>
+      {/* Duplicated in multiple components */}
+    </Select>
+  );
+}
+```
+
+**Benefits of Shared Constants:**
+- Single source of truth prevents inconsistencies
+- Type-safe with `as const` for readonly arrays
+- Easier to maintain and update
+- Reduces duplication across components
+- Prevents typos in string literals
+- Improves IDE autocomplete suggestions
 
 **State Management:**
 
