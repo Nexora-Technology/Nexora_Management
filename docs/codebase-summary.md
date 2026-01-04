@@ -1,9 +1,9 @@
 # Codebase Summary
 
-**Last Updated:** 2026-01-04
+**Last Updated:** 2026-01-04 22:10
 **Version:** Phase 07 In Progress (Document & Wiki System - 60% Complete)
 **Backend Files:** 144 files
-**Frontend Lines:** ~5,722 lines
+**Frontend Lines:** ~6,200 lines
 
 ## Project Overview
 
@@ -730,6 +730,223 @@ transitionDuration: {
 <input className="clickup-input" placeholder="Enter task name..." />
 <div className="clickup-card">Card content</div>
 ```
+
+---
+
+## ClickUp Components (Phase 02) ✅
+
+**Status:** Complete (2026-01-04)
+**Components:** 6 core component types
+**Variants:** 20+ component variants using CVA (class-variance-authority)
+
+### Component Library
+
+All components use `class-variance-authority` for type-safe variant management and follow ClickUp's visual language.
+
+#### 1. Button Component (`src/components/ui/button.tsx`)
+
+**Variants:** 6 types
+- `primary` - Purple background with shadow and scale transform on hover
+- `secondary` - White background with 2px border
+- `ghost` - Transparent background with gray hover
+- `destructive` - Red for dangerous actions
+- `outline` - Border only with hover fill
+- `link` - Text-only with underline
+
+**Sizes:** 4 options
+- `sm` - 36px height, small text
+- `md` - 40px height, standard (default)
+- `lg` - 44px height, large text
+- `icon` - 40px × 40px square
+
+**Features:**
+- Scale transform on hover (`hover:scale-[1.02]`)
+- Active scale down (`active:scale-[0.98]`)
+- Icon support via children
+- Disabled state styling
+- Full ref forwarding
+
+**Usage:**
+```tsx
+<Button variant="primary" size="md" className="gap-2">
+  <CheckCircle2 className="h-4 w-4" />
+  Complete
+</Button>
+```
+
+#### 2. Badge Component (`src/components/ui/badge.tsx`)
+
+**Status Variants:** 5 types
+- `complete` - Green (emerald-100/700)
+- `inProgress` - Yellow (amber-100/700)
+- `overdue` - Red (red-100/700)
+- `neutral` - Gray (gray-100/700)
+- `default` - Primary purple
+
+**Sizes:** 3 options
+- `sm` - 10px text, compact padding
+- `md` - 12px text, standard (default)
+- `lg` - 14px text, large padding
+
+**Features:**
+- Icon prop support
+- Dark mode variants
+- Semantic status naming
+
+**Usage:**
+```tsx
+<Badge status="complete" icon={<CheckCircle2 className="h-3 w-3" />}>
+  Complete
+</Badge>
+```
+
+#### 3. Input Component (`src/components/ui/input.tsx`)
+
+**Props:**
+- `error?: boolean` - Red border and focus ring when true
+
+**Styling:**
+- 40px height
+- 2px border (gray-200 → error red)
+- Purple focus ring (`ring-primary/20`)
+- Full width by default
+
+**Features:**
+- TypeScript extends HTML input attributes
+- Error state styling
+- Disabled state support
+- Ref forwarding
+
+**Usage:**
+```tsx
+<Input placeholder="Enter your name..." />
+<Input error placeholder="This field has an error" />
+```
+
+#### 4. Textarea Component (`src/components/ui/textarea.tsx`)
+
+**Props:**
+- `error?: boolean` - Red border and focus ring when true
+
+**Styling:**
+- 80px minimum height
+- 2px border (matches Input)
+- Purple focus ring
+- Vertical resize only
+- Full width by default
+
+**Features:**
+- New component (created in Phase 02)
+- Matches Input component styles
+- Error state support
+
+**Usage:**
+```tsx
+<Textarea placeholder="Enter a description..." />
+<Textarea error placeholder="This field has an error" />
+```
+
+#### 5. Avatar Component (`src/components/ui/avatar.tsx`)
+
+**Components:**
+- `Avatar` - Root container
+- `AvatarImage` - Image display
+- `AvatarFallback` - Initials fallback
+
+**Features:**
+- Initials generation (first 2 characters)
+- Hash-based color from 16-color palette
+- Radix UI primitives for accessibility
+- Name prop for automatic initials
+
+**Color Palette:**
+```tsx
+const colors = [
+  "bg-red-500", "bg-orange-500", "bg-amber-500", "bg-yellow-500",
+  "bg-green-500", "bg-emerald-500", "bg-teal-500", "bg-cyan-500",
+  "bg-sky-500", "bg-blue-500", "bg-indigo-500", "bg-violet-500",
+  "bg-purple-500", // ClickUp purple
+  "bg-fuchsia-500", "bg-pink-500", "bg-rose-500",
+]
+```
+
+**Usage:**
+```tsx
+<Avatar>
+  <AvatarImage src="https://..." />
+  <AvatarFallback name="John Doe" /> {/* Shows "JD" */}
+</Avatar>
+```
+
+#### 6. Tooltip Component (`src/components/ui/tooltip.tsx`)
+
+**Components:**
+- `Tooltip` - Provider with mouse events
+- `TooltipTrigger` - Trigger element
+- `TooltipContent` - Dark tooltip content
+
+**Styling:**
+- Dark theme (`bg-gray-900`, `text-white`)
+- 200ms hover delay
+- Zoom/fade animation
+- Rounded corners
+
+**Features:**
+- Mouse enter/leave handling
+- Auto-positioning
+- Controlled/uncontrolled open state
+
+**Usage:**
+```tsx
+<Tooltip delayDuration={200}>
+  <TooltipTrigger asChild>
+    <Button variant="outline">Hover me</Button>
+  </TooltipTrigger>
+  <TooltipContent>This is a helpful tooltip</TooltipContent>
+</Tooltip>
+```
+
+### Component Showcase
+
+**Location:** `/src/app/components/showcase/page.tsx`
+
+Features:
+- All component variants displayed
+- Dark mode toggle
+- Real-world task card example
+- Form element states
+
+**View locally:** `http://localhost:3000/components/showcase`
+
+### Component Files
+
+```
+apps/frontend/src/components/ui/
+├── button.tsx      # 6 variants, 4 sizes (110 lines)
+├── badge.tsx       # 5 status variants, 3 sizes (55 lines)
+├── input.tsx       # Error state support (35 lines)
+├── textarea.tsx    # New component (34 lines)
+├── avatar.tsx      # Initials + colors (92 lines)
+└── tooltip.tsx     # Dark theme (109 lines)
+```
+
+### Dependencies
+
+**New in Phase 02:**
+```json
+{
+  "class-variance-authority": "^0.7.1",
+  "@radix-ui/react-avatar": "^1.1.3"
+}
+```
+
+### TypeScript Types
+
+All components use strict TypeScript with:
+- Forwarded refs (React.forwardRef)
+- Extended HTML attributes
+- CVA variant props (VariantProps)
+- Proper displayName for debugging
 
 ### Tech Stack
 
