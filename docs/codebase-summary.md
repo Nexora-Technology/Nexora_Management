@@ -1,9 +1,31 @@
 # Codebase Summary
 
-**Last Updated:** 2026-01-05
-**Version:** Phase 05A Complete (Performance Optimization & Accessibility)
-**Backend Files:** 144 files
-**Frontend Lines:** ~7,350 lines (+1,100 lines from Phase 04.1, +~50 lines from Phase 05A)
+**Last Updated:** 2026-01-06
+**Version:** Phase 08 Complete (Goal Tracking & OKRs)
+**Backend Files:** 164 files (+20 files from Phase 08)
+**Frontend Lines:** ~7,800 lines (+400 lines from Phase 08)
+
+## Documentation Section
+
+### Component Documentation (Phase 05B)
+
+- **JSDoc Coverage:** 5 public components with comprehensive documentation
+  - `Button` - UI primitive with 6 variants, 4 sizes
+  - `Input` - Form input with error state support
+  - `Card` - Container component with header, content, footer
+  - `TaskCard` - Board view task card with drag handle
+  - `TaskModal` - Create/edit task dialog
+
+- **Component Usage Guide:** `docs/component-usage.md`
+  - Usage examples for all major components
+  - Best practices and patterns
+  - Accessibility guidelines
+  - TypeScript type definitions
+
+- **Route Group Layout:** `src/app/(app)/layout.tsx`
+  - AppLayout wrapper for authenticated routes
+  - Consistent sidebar across all application pages
+  - Improved navigation structure
 
 ## Project Overview
 
@@ -42,7 +64,7 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 
 **Components:**
 
-- **Entities** (21 domain models):
+- **Entities** (24 domain models):
   - `User` - User accounts and authentication
   - `Role` - User roles (Admin, Member, Guest)
   - `Permission` - Granular permissions (Create, Read, Update, Delete)
@@ -65,6 +87,10 @@ Nexora Management is a ClickUp-inspired project management platform built with .
     - `PageVersion` - Page version history for restore capability
     - `PageCollaborator` - Page collaboration with role-based access
     - `PageComment` - Comments on document pages
+  - **NEW Phase 08:**
+    - `GoalPeriod` - Time periods for goal tracking (e.g., Q1 2026, FY 2026)
+    - `Objective` - Objectives with hierarchical structure and progress tracking
+    - `KeyResult` - Measurable key results for objectives
 
 - **Common:**
   - `BaseEntity` - Base entity with Id, CreatedAt, UpdatedAt
@@ -77,8 +103,8 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 **Components:**
 
 - **Persistence** (`/Persistence/`):
-  - `AppDbContext` - EF Core DbContext with 21 DbSets
-  - **Configurations** (25 EF Core configurations):
+  - `AppDbContext` - EF Core DbContext with 24 DbSets
+  - **Configurations** (28 EF Core configurations):
     - `UserConfiguration` - User entity mapping
     - `RoleConfiguration` - Role entity mapping
     - `PermissionConfiguration` - Permission entity mapping
@@ -101,6 +127,8 @@ Nexora Management is a ClickUp-inspired project management platform built with .
       - `PageVersionConfiguration` - Version history with unique constraint
       - `PageCollaboratorConfiguration` - Composite key (PageId + UserId)
       - `PageCommentConfiguration` - Threaded comments on pages
+    - **NEW Phase 08:**
+      - `GoalEntitiesConfiguration` - Goal tracking entities (GoalPeriod, Objective, KeyResult)
 
 - **Interfaces:**
   - `IAppDbContext` - Abstraction for DbContext
@@ -116,7 +144,7 @@ Nexora Management is a ClickUp-inspired project management platform built with .
   - `ApiResponse<T>` - Standardized API response wrapper
   - MediatR setup for CQRS pattern
 
-**CQRS Modules Summary (59 files across 8 feature modules):**
+**CQRS Modules Summary (78 files across 9 feature modules):**
 
 - **Authentication:** 3 Commands, 3 DTOs (9 files)
 - **Authorization:** 4 components (Handler, Provider, Attribute, Requirement) (4 files)
@@ -124,7 +152,8 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 - **Comments:** 3 Commands, 2 Queries, 3 DTOs (8 files)
 - **Attachments:** 2 Commands, 1 Query, 3 DTOs (6 files)
 - **Documents:** 6 Commands, 4 Queries, 7 DTOs (17 files) - Phase 07
-- **Common:** Result patterns, ApiResponse, IUserContext (3 files)
+- **Goals:** 9 Commands, 4 Queries, 9 DTOs (22 files) - Phase 08
+- **Common:** Result patterns, ApiResponse, IUserContext, PagedResult (4 files)
 - **SignalR:** Message DTOs for real-time (3 files)
 
 - **Authentication:**
@@ -152,10 +181,15 @@ Nexora Management is a ClickUp-inspired project management platform built with .
   - **Queries:** GetAttachments
   - **DTOs:** AttachmentDto, UploadAttachmentResponse
 
-- **Documents** (NEW Phase 07):
+- **Documents** (Phase 07):
   - **Commands:** CreatePage, UpdatePage, DeletePage, ToggleFavorite, MovePage, RestorePageVersion
   - **Queries:** GetPageById, GetPageTree, GetPageHistory, SearchPages
   - **DTOs:** PageDto, PageDetailDto, PageTreeNodeDto, PageVersionDto, PageCommentDto, CreatePageRequest, UpdatePageRequest, MovePageRequest, SearchPagesRequest
+
+- **Goals** (NEW Phase 08):
+  - **Commands:** CreatePeriod, UpdatePeriod, DeletePeriod, CreateObjective, UpdateObjective, DeleteObjective, CreateKeyResult, UpdateKeyResult, DeleteKeyResult
+  - **Queries:** GetPeriods, GetObjectives, GetObjectiveTree, GetProgressDashboard
+  - **DTOs:** GoalPeriodDto, ObjectiveDto, KeyResultDto, ObjectiveTreeNodeDto, ProgressDashboardDto, StatusBreakdownDto, ObjectiveSummaryDto, PagedResult<T>
 
 #### 4. API Layer (`/apps/backend/src/Nexora.Management.API/`)
 
@@ -163,12 +197,13 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 
 **Components:**
 
-- **Endpoints:** (5 Minimal API groups)
+- **Endpoints:** (6 Minimal API groups)
   - `AuthEndpoints.cs` - Authentication endpoints at `/api/auth`
   - `TaskEndpoints.cs` - Task CRUD endpoints at `/api/tasks`
   - `CommentEndpoints.cs` - Comment endpoints at `/api/comments`
   - `AttachmentEndpoints.cs` - File attachment endpoints at `/api/attachments`
-  - `DocumentEndpoints.cs` (NEW Phase 07) - Document endpoints at `/api/documents`
+  - `DocumentEndpoints.cs` - Document endpoints at `/api/documents` (Phase 07)
+  - `GoalEndpoints.cs` - Goal tracking endpoints at `/api/goals` (NEW Phase 08)
 
 - **SignalR Hubs:** (3 real-time hubs)
   - `TaskHub` - Task real-time updates (created, updated, deleted, status changed)
@@ -189,12 +224,13 @@ Nexora Management is a ClickUp-inspired project management platform built with .
   - Health check endpoint
   - Welcome endpoint
 
-- **Persistence/Migrations** (6 migration files):
+- **Persistence/Migrations** (7 migration files):
   - `20260103071610_InitialCreate` - Initial schema creation
   - `20260103071738_EnableRowLevelSecurity` - RLS policies
   - `20260103071908_SeedRolesAndPermissions` - Initial data seeding
   - `20260103171029_AddRealtimeCollaborationTables` - Real-time features (presence, notifications)
   - `20260104112014_AddDocumentTables` (Phase 07) - Document/Wiki system tables
+  - `20260105165809_AddGoalTrackingTables` (NEW Phase 08) - Goal tracking tables (GoalPeriod, Objective, KeyResult)
   - `AppDbContextModelSnapshot` - EF Core model snapshot
 
 - **appsettings.json** - Configuration including connection string
@@ -225,6 +261,13 @@ User (1) ────< (N) UserRole >─── (N) Role
                               │         ├───── (N) PageComment ──── (1) ParentComment (self-ref)
                               │         └───── (N) PageCollaborator ──── (1) User
                               │
+                              ├───── (N) GoalPeriod ──── (1) Workspace
+                              │         │
+                              │         └───── (N) Objective ──── (1) ParentObjective (self-ref)
+                              │                   │
+                              │                   ├───── (N) KeyResult
+                              │                   └───── (N) Owner ──── (1) User
+                              │
                               ├───── (N) ActivityLog
                               ├───── (N) Notification ──── (1) User
                               └───── (N) UserPresence ──── (1) User
@@ -245,13 +288,21 @@ Role (1) ────< (N) RolePermission >─── (N) Permission
    - Custom statuses per project
    - Position ordering for drag-and-drop
 
-3. **Row-Level Security (RLS):**
+3. **Goal Tracking & OKRs (NEW Phase 08):**
+   - GoalPeriod for time-based goal tracking (Q1, FY, etc.)
+   - Objective with hierarchical structure (parent-child relationships)
+   - KeyResult with measurable metrics (number, percentage, currency)
+   - Weighted progress calculation (0-100%)
+   - Status tracking (on-track, at-risk, off-track, completed)
+   - Progress dashboard with statistics
+
+4. **Row-Level Security (RLS):**
    - Applied to Tasks, Projects, Comments, Attachments, ActivityLog
    - Policies enforce workspace membership
    - User context set via `set_current_user_id()` function
    - Automatic filtering at database level
 
-4. **Audit Trail:**
+5. **Audit Trail:**
    - ActivityLog tracks all entity changes
    - JSONB storage for flexible change tracking
    - Workspace and user association
@@ -2362,8 +2413,20 @@ apps/frontend/
   - Notification preferences with per-event type toggles
   - Project-based messaging groups for efficiency
   - Auto-reconnect with graceful connection handling
-- [ ] **Phase 07:** Document & Wiki System
-- [ ] **Phase 08:** Goal Tracking & OKRs
+- [x] **Phase 07:** Document & Wiki System
+  - Document endpoints at `/api/documents`
+  - Page tree with hierarchical structure
+  - Version history with restore capability
+  - Page collaboration with role-based access
+- [x] **Phase 08:** Goal Tracking & OKRs
+  - Goal tracking entities (GoalPeriod, Objective, KeyResult)
+  - Goal endpoints at `/api/goals`
+  - Frontend goals feature module with types and API client
+  - Goal components (objective-card, key-result-editor, progress-dashboard, objective-tree)
+  - Goals pages (/goals, /goals/[id])
+  - Progress UI component
+  - Weighted progress calculation
+  - Hierarchical objective structure
 - [ ] **Phase 09:** Time Tracking
 - [ ] **Phase 10:** Dashboards & Reporting
 - [ ] **Phase 11:** Automation & Workflow Engine
@@ -2404,6 +2467,29 @@ apps/frontend/
 - `GET /{attachmentId}/download` - Download file
 - `DELETE /{attachmentId}` - Delete attachment (owner only)
 
+### Goals (NEW Phase 08) (`/api/goals`)
+
+#### Periods
+- `POST /periods` - Create goal period
+- `GET /periods` - Get periods for workspace (with status filter)
+- `PUT /periods/{id}` - Update period
+- `DELETE /periods/{id}` - Delete period
+
+#### Objectives
+- `POST /objectives` - Create objective
+- `GET /objectives` - Get objectives (paginated with filters)
+- `GET /objectives/tree` - Get hierarchical objective tree
+- `PUT /objectives/{id}` - Update objective
+- `DELETE /objectives/{id}` - Delete objective
+
+#### Key Results
+- `POST /keyresults` - Create key result
+- `PUT /keyresults/{id}` - Update key result
+- `DELETE /keyresults/{id}` - Delete key result
+
+#### Dashboard
+- `GET /dashboard` - Get progress dashboard statistics
+
 ## Security Features
 
 - **Path Traversal Protection:** `Path.GetFileName()` sanitization in file uploads
@@ -2415,18 +2501,25 @@ apps/frontend/
 
 ## Next Steps
 
-1. **Phase 07:** Complete Document & Wiki system integration
-   - Apply database migration
-   - Create document routes
-   - Wire frontend to backend API
-   - Add real-time collaboration
-   - Implement slash commands
-2. **Phase 08:** Goal Tracking & OKRs
-3. **Phase 09:** Time Tracking
-4. **Phase 10:** Dashboards & Reporting
+1. **Phase 09:** Time Tracking
+   - Time entry entities and tables
+   - Timer functionality
+   - Time reports and analytics
+2. **Phase 10:** Dashboards & Reporting
+   - Customizable dashboards
+   - Advanced reporting features
+   - Export capabilities
+3. **Phase 11:** Automation & Workflow Engine
+   - Rule-based automation
+   - Webhook integrations
+   - Custom triggers
+4. **Phase 12:** Mobile Responsive Design
+   - Responsive layouts
+   - Touch interactions
+   - Mobile-specific features
 
 ---
 
-**Documentation Version:** 1.3
-**Last Updated:** 2026-01-05
+**Documentation Version:** 1.4
+**Last Updated:** 2026-01-06
 **Maintained By:** Development Team

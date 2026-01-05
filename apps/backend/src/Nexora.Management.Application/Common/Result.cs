@@ -33,3 +33,15 @@ public record Result<T>
     public static Result<T> Success(T value) => new(true, value, null);
     public static Result<T> Failure(string error) => new(false, default, error);
 }
+
+public record PagedResult<T>(
+    List<T> Items,
+    int Total,
+    int Page,
+    int PageSize
+)
+{
+    public int TotalPages => (int)Math.Ceiling(Total / (double)PageSize);
+    public bool HasPrevious => Page > 1;
+    public bool HasNext => Page < TotalPages;
+}

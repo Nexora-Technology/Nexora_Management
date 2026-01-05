@@ -27,6 +27,9 @@ public interface IAppDbContext
     DbSet<Page> Pages { get; }
     DbSet<PageVersion> PageVersions { get; }
     DbSet<PageComment> PageComments { get; }
+    DbSet<GoalPeriod> GoalPeriods { get; }
+    DbSet<Objective> Objectives { get; }
+    DbSet<KeyResult> KeyResults { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 

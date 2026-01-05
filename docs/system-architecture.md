@@ -1,7 +1,7 @@
 # System Architecture
 
-**Last Updated:** 2026-01-05
-**Version:** Phase 05A Complete (Performance Optimization & Accessibility)
+**Last Updated:** 2026-01-06
+**Version:** Phase 08 Complete (Goal Tracking & OKRs)
 
 ## Overview
 
@@ -42,7 +42,7 @@ Nexora Management implements **Clean Architecture** principles with clear separa
 
 ### Components
 
-#### Entities (21 Domain Models)
+#### Entities (24 Domain Models)
 
 All entities inherit from `BaseEntity` which provides:
 
@@ -71,10 +71,13 @@ BaseEntity (abstract)
 ├── UserPresence
 ├── Notification
 ├── NotificationPreference
-├── Page (NEW Phase 07)
-├── PageVersion (NEW Phase 07)
-├── PageCollaborator (NEW Phase 07)
-└── PageComment (NEW Phase 07)
+├── Page (Phase 07)
+├── PageVersion (Phase 07)
+├── PageCollaborator (Phase 07)
+├── PageComment (Phase 07)
+├── GoalPeriod (NEW Phase 08)
+├── Objective (NEW Phase 08)
+└── KeyResult (NEW Phase 08)
 ```
 
 **Key Entities:**
@@ -148,10 +151,34 @@ BaseEntity (abstract)
     - Composite key (PageId + UserId)
     - Workspace membership validation
 
-13. **PageComment** (NEW Phase 07)
+13. **PageComment** (Phase 07)
     - Threaded comments on document pages
     - Self-referencing via `ParentCommentId` for nested replies
     - Similar to Task comments but for pages
+
+14. **GoalPeriod** (NEW Phase 08)
+    - Time periods for goal tracking (e.g., Q1 2026, FY 2026)
+    - Workspace-scoped with start/end dates
+    - Status tracking (active, archived)
+    - Objectives association for period-based goals
+
+15. **Objective** (NEW Phase 08)
+    - Objectives with hierarchical structure (parent-child relationships)
+    - Workspace-scoped with optional period association
+    - Owner assignment to users
+    - Weight-based priority (1-10)
+    - Status tracking (on-track, at-risk, off-track, completed)
+    - Progress percentage (0-100) calculated from weighted average of key results
+    - Position ordering for drag-and-drop
+
+16. **KeyResult** (NEW Phase 08)
+    - Measurable key results for objectives
+    - Metric types: number, percentage, currency
+    - Current and target values for progress tracking
+    - Unit specification (%, $, count, etc.)
+    - Due date for time-bound key results
+    - Progress percentage (0-100) calculated as (CurrentValue / TargetValue) * 100
+    - Weight-based priority for weighted average calculation
 
 #### Common Abstractions
 
@@ -179,7 +206,7 @@ BaseEntity (abstract)
 ```csharp
 public class AppDbContext : DbContext, IAppDbContext
 {
-    // 21 DbSets for all entities
+    // 24 DbSets for all entities
     public DbSet<User> Users => Set<User>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Permission> Permissions => Set<Permission>();
@@ -201,6 +228,9 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<PageVersion> PageVersions => Set<PageVersion>();
     public DbSet<PageCollaborator> PageCollaborators => Set<PageCollaborator>();
     public DbSet<PageComment> PageComments => Set<PageComment>();
+    public DbSet<GoalPeriod> GoalPeriods => Set<GoalPeriod>();
+    public DbSet<Objective> Objectives => Set<Objective>();
+    public DbSet<KeyResult> KeyResults => Set<KeyResult>();
 
     // Auto-audit on SaveChangesAsync
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -256,7 +286,7 @@ public async Task<T> SqlQuerySingleAsync<T>(string sql, params object[] paramete
 - **Permission Queries:** `SqlQuerySingleAsync<bool>` checks user permissions efficiently
 - **Custom Queries:** `SqlQueryRawAsync<T>` for complex database queries
 
-#### EF Core Configurations (25 Files)
+#### EF Core Configurations (28 Files)
 
 Each entity has a dedicated `IEntityTypeConfiguration<T>` implementation:
 
@@ -712,12 +742,26 @@ builder.Services.AddAuthentication()
   - `POST /api/documents/{id}/restore` - Restore version
   - `POST /api/documents/{id}/move` - Move page
   - `GET /api/documents/search` - Search pages
+- **Goal Endpoints (Phase 08):**
+  - `POST /api/goals/periods` - Create goal period
+  - `GET /api/goals/periods` - Get periods for workspace
+  - `PUT /api/goals/periods/{id}` - Update period
+  - `DELETE /api/goals/periods/{id}` - Delete period
+  - `POST /api/goals/objectives` - Create objective
+  - `GET /api/goals/objectives` - Get objectives (paginated)
+  - `GET /api/goals/objectives/tree` - Get hierarchical objective tree
+  - `PUT /api/goals/objectives/{id}` - Update objective
+  - `DELETE /api/goals/objectives/{id}` - Delete objective
+  - `POST /api/goals/keyresults` - Create key result
+  - `PUT /api/goals/keyresults/{id}` - Update key result
+  - `DELETE /api/goals/keyresults/{id}` - Delete key result
+  - `GET /api/goals/dashboard` - Get progress dashboard statistics
 
 #### Database Migrations
 
 **Location:** `/Persistence/Migrations/`
 
-**Six Migration Files:**
+**Seven Migration Files:**
 
 1. **InitialCreate (20260103071610)**
    - Creates all 17 base tables (Users, Roles, Permissions, Workspaces, Projects, Tasks, etc.)
@@ -750,6 +794,14 @@ builder.Services.AddAuthentication()
    - Adds unique constraints on PageId + VersionNumber
    - Adds indexes for workspace, parent page, slug queries
    - Enables RLS on document tables
+
+6. **AddGoalTrackingTables (20260105165809)** (NEW Phase 08)
+   - Creates `goal_periods` table for time-based goal tracking
+   - Creates `objectives` table for hierarchical objectives
+   - Creates `key_results` table for measurable key results
+   - Adds indexes for workspace, period, owner, status queries
+   - Composite indexes for efficient filtering
+   - Foreign key relationships for goal hierarchy
 
 **Model Snapshot:**
 
@@ -1205,6 +1257,6 @@ services:
 
 ---
 
-**Documentation Version:** 1.2
-**Last Updated:** 2026-01-05
+**Documentation Version:** 1.3
+**Last Updated:** 2026-01-06
 **Maintained By:** Development Team

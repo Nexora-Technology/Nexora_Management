@@ -39,6 +39,9 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<Page> Pages => Set<Page>();
     public DbSet<PageVersion> PageVersions => Set<PageVersion>();
     public DbSet<PageComment> PageComments => Set<PageComment>();
+    public DbSet<GoalPeriod> GoalPeriods => Set<GoalPeriod>();
+    public DbSet<Objective> Objectives => Set<Objective>();
+    public DbSet<KeyResult> KeyResults => Set<KeyResult>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -181,6 +181,9 @@ app.MapAttachmentEndpoints();
 // Map Document endpoints
 app.MapDocumentEndpoints();
 
+// Map Goal endpoints
+app.MapGoalEndpoints();
+
 // Map SignalR Hubs
 app.MapHub<TaskHub>("/hubs/tasks");
 app.MapHub<PresenceHub>("/hubs/presence");
