@@ -2,8 +2,20 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Input Component
+ *
+ * Form input with error state support. Extends native HTML input attributes.
+ *
+ * @example
+ * ```tsx
+ * <Input placeholder="Enter name" />
+ * <Input type="email" error={hasError} />
+ * ```
+ */
 export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
+  /** Show error styling (red border) */
   error?: boolean
 }
 

@@ -23,13 +23,44 @@ import {
 import { Task, TaskStatus, TaskPriority } from "./types"
 import { cn } from "@/lib/utils"
 
+/**
+ * TaskModal Component
+ *
+ * Modal dialog for creating/editing tasks with form validation.
+ * Supports title, description, status, priority, and due date fields.
+ *
+ * Features:
+ * - Create/edit modes with pre-filled data
+ * - Form validation (title required)
+ * - Loading state during submission
+ * - Accessible (aria-live announcements, ARIA labels)
+ * - Optimized with React.memo
+ *
+ * @example
+ * ```tsx
+ * <TaskModal
+ *   open={isOpen}
+ *   onOpenChange={setIsOpen}
+ *   mode="create"
+ *   onSubmit={handleCreateTask}
+ *   isLoading={isCreating}
+ * />
+ * ```
+ */
 interface TaskModalProps {
+  /** Whether modal is open */
   open?: boolean
+  /** Callback when modal open state changes */
   onOpenChange?: (open: boolean) => void
+  /** Task data (for edit mode) */
   task?: Task
+  /** Callback when form is submitted */
   onSubmit?: (task: Omit<Task, "id" | "createdAt" | "updatedAt">) => void
+  /** Create or edit mode */
   mode?: "create" | "edit"
+  /** Show loading state on submit button */
   isLoading?: boolean
+  /** Additional CSS classes */
   className?: string
 }
 

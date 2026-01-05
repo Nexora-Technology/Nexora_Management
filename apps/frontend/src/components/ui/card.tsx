@@ -2,6 +2,24 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Card Components
+ *
+ * ClickUp-style card container with header, content, footer subcomponents.
+ * Used for grouping related content with consistent styling.
+ *
+ * @example
+ * ```tsx
+ * <Card>
+ *   <CardHeader>
+ *     <CardTitle>Title</CardTitle>
+ *     <CardDescription>Description</CardDescription>
+ *   </CardHeader>
+ *   <CardContent>Content</CardContent>
+ *   <CardFooter>Actions</CardFooter>
+ * </Card>
+ * ```
+ */
 const Card = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>

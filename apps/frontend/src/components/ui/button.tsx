@@ -4,6 +4,20 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Button Component
+ *
+ * ClickUp-inspired button with multiple variants and sizes.
+ * Supports hover/active scales, shadows, and full keyboard navigation.
+ *
+ * @example
+ * ```tsx
+ * <Button variant="primary" size="md">Click me</Button>
+ * <Button variant="secondary" size="lg">Large Button</Button>
+ * <Button variant="ghost" size="icon"><Icon /></Button>
+ * ```
+ */
+
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
@@ -41,6 +55,14 @@ const buttonVariants = cva(
   }
 )
 
+/**
+ * Props for Button component.
+ *
+ * @extends React.ButtonHTMLAttributes<HTMLButtonElement>
+ * @property {boolean} [asChild=false] - Render as child component (Radix Slot pattern)
+ * @property {'primary'|'secondary'|'ghost'|'destructive'|'outline'|'link'} [variant='primary'] - Visual style variant
+ * @property {'sm'|'md'|'lg'|'icon'} [size='md'] - Button size
+ */
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {

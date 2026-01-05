@@ -9,9 +9,32 @@ import { cn } from "@/lib/utils"
 import { Task } from "./types"
 import { PRIORITY_COLORS, STATUS_LABELS, STATUS_BADGE_VARIANTS } from "./constants"
 
+/**
+ * TaskCard Component
+ *
+ * Kanban-style task card with drag handle, priority indicator, status badge,
+ * assignee avatar, and comment/attachment counts.
+ *
+ * Features:
+ * - Keyboard navigation (Enter/Space to activate)
+ * - Accessible ARIA labels
+ * - Optimized with React.memo (prevents unnecessary re-renders)
+ * - Smooth animations (fade-in, hover scale)
+ *
+ * @example
+ * ```tsx
+ * <TaskCard
+ *   task={task}
+ *   onClick={() => openTaskDetail(task.id)}
+ * />
+ * ```
+ */
 interface TaskCardProps {
+  /** Task data object */
   task: Task
+  /** Click handler (opens task detail/modal) */
   onClick?: () => void
+  /** Additional CSS classes */
   className?: string
 }
 

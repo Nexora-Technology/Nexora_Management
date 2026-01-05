@@ -1,0 +1,117 @@
+
+> @nexora/frontend@0.1.0 build
+> next build
+
+ ⚠ `experimental.typedRoutes` has been moved to `typedRoutes`. Please update your next.config.ts file accordingly.
+ ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of /Users/nhatduyfirst/Documents/Projects/Nexora_Management/package-lock.json as the root directory.
+ To silence this warning, set `outputFileTracingRoot` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/output#caveats for more information.
+ Detected additional lockfiles: 
+   * /Users/nhatduyfirst/Documents/Projects/Nexora_Management/apps/frontend/package-lock.json
+
+   ▲ Next.js 15.5.9
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ✓ typedRoutes
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 1258ms
+   Linting and checking validity of types ...
+
+./src/app/(app)/tasks/board/page.tsx
+26:35  Warning: 'taskData' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(app)/tasks/page.tsx
+42:35  Warning: 'taskData' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/page.tsx
+6:8  Warning: 'Link' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/ui/tooltip.tsx
+14:3  Warning: 'delayDuration' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/features/documents/Toolbar.tsx
+188:11  Warning: Image elements must have an alt prop, either with meaningful text, or an empty string for decorative images.  jsx-a11y/alt-text
+
+./src/features/notifications/NotificationCenter.tsx
+3:20  Warning: 'useEffect' is defined but never used.  @typescript-eslint/no-unused-vars
+16:16  Warning: 'Trash2' is defined but never used.  @typescript-eslint/no-unused-vars
+16:24  Warning: 'Check' is defined but never used.  @typescript-eslint/no-unused-vars
+43:3  Warning: 'onDelete' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/features/tasks/TaskDetailWithRealtime.tsx
+43:23  Warning: 'setTypingUsers' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/features/tasks/ViewingAvatars.tsx
+49:19  Warning: Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+./src/features/views/board/BoardView.tsx
+22:10  Warning: 'restrictToVerticalAxis' is defined but never used.  @typescript-eslint/no-unused-vars
+139:29  Warning: 'projectId' is defined but never used.  @typescript-eslint/no-unused-vars
+157:28  Warning: 'event' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/features/views/board/BoardViewWithRealtime.tsx
+18:10  Warning: 'tasks' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+19:23  Warning: 'setTypingUsers' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/features/views/calendar/CalendarView.tsx
+12:11  Warning: 'CalendarTask' is defined but never used.  @typescript-eslint/no-unused-vars
+16:32  Warning: 'projectId' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/features/views/gantt/GanttView.tsx
+20:29  Warning: 'projectId' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/features/views/list/ListView.tsx
+17:28  Warning: 'projectId' is defined but never used.  @typescript-eslint/no-unused-vars
+18:17  Warning: 'setTasks' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/features/views/list/ListViewWithRealtime.tsx
+18:10  Warning: 'tasks' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+19:23  Warning: 'setTypingUsers' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/hooks/signalr/usePresenceHub.ts
+3:15  Warning: 'UserPresenceMessage' is defined but never used.  @typescript-eslint/no-unused-vars
+118:60  Warning: 'viewType' is defined but never used.  @typescript-eslint/no-unused-vars
+127:61  Warning: 'viewType' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/hooks/signalr/useTaskHub.ts
+103:36  Warning: '_callback' is defined but never used.  @typescript-eslint/no-unused-vars
+107:38  Warning: '_callback' is defined but never used.  @typescript-eslint/no-unused-vars
+111:38  Warning: '_callback' is defined but never used.  @typescript-eslint/no-unused-vars
+115:42  Warning: '_callback' is defined but never used.  @typescript-eslint/no-unused-vars
+119:41  Warning: '_callback' is defined but never used.  @typescript-eslint/no-unused-vars
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/13) ...
+   Generating static pages (3/13) 
+   Generating static pages (6/13) 
+   Generating static pages (9/13) 
+ ✓ Generating static pages (13/13)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                    2.42 kB         114 kB
+├ ○ /_not-found                            990 B         103 kB
+├ ○ /components/showcase                 6.51 kB         118 kB
+├ ○ /dashboard                           1.93 kB         113 kB
+├ ○ /forgot-password                       120 B         102 kB
+├ ○ /login                               2.67 kB         117 kB
+├ ƒ /projects/[id]                       27.9 kB         139 kB
+├ ○ /register                            2.74 kB         117 kB
+├ ○ /tasks                               16.7 kB         166 kB
+├ ƒ /tasks/[id]                          3.16 kB         156 kB
+├ ○ /tasks/board                           734 B         150 kB
+├ ○ /workspaces                            163 B         106 kB
+└ ƒ /workspaces/[id]/projects              163 B         106 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/18-1d63ee0134f9e01b.js          46 kB
+  ├ chunks/87c73c54-24122e7b92478d00.js  54.2 kB
+  └ other shared chunks (total)          1.92 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
