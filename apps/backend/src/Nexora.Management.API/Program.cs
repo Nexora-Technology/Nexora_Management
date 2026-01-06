@@ -184,6 +184,11 @@ app.MapDocumentEndpoints();
 // Map Goal endpoints
 app.MapGoalEndpoints();
 
+// Map ClickUp Hierarchy endpoints
+app.MapSpaceEndpoints();
+app.MapFolderEndpoints();
+app.MapTaskListEndpoints();
+
 // Map SignalR Hubs
 app.MapHub<TaskHub>("/hubs/tasks");
 app.MapHub<PresenceHub>("/hubs/presence");

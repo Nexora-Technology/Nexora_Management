@@ -30,6 +30,9 @@ public interface IAppDbContext
     DbSet<GoalPeriod> GoalPeriods { get; }
     DbSet<Objective> Objectives { get; }
     DbSet<KeyResult> KeyResults { get; }
+    DbSet<Space> Spaces { get; }
+    DbSet<Folder> Folders { get; }
+    DbSet<TaskList> TaskLists { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 

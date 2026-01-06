@@ -177,6 +177,59 @@ namespace Nexora.Management.API.Persistence.Migrations
                     b.ToTable("Comments", (string)null);
                 });
 
+            modelBuilder.Entity("Nexora.Management.Domain.Entities.Folder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v4()");
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Icon")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("PositionOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.Property<Dictionary<string, object>>("SettingsJsonb")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("SpaceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SpaceId")
+                        .HasDatabaseName("idx_folders_space");
+
+                    b.HasIndex("SpaceId", "PositionOrder")
+                        .IsUnique()
+                        .HasDatabaseName("uq_folders_space_position");
+
+                    b.ToTable("Folders", (string)null);
+                });
+
             modelBuilder.Entity("Nexora.Management.Domain.Entities.GoalPeriod", b =>
                 {
                     b.Property<Guid>("Id")
@@ -939,6 +992,55 @@ namespace Nexora.Management.API.Persistence.Migrations
                     b.ToTable("RolePermissions", (string)null);
                 });
 
+            modelBuilder.Entity("Nexora.Management.Domain.Entities.Space", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v4()");
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Icon")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("IsPrivate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Dictionary<string, object>>("SettingsJsonb")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WorkspaceId")
+                        .HasDatabaseName("idx_spaces_workspace");
+
+                    b.ToTable("Spaces", (string)null);
+                });
+
             modelBuilder.Entity("Nexora.Management.Domain.Entities.Task", b =>
                 {
                     b.Property<Guid>("Id")
@@ -996,6 +1098,9 @@ namespace Nexora.Management.API.Persistence.Migrations
                     b.Property<Guid?>("StatusId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("TaskListId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -1031,10 +1136,91 @@ namespace Nexora.Management.API.Persistence.Migrations
                     b.HasIndex("StatusId")
                         .HasDatabaseName("idx_tasks_status");
 
+                    b.HasIndex("TaskListId")
+                        .HasDatabaseName("idx_tasks_tasklist");
+
                     b.HasIndex("ProjectId", "StatusId", "PositionOrder")
                         .HasDatabaseName("idx_tasks_list");
 
                     b.ToTable("Tasks", (string)null);
+                });
+
+            modelBuilder.Entity("Nexora.Management.Domain.Entities.TaskList", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v4()");
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("FolderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Icon")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("ListType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("task");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<Guid>("OwnerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("PositionOrder")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.Property<Dictionary<string, object>>("SettingsJsonb")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<Guid>("SpaceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("active");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FolderId")
+                        .HasDatabaseName("idx_tasklists_folder");
+
+                    b.HasIndex("OwnerId");
+
+                    b.HasIndex("SpaceId")
+                        .HasDatabaseName("idx_tasklists_space_active")
+                        .HasFilter("status = 'active'");
+
+                    b.HasIndex("SpaceId", "FolderId", "PositionOrder")
+                        .HasDatabaseName("idx_tasklists_position");
+
+                    b.ToTable("TaskLists", (string)null);
                 });
 
             modelBuilder.Entity("Nexora.Management.Domain.Entities.TaskStatus", b =>
@@ -1066,6 +1252,9 @@ namespace Nexora.Management.API.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("uuid_generate_v4()");
 
+                    b.Property<Guid>("TaskListId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -1078,8 +1267,15 @@ namespace Nexora.Management.API.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TaskListId")
+                        .HasDatabaseName("idx_taskstatuses_tasklist");
+
                     b.HasIndex("ProjectId", "OrderIndex")
                         .IsUnique();
+
+                    b.HasIndex("TaskListId", "OrderIndex")
+                        .IsUnique()
+                        .HasDatabaseName("uq_taskstatuses_tasklist_order");
 
                     b.ToTable("TaskStatuses", (string)null);
                 });
@@ -1346,6 +1542,17 @@ namespace Nexora.Management.API.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Nexora.Management.Domain.Entities.Folder", b =>
+                {
+                    b.HasOne("Nexora.Management.Domain.Entities.Space", "Space")
+                        .WithMany("Folders")
+                        .HasForeignKey("SpaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Space");
+                });
+
             modelBuilder.Entity("Nexora.Management.Domain.Entities.GoalPeriod", b =>
                 {
                     b.HasOne("Nexora.Management.Domain.Entities.Workspace", "Workspace")
@@ -1576,6 +1783,17 @@ namespace Nexora.Management.API.Persistence.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("Nexora.Management.Domain.Entities.Space", b =>
+                {
+                    b.HasOne("Nexora.Management.Domain.Entities.Workspace", "Workspace")
+                        .WithMany("Spaces")
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Workspace");
+                });
+
             modelBuilder.Entity("Nexora.Management.Domain.Entities.Task", b =>
                 {
                     b.HasOne("Nexora.Management.Domain.Entities.User", "Assignee")
@@ -1605,6 +1823,12 @@ namespace Nexora.Management.API.Persistence.Migrations
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Nexora.Management.Domain.Entities.TaskList", "TaskList")
+                        .WithMany("Tasks")
+                        .HasForeignKey("TaskListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Assignee");
 
                     b.Navigation("Creator");
@@ -1614,6 +1838,34 @@ namespace Nexora.Management.API.Persistence.Migrations
                     b.Navigation("Project");
 
                     b.Navigation("Status");
+
+                    b.Navigation("TaskList");
+                });
+
+            modelBuilder.Entity("Nexora.Management.Domain.Entities.TaskList", b =>
+                {
+                    b.HasOne("Nexora.Management.Domain.Entities.Folder", "Folder")
+                        .WithMany("TaskLists")
+                        .HasForeignKey("FolderId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Nexora.Management.Domain.Entities.User", "Owner")
+                        .WithMany("OwnedTaskLists")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Nexora.Management.Domain.Entities.Space", "Space")
+                        .WithMany("TaskLists")
+                        .HasForeignKey("SpaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Folder");
+
+                    b.Navigation("Owner");
+
+                    b.Navigation("Space");
                 });
 
             modelBuilder.Entity("Nexora.Management.Domain.Entities.TaskStatus", b =>
@@ -1624,7 +1876,15 @@ namespace Nexora.Management.API.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Nexora.Management.Domain.Entities.TaskList", "TaskList")
+                        .WithMany("TaskStatuses")
+                        .HasForeignKey("TaskListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Project");
+
+                    b.Navigation("TaskList");
                 });
 
             modelBuilder.Entity("Nexora.Management.Domain.Entities.UserPresence", b =>
@@ -1716,6 +1976,11 @@ namespace Nexora.Management.API.Persistence.Migrations
                     b.Navigation("Replies");
                 });
 
+            modelBuilder.Entity("Nexora.Management.Domain.Entities.Folder", b =>
+                {
+                    b.Navigation("TaskLists");
+                });
+
             modelBuilder.Entity("Nexora.Management.Domain.Entities.GoalPeriod", b =>
                 {
                     b.Navigation("Objectives");
@@ -1763,6 +2028,13 @@ namespace Nexora.Management.API.Persistence.Migrations
                     b.Navigation("UserRoles");
                 });
 
+            modelBuilder.Entity("Nexora.Management.Domain.Entities.Space", b =>
+                {
+                    b.Navigation("Folders");
+
+                    b.Navigation("TaskLists");
+                });
+
             modelBuilder.Entity("Nexora.Management.Domain.Entities.Task", b =>
                 {
                     b.Navigation("Attachments");
@@ -1770,6 +2042,13 @@ namespace Nexora.Management.API.Persistence.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("Subtasks");
+                });
+
+            modelBuilder.Entity("Nexora.Management.Domain.Entities.TaskList", b =>
+                {
+                    b.Navigation("TaskStatuses");
+
+                    b.Navigation("Tasks");
                 });
 
             modelBuilder.Entity("Nexora.Management.Domain.Entities.TaskStatus", b =>
@@ -1789,6 +2068,8 @@ namespace Nexora.Management.API.Persistence.Migrations
 
                     b.Navigation("OwnedProjects");
 
+                    b.Navigation("OwnedTaskLists");
+
                     b.Navigation("OwnedWorkspaces");
 
                     b.Navigation("RefreshTokens");
@@ -1805,6 +2086,8 @@ namespace Nexora.Management.API.Persistence.Migrations
                     b.Navigation("Members");
 
                     b.Navigation("Projects");
+
+                    b.Navigation("Spaces");
 
                     b.Navigation("UserRoles");
                 });
