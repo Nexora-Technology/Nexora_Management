@@ -19,6 +19,11 @@ public class TaskStatusConfiguration : IEntityTypeConfiguration<TaskStatusEntity
         builder.Property(ts => ts.ProjectId)
             .HasDefaultValueSql("uuid_generate_v4()");
 
+        // NEW: TaskListId for ClickUp hierarchy migration
+        // TODO: After migration, remove ProjectId and keep only TaskListId
+        builder.Property(ts => ts.TaskListId)
+            .IsRequired();
+
         builder.Property(ts => ts.Name)
             .IsRequired()
             .HasMaxLength(50);
@@ -37,9 +42,25 @@ public class TaskStatusConfiguration : IEntityTypeConfiguration<TaskStatusEntity
         builder.HasIndex(ts => new { ts.ProjectId, ts.OrderIndex })
             .IsUnique();
 
+        // NEW: Unique index on TaskListId + OrderIndex to ensure uniqueness per TaskList
+        builder.HasIndex(ts => new { ts.TaskListId, ts.OrderIndex })
+            .IsUnique()
+            .HasDatabaseName("uq_taskstatuses_tasklist_order");
+
+        // NEW: Index for TaskList (ClickUp hierarchy)
+        builder.HasIndex(ts => ts.TaskListId)
+            .HasDatabaseName("idx_taskstatuses_tasklist");
+
         builder.HasOne(ts => ts.Project)
             .WithMany(p => p.TaskStatuses)
             .HasForeignKey(ts => ts.ProjectId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // NEW: TaskList relationship (ClickUp hierarchy)
+        // TODO: After migration, remove Project relationship and keep only TaskList
+        builder.HasOne(ts => ts.TaskList)
+            .WithMany(tl => tl.TaskStatuses)
+            .HasForeignKey(ts => ts.TaskListId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -28,6 +28,9 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Project> Projects => Set<Project>();
+    public DbSet<Space> Spaces => Set<Space>(); // NEW: ClickUp hierarchy
+    public DbSet<Folder> Folders => Set<Folder>(); // NEW: ClickUp hierarchy
+    public DbSet<TaskList> TaskLists => Set<TaskList>(); // NEW: ClickUp hierarchy (Lists)
     public DbSet<TaskStatusEntity> TaskStatuses => Set<TaskStatusEntity>();
     public DbSet<TaskEntity> Tasks => Set<TaskEntity>();
     public DbSet<Comment> Comments => Set<Comment>();

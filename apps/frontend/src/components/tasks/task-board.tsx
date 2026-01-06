@@ -9,7 +9,7 @@ import {
   DragStartEvent,
   KeyboardSensor,
   PointerSensor,
-  closestCenter,
+  pointerWithin,
   useSensor,
   useSensors,
   useDroppable,
@@ -89,11 +89,13 @@ export const TaskBoard = memo(function TaskBoard({
 }: TaskBoardProps) {
   const [activeTask, setActiveTask] = useState<Task | null>(null)
   const [taskList, setTaskList] = useState<Task[]>(tasks)
+  const [isDragging, setIsDragging] = useState(false)
 
   // Update local state when tasks prop changes
   React.useEffect(() => {
+    if (isDragging) return
     setTaskList(tasks)
-  }, [tasks])
+  }, [tasks, isDragging])
 
   const tasksByStatus = React.useMemo(() => {
     const result: { todo: Task[]; inProgress: Task[]; complete: Task[]; overdue: Task[] } = {
@@ -145,26 +147,28 @@ export const TaskBoard = memo(function TaskBoard({
     const task = taskList.find((t) => t.id === active.id)
     if (task) {
       setActiveTask(task)
+      setIsDragging(true)
     }
   }, [taskList])
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
     const { active, over } = event
     setActiveTask(null)
+    setIsDragging(false)
 
     if (!over) return
 
     const activeId = active.id as string
     const overId = over.id as string
-    const overData = over.data.current
 
     // Find the active task
     const activeTask = taskList.find((t) => t.id === activeId)
     if (!activeTask) return
 
     // Check if dropped over a column (status change)
-    if (overData?.type === "column") {
-      const newStatus = overData.status as Task["status"]
+    // Column IDs are prefixed with "column-"
+    if (overId.toString().startsWith("column-")) {
+      const newStatus = overId.toString().replace("column-", "") as Task["status"]
       if (activeTask.status !== newStatus) {
         // Update task status
         const updatedTasks = taskList.map((t) =>
@@ -196,7 +200,7 @@ export const TaskBoard = memo(function TaskBoard({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={pointerWithin}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >

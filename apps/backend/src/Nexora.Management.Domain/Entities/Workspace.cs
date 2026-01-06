@@ -12,6 +12,7 @@ public class Workspace : BaseEntity
     public User Owner { get; set; } = null!;
     public ICollection<WorkspaceMember> Members { get; set; } = new List<WorkspaceMember>();
     public ICollection<Project> Projects { get; set; } = new List<Project>();
+    public ICollection<Space> Spaces { get; set; } = new List<Space>(); // NEW: ClickUp hierarchy
     public ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
     public ICollection<ActivityLog> ActivityLogs { get; set; } = new List<ActivityLog>();
 }

@@ -15,6 +15,7 @@ public class User : BaseEntity
     public ICollection<Workspace> OwnedWorkspaces { get; set; } = new List<Workspace>();
     public ICollection<WorkspaceMember> WorkspaceMemberships { get; set; } = new List<WorkspaceMember>();
     public ICollection<Project> OwnedProjects { get; set; } = new List<Project>();
+    public ICollection<TaskList> OwnedTaskLists { get; set; } = new List<TaskList>(); // NEW: ClickUp hierarchy
     public ICollection<Task> AssignedTasks { get; set; } = new List<Task>();
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     public ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
