@@ -9,10 +9,11 @@ A powerful, ClickUp-inspired project management platform built with modern techn
 - **Next.js 15** - React framework with App Router
 - **TypeScript** - Type-safe development
 - **Tailwind CSS** - Utility-first styling
-- **shadcn/ui** - High-quality React components
+- **shadcn/ui** - High-quality React components (18 components integrated)
 - **Zustand** - Lightweight state management
-- **React Query** - Data fetching and caching
-- **SignalR** - Real-time communication
+- **React Query** - Data fetching and caching (@tanstack/react-table)
+- **SignalR** - Real-time communication (@microsoft/signalr)
+- **@dnd-kit** - Drag and drop functionality (core, modifiers, sortable, utilities)
 
 ### Backend
 
@@ -215,64 +216,85 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [x] Project setup and architecture
 - [x] Authentication & authorization (JWT, permissions, RLS)
 - [x] Core workspace functionality
-- [x] Task management (CRUD, hierarchy, multiple views)
+- [x] Task management (CRUD, hierarchy, multiple views, drag-and-drop)
 - [x] Real-time updates via SignalR
 - [x] File attachments
 - [x] Comments and collaboration
-- [ ] Document & Wiki system (60% complete)
+- [x] Document & Wiki system (100% complete)
+- [x] Goal tracking & OKRs (100% complete)
 - [ ] Advanced filtering and search
 - [ ] Mobile responsive design
 - [ ] Performance optimization
 - [ ] Deployment to production
 
-## Current Phase: ClickUp Design System Polish (Phase 05B - Complete) ✅
+## Current Phase: Goal Tracking & OKRs (Phase 08 - Complete) ✅
 
-### Documentation Improvements ✅
+### Phase 08 Achievements ✅
 
-- **JSDoc Documentation:** 5 public components fully documented
-  - Button, Input, Card (UI primitives)
-  - TaskCard, TaskModal (Task components)
-  - Comprehensive parameter descriptions
-  - Usage examples and type definitions
+- **Goal Tracking System:**
+  - GoalPeriod entities for time-based tracking (Q1, Q2, FY, etc.)
+  - Objective entities with hierarchical structure (3 levels max)
+  - KeyResult entities with measurable metrics (number, percentage, currency)
+  - Weighted average progress calculation
+  - Auto-status calculation (on-track/at-risk/off-track)
+  - Progress dashboard with analytics
 
-- **Component Usage Guide:** New documentation file
-  - Location: `docs/component-usage.md`
-  - Examples for all major components
-  - Best practices and patterns
-  - Accessibility guidelines
+- **Frontend Components:**
+  - ObjectiveCard component for displaying objectives
+  - KeyResultEditor for editing key results
+  - ProgressDashboard for visual analytics
+  - ObjectiveTree for hierarchical view
+  - Goals pages (list and detail views)
 
-- **Sidebar Integration:** Route group layout fix
-  - New: `src/app/(app)/layout.tsx`
-  - AppLayout wrapper for authenticated routes
-  - Consistent sidebar across all pages
+- **API Endpoints:**
+  - 12 goal tracking endpoints (periods, objectives, key results, dashboard)
+  - RESTful API design with CQRS pattern
+  - Proper error handling and validation
 
-### Phase 05A Achievements ✅
+- **Database:**
+  - 3 new tables (goal_periods, objectives, key_results)
+  - 8 indexes for performance
+  - Foreign key relationships for data integrity
 
-- **React.memo Implementation:** 4 task components optimized
-  - TaskCard, TaskRow, TaskBoard, TaskModal
-  - 75% reduction in unnecessary re-renders
+### Recent Improvements (January 2026) ✅
 
-- **Algorithm Optimization:** Single-pass tasksByStatus grouping
-  - Reduced from O(n×4) to O(n) complexity
-  - Improved board view performance significantly
+- **Drag and Drop Functionality:**
+  - Fixed Kanban board drag and drop
+  - Tasks can be dragged anywhere on the card
+  - Tasks can be dragged between columns to change status
+  - Added @dnd-kit/core 6.3.1, @dnd-kit/modifiers 9.0.0, @dnd-kit/sortable 10.0.0, @dnd-kit/utilities 3.2.2
 
-- **Accessibility Enhancements:** WCAG 2.1 AA compliance
-  - aria-live regions for dynamic content
-  - ARIA labels for interactive elements
-  - Screen reader support improved
+### Next Phase 📋
+
+**Phase 09:** Time Tracking
+
+- Time entry entities and tables
+- Timer functionality
+- Time reports and analytics
+
+### Previous Achievements ✅
+
+**Phase 05B (ClickUp Design System Polish):** Complete ✅
+
+- Documentation: 5 components with JSDoc
+- Component usage guide
+- Sidebar integration via route group layout
+
+**Phase 05A (Performance & Accessibility):** Complete ✅
+
+- 75% reduction in unnecessary re-renders
+- Single-pass algorithm (O(n) complexity)
+- aria-live regions (WCAG 2.1 AA compliant)
+- ARIA labels for interactive elements
+- Code Review: 8.5/10
 
 ### Build Status ✅
 
 - TypeScript compilation: Passed
+- Backend: 0 errors, 24 warnings (pre-existing)
+- Frontend: 0 TypeScript errors
 - Code review: 8.5/10
-- Commit: a145c08 (2026-01-05)
-
-### Next Phase 📋
-
-**Phase 07:** Document & Wiki System (60% Complete)
-- Backend: 100% complete (entities, CQRS, endpoints)
-- Frontend: 100% complete (7 components with TipTap editor)
-- Integration: Pending (migration, routes, API wiring)
+- Commit: Latest (2026-01-06)
 
 ## Support
 
