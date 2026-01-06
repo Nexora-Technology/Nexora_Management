@@ -24,6 +24,7 @@ import { PRIORITY_COLORS, STATUS_LABELS } from "@/components/tasks/constants"
 
 export default function TasksPage() {
   const [viewMode, setViewMode] = React.useState<ViewMode>("list")
+  const [tasks, setTasks] = React.useState<Task[]>(mockTasks)
   const [selectedTasks, setSelectedTasks] = React.useState<Set<string>>(new Set())
   const [isModalOpen, setIsModalOpen] = React.useState(false)
   const [editingTask, setEditingTask] = React.useState<Task | undefined>()
@@ -48,9 +49,25 @@ export default function TasksPage() {
     setIsModalOpen(false)
   }
 
+  const handleTaskStatusChange = (taskId: string, newStatus: Task["status"]) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === taskId ? { ...task, status: newStatus } : task
+      )
+    )
+    // TODO: Sync with backend API
+    console.log(`Task ${taskId} status changed to ${newStatus}`)
+  }
+
+  const handleTaskReorder = (newTasks: Task[]) => {
+    setTasks(newTasks)
+    // TODO: Sync with backend API
+    console.log("Tasks reordered")
+  }
+
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedTasks(new Set(mockTasks.map((t) => t.id)))
+      setSelectedTasks(new Set(tasks.map((t) => t.id)))
     } else {
       setSelectedTasks(new Set())
     }
@@ -160,7 +177,7 @@ export default function TasksPage() {
   ]
 
   const table = useReactTable({
-    data: mockTasks,
+    data: tasks,
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
@@ -238,17 +255,22 @@ export default function TasksPage() {
 
         {/* Board View */}
         {viewMode === "board" && (
-          <TaskBoard tasks={mockTasks} onTaskClick={handleEditTask} />
+          <TaskBoard
+            tasks={tasks}
+            onTaskClick={handleEditTask}
+            onTaskStatusChange={handleTaskStatusChange}
+            onTaskReorder={handleTaskReorder}
+          />
         )}
 
         {/* Calendar View */}
         {viewMode === "calendar" && (
-          <TaskCalendar tasks={mockTasks} onTaskClick={handleEditTask} />
+          <TaskCalendar tasks={tasks} onTaskClick={handleEditTask} />
         )}
 
         {/* Gantt View */}
         {viewMode === "gantt" && (
-          <TaskGantt tasks={mockTasks} onTaskClick={handleEditTask} />
+          <TaskGantt tasks={tasks} onTaskClick={handleEditTask} />
         )}
       </div>
 

@@ -30,6 +30,7 @@ interface BoardColumnProps {
   count?: number
   children: React.ReactNode
   className?: string
+  id?: string
 }
 
 export function BoardColumn({
@@ -37,9 +38,11 @@ export function BoardColumn({
   count,
   children,
   className,
+  id,
 }: BoardColumnProps) {
   return (
     <div
+      id={id}
       className={cn(
         "w-[280px] flex-shrink-0 snap-start",
         className
