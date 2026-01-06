@@ -1,7 +1,7 @@
 # System Architecture
 
-**Last Updated:** 2026-01-06
-**Version:** Phase 08 Complete (Goal Tracking & OKRs)
+**Last Updated:** 2026-01-07
+**Version:** Phase 09 In Progress (ClickUp Hierarchy - Phase 5 Complete)
 
 ## Overview
 
@@ -40,9 +40,144 @@ Nexora Management implements **Clean Architecture** principles with clear separa
 
 **Purpose:** Contains core business logic and enterprise rules. This layer has no dependencies on external frameworks or databases.
 
+### Frontend Domain Models (Phase 09 - Phase 5)
+
+**Location:** `/apps/frontend/src/features/spaces/types.ts`
+
+**Purpose:** TypeScript type definitions mirroring backend domain entities for ClickUp hierarchy
+
+**Type Definitions:**
+
+```typescript
+// Space Types - First organizational level under Workspace
+interface Space {
+  id: string;
+  workspaceId: string;
+  name: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  isPrivate: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CreateSpaceRequest {
+  workspaceId: string;
+  name: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  isPrivate?: boolean;
+}
+
+interface UpdateSpaceRequest {
+  name?: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  isPrivate?: boolean;
+}
+
+// Folder Types - Optional grouping container for Lists
+interface Folder {
+  id: string;
+  spaceId: string;
+  name: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  positionOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CreateFolderRequest {
+  spaceId: string;
+  name: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+}
+
+interface UpdateFolderRequest {
+  name?: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+}
+
+interface UpdateFolderPositionRequest {
+  positionOrder: number;
+}
+
+// TaskList Types - Mandatory container for Tasks
+interface TaskList {
+  id: string;
+  spaceId: string;
+  folderId?: string;
+  name: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  listType: 'task' | 'project' | 'team' | 'campaign';
+  status: string;
+  ownerId: string;
+  positionOrder: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CreateTaskListRequest {
+  spaceId: string;
+  folderId?: string;
+  name: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  listType?: string;
+  ownerId?: string;
+}
+
+interface UpdateTaskListRequest {
+  name?: string;
+  description?: string;
+  color?: string;
+  icon?: string;
+  status?: string;
+}
+
+interface UpdateTaskListPositionRequest {
+  positionOrder: number;
+}
+
+// Tree Navigation Types - Hierarchical UI structure
+type SpaceTreeNodeType = 'space' | 'folder' | 'tasklist';
+
+interface SpaceTreeNode {
+  id: string;
+  name: string;
+  type: SpaceTreeNodeType;
+  spaceId?: string;
+  folderId?: string;
+  children?: SpaceTreeNode[];
+  color?: string;
+  icon?: string;
+  listType?: string;
+}
+```
+
+**Design Principles:**
+
+- **Type Safety:** Full TypeScript coverage for all entities
+- **API Parity:** Create/Update request types match backend DTOs
+- **Tree Structure:** SpaceTreeNode enables hierarchical UI rendering
+- **Optional Fields:** Proper handling of nullable fields with `?`
+- **Enum Types:** ListType restricted to specific values for type safety
+
 ### Components
 
-#### Entities (24 Domain Models)
+#### Entities (27 Domain Models)
 
 All entities inherit from `BaseEntity` which provides:
 
@@ -62,7 +197,10 @@ BaseEntity (abstract)
 ├── RefreshToken
 ├── Workspace
 ├── WorkspaceMember (join table)
-├── Project
+├── Project (DEPRECATED - migrating to TaskList)
+├── Space (NEW Phase 09)
+├── Folder (NEW Phase 09)
+├── TaskList (NEW Phase 09)
 ├── Task
 ├── TaskStatus
 ├── Comment
@@ -75,34 +213,61 @@ BaseEntity (abstract)
 ├── PageVersion (Phase 07)
 ├── PageCollaborator (Phase 07)
 ├── PageComment (Phase 07)
-├── GoalPeriod (NEW Phase 08)
-├── Objective (NEW Phase 08)
-└── KeyResult (NEW Phase 08)
+├── GoalPeriod (Phase 08)
+├── Objective (Phase 08)
+└── KeyResult (Phase 08)
 ```
 
 **Key Entities:**
 
 1. **User**
    - Authentication and user profile
-   - Relationships: Workspaces (owned), Projects (owned), Tasks (assigned), Comments, Attachments
+   - Relationships: Workspaces (owned), TaskLists (owned), Tasks (assigned), Comments, Attachments
 
 2. **Workspace**
    - Top-level container for multi-tenancy
    - JSONB settings for flexible configuration
    - Owner and members relationship
+   - Spaces collection (NEW Phase 09)
 
-3. **Project**
+3. **Space** (NEW Phase 09)
+   - First organizational level under Workspace in ClickUp-style hierarchy
+   - Organizes work by: departments, teams, clients, or high-level initiatives
+   - Properties: Name, Description, Color, Icon, IsPrivate, SettingsJsonb
+   - Relationships: Parent Workspace, Folders, TaskLists
+   - Independent settings per Space
+
+4. **Folder** (NEW Phase 09)
+   - Optional grouping container for Lists within a Space
+   - Single-level only (no sub-folders)
+   - Properties: Name, Description, Color, Icon, PositionOrder, SettingsJsonb
+   - Relationships: Parent Space, TaskLists
+   - Position ordering for drag-and-drop
+
+5. **TaskList** (NEW Phase 09)
+   - Mandatory container for Tasks in ClickUp-style hierarchy
+   - Display name in UI: "List"
+   - Can exist directly under Spaces or within Folders
+   - Properties: Name, Description, Color, Icon, ListType, Status, OwnerId, PositionOrder, SettingsJsonb
+   - ListType examples: "task", "project", "team", "campaign", "milestone"
+   - Relationships: Parent Space, optional parent Folder, Owner, Tasks, TaskStatuses
+   - Every Task MUST belong to a TaskList (no orphaned tasks)
+
+6. **Project** (DEPRECATED - Migrating to TaskList)
    - Workspace-scoped project management
    - Properties: Name, Description, Color, Icon, Status
    - Tasks and TaskStatus relationships
+   - NOTE: Being replaced by TaskList in Phase 09
 
-4. **Task**
+7. **Task**
    - Hierarchical tasks (parent-child via `ParentTaskId`)
    - Flexible scheduling (StartDate, DueDate)
    - Time tracking (EstimatedHours)
    - Priority levels (low, medium, high, urgent)
    - JSONB custom fields for extensibility
    - Position ordering for drag-and-drop
+   - NEW: TaskListId (references TaskList in ClickUp hierarchy)
+   - DEPRECATED: ProjectId (kept for migration compatibility)
 
 5. **Comment**
    - Threaded comments (self-referencing via `ParentCommentId`)
@@ -130,7 +295,7 @@ BaseEntity (abstract)
    - In-app vs email preferences
    - Quiet hours configuration
 
-10. **Page** (NEW Phase 07)
+10. **Page** (Phase 07)
     - Wiki/document pages with hierarchical structure
     - Self-referencing via `ParentPageId` for nested pages
     - Unique slug for URLs
@@ -138,14 +303,14 @@ BaseEntity (abstract)
     - Favorite and recent view tracking
     - Workspace-scoped with RLS
 
-11. **PageVersion** (NEW Phase 07)
+11. **PageVersion** (Phase 07)
     - Version history for page restore capability
     - Auto-created on content changes
     - Composite key (PageId + VersionNumber)
     - Stores full content snapshot
     - Created by tracking
 
-12. **PageCollaborator** (NEW Phase 07)
+12. **PageCollaborator** (Phase 07)
     - Page collaboration with role-based access
     - Roles: Owner, Editor, Viewer
     - Composite key (PageId + UserId)
@@ -156,13 +321,13 @@ BaseEntity (abstract)
     - Self-referencing via `ParentCommentId` for nested replies
     - Similar to Task comments but for pages
 
-14. **GoalPeriod** (NEW Phase 08)
+14. **GoalPeriod** (Phase 08)
     - Time periods for goal tracking (e.g., Q1 2026, FY 2026)
     - Workspace-scoped with start/end dates
     - Status tracking (active, archived)
     - Objectives association for period-based goals
 
-15. **Objective** (NEW Phase 08)
+15. **Objective** (Phase 08)
     - Objectives with hierarchical structure (parent-child relationships)
     - Workspace-scoped with optional period association
     - Owner assignment to users
@@ -171,7 +336,7 @@ BaseEntity (abstract)
     - Progress percentage (0-100) calculated from weighted average of key results
     - Position ordering for drag-and-drop
 
-16. **KeyResult** (NEW Phase 08)
+16. **KeyResult** (Phase 08)
     - Measurable key results for objectives
     - Metric types: number, percentage, currency
     - Current and target values for progress tracking
@@ -206,7 +371,7 @@ BaseEntity (abstract)
 ```csharp
 public class AppDbContext : DbContext, IAppDbContext
 {
-    // 24 DbSets for all entities
+    // 27 DbSets for all entities
     public DbSet<User> Users => Set<User>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Permission> Permissions => Set<Permission>();
@@ -215,7 +380,10 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
     public DbSet<Workspace> Workspaces => Set<Workspace>();
     public DbSet<WorkspaceMember> WorkspaceMembers => Set<WorkspaceMember>();
-    public DbSet<Project> Projects => Set<Project>();
+    public DbSet<Project> Projects => Set<Project>(); // DEPRECATED
+    public DbSet<Space> Spaces => Set<Space>(); // NEW Phase 09
+    public DbSet<Folder> Folders => Set<Folder>(); // NEW Phase 09
+    public DbSet<TaskList> TaskLists => Set<TaskList>(); // NEW Phase 09
     public DbSet<Task> Tasks => Set<Task>();
     public DbSet<TaskStatus> TaskStatuses => Set<TaskStatus>();
     public DbSet<Comment> Comments => Set<Comment>();
@@ -286,7 +454,7 @@ public async Task<T> SqlQuerySingleAsync<T>(string sql, params object[] paramete
 - **Permission Queries:** `SqlQuerySingleAsync<bool>` checks user permissions efficiently
 - **Custom Queries:** `SqlQueryRawAsync<T>` for complex database queries
 
-#### EF Core Configurations (28 Files)
+#### EF Core Configurations (31 Files)
 
 Each entity has a dedicated `IEntityTypeConfiguration<T>` implementation:
 
@@ -497,12 +665,227 @@ Implemented CQRS operations for task management:
 - `UpdateTaskRequest`: Task update payload
 - `GetTasksQueryRequest`: Task list query parameters
 
-### Future Components (Planned)
+### Frontend API Client (Phase 09 - Phase 5)
 
-- **Commands:** Create, Update, Delete operations for other domains
-- **Queries:** Read operations with complex business logic
-- **Validation:** FluentValidation rules
-- **Mapping:** AutoMapper profiles
+**Location:** `/apps/frontend/src/features/spaces/api.ts`
+
+**Purpose:** HTTP client for Space/Folder/TaskList CRUD operations using centralized API client
+
+**API Endpoints:**
+
+```typescript
+// Spaces API
+getSpaceById(id: string)              // GET /api/spaces/{id}
+getSpacesByWorkspace(workspaceId)      // GET /api/spaces?workspaceId={id}
+createSpace(data: CreateSpaceRequest)  // POST /api/spaces
+updateSpace(id, data: UpdateSpaceRequest) // PUT /api/spaces/{id}
+deleteSpace(id: string)                // DELETE /api/spaces/{id}
+
+// Folders API
+getFolderById(id: string)              // GET /api/folders/{id}
+getFoldersBySpace(spaceId)             // GET /api/spaces/{spaceId}/folders
+createFolder(data: CreateFolderRequest) // POST /api/folders
+updateFolder(id, data)                 // PUT /api/folders/{id}
+updateFolderPosition(id, data)         // PATCH /api/folders/{id}/position
+deleteFolder(id: string)               // DELETE /api/folders/{id}
+
+// TaskLists API
+getTaskListById(id: string)            // GET /api/tasklists/{id}
+getTaskLists(spaceId?, folderId?)      // GET /api/tasklists?spaceId={id}&folderId={id}
+createTaskList(data)                   // POST /api/tasklists
+updateTaskList(id, data)               // PUT /api/tasklists/{id}
+updateTaskListPosition(id, data)       // PATCH /api/tasklists/{id}/position
+deleteTaskList(id: string)             // DELETE /api/tasklists/{id}
+
+// Exported as grouped object
+export const spacesApi = {
+  // Spaces
+  getSpaceById, getSpacesByWorkspace, createSpace, updateSpace, deleteSpace,
+  // Folders
+  getFolderById, getFoldersBySpace, createFolder, updateFolder, updateFolderPosition, deleteFolder,
+  // TaskLists
+  getTaskListById, getTaskLists, createTaskList, updateTaskList, updateTaskListPosition, deleteTaskList,
+};
+```
+
+**Design Features:**
+
+- **Centralized Client:** Uses `apiClient` from `@/lib/api-client`
+- **Typed Responses:** Generic type parameters for type safety
+- **Grouped Exports:** Convenient object with all CRUD operations
+- **Query Parameters:** Proper handling of optional query params
+- **RESTful Conventions:** GET/POST/PUT/PATCH/DELETE mapping
+
+**Usage Example:**
+
+```typescript
+import { spacesApi } from '@/features/spaces';
+
+// Get all spaces for a workspace
+const spaces = await spacesApi.getSpacesByWorkspace(workspaceId);
+
+// Create a new folder
+const folder = await spacesApi.createFolder({
+  spaceId: space.id,
+  name: 'Marketing Campaigns',
+  color: '#7B68EE',
+});
+
+// Update tasklist position
+await spacesApi.updateTaskListPosition(tasklist.id, { positionOrder: 5 });
+```
+
+### Frontend Tree Utilities (Phase 09 - Phase 5)
+
+**Location:** `/apps/frontend/src/features/spaces/utils.ts`
+
+**Purpose:** Transform flat database relationships into hierarchical UI structures
+
+**Utility Functions:**
+
+```typescript
+/**
+ * Builds hierarchical tree from flat lists
+ * Hierarchy: Space → Folder (optional) → TaskList
+ */
+buildSpaceTree(
+  spaces: Space[],
+  folders: Folder[],
+  taskLists: TaskList[]
+): SpaceTreeNode[]
+// Returns: Space nodes with nested folders and tasklists
+
+/**
+ * Finds a node by ID in the tree
+ * Useful for locating specific nodes in large hierarchies
+ */
+findNodeById(nodes: SpaceTreeNode[], id: string): SpaceTreeNode | undefined
+// Returns: The found node or undefined
+
+/**
+ * Gets breadcrumb path to a node
+ * Returns array of nodes from root to target
+ */
+getNodePath(nodes: SpaceTreeNode[], id: string): SpaceTreeNode[]
+// Returns: Path array [root, ..., target]
+```
+
+**Algorithm Complexity:**
+
+- **buildSpaceTree:** O(n + m + p) where n=spaces, m=folders, p=tasklists
+  - Creates Map data structures for O(1) lookups
+  - Single pass through each array
+  - Attaches children to parents via foreign keys
+
+- **findNodeById:** O(n) worst case for tree traversal
+  - Depth-first search through all nodes
+  - Short-circuits on first match
+
+- **getNodePath:** O(n) worst case
+  - Recursive search builds path from root
+  - Returns empty array if not found
+
+**Usage Example:**
+
+```typescript
+import { buildSpaceTree, findNodeById, getNodePath } from '@/features/spaces';
+
+// Build tree from API data
+const tree = buildSpaceTree(spaces, folders, taskLists);
+
+// Find specific tasklist
+const tasklist = findNodeById(tree, 'tasklist-123');
+console.log(tasklist?.name); // "Marketing Campaigns"
+
+// Get breadcrumb for navigation
+const path = getNodePath(tree, 'tasklist-123');
+// [{name: 'Workspace'}, {name: 'Space'}, {name: 'Folder'}, {name: 'TaskList'}]
+```
+
+### Frontend Components (Phase 09 - Phase 5)
+
+**Location:** `/apps/frontend/src/components/spaces/space-tree-nav.tsx`
+
+**Purpose:** Hierarchical navigation tree with expand/collapse functionality
+
+**Component Interface:**
+
+```typescript
+interface SpaceTreeNavProps {
+  spaces: SpaceTreeNode[];           // Hierarchical tree data
+  onNodeClick?: (node: SpaceTreeNode) => void;  // Node selection callback
+  onCreateSpace?: () => void;        // Create space callback
+  onCreateFolder?: (spaceId: string) => void;  // Create folder callback
+  onCreateList?: (spaceId: string, folderId?: string) => void;  // Create list callback
+  collapsed?: boolean;               // Icon-only mode
+  className?: string;                // Custom styling
+  selectedNodeId?: string;           // Currently selected node
+}
+```
+
+**Features:**
+
+1. **Expandable Nodes:**
+   - ChevronRight icons rotate on expand (90deg)
+   - Click to toggle expand/collapse
+   - State managed via Set for O(1) lookups
+
+2. **Dynamic Icons:**
+   - Circle icon for spaces
+   - Folder icon for folders
+   - List icon for tasklists
+   - Custom colors from node.color property
+
+3. **Action Buttons:**
+   - Hover-to-reveal on nodes
+   - Create folder on spaces
+   - Create list on spaces or folders
+   - Create space at root level
+
+4. **Accessibility (WCAG 2.1 AA):**
+   - `role="tree"` on container
+   - `role="treeitem"` on nodes
+   - `aria-expanded` for expand state
+   - `aria-selected` for selection state
+   - `aria-label="Space hierarchy"`
+   - Keyboard navigation support
+
+5. **Performance Optimizations:**
+   - React.memo with custom comparison
+   - useCallback for event handlers
+   - Optimized re-render logic
+
+6. **Styling:**
+   - Dynamic indentation based on level (`level * 16 + 8` px)
+   - Inline styles for dynamic colors
+   - Hover effects (gray-100/gray-800)
+   - Smooth transitions (200ms)
+   - Dark mode support
+
+**Usage Example:**
+
+```typescript
+import { SpaceTreeNav } from '@/components/spaces';
+
+<SpaceTreeNav
+  spaces={spaceTree}
+  onNodeClick={(node) => navigate(`/${node.type}/${node.id}`)}
+  onCreateSpace={() => setShowCreateDialog(true)}
+  onCreateFolder={(spaceId) => createFolder(spaceId)}
+  onCreateList={(spaceId, folderId) => createTaskList(spaceId, folderId)}
+  collapsed={sidebarCollapsed}
+  selectedNodeId={currentNodeId}
+/>
+```
+
+**Memoized Version:**
+
+```typescript
+import { MemoizedSpaceTreeNav } from '@/components/spaces';
+
+// Prevents unnecessary re-renders when props haven't changed
+<MemoizedSpaceTreeNav spaces={spaceTree} collapsed={false} />
+```
 
 ## 4. API Layer
 

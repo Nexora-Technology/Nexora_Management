@@ -1,6 +1,6 @@
 # Project Roadmap
 
-**Last Updated:** 2026-01-06 | **Phase 08 Complete**
+**Last Updated:** 2026-01-07 | **Phase 09 In Progress**
 
 ## Project Phases
 
@@ -634,7 +634,139 @@ Phase 08 successfully implements a complete OKR (Objectives and Key Results) tra
 
 ---
 
-### Phase 09: File Attachments ⏳ **PLANNED**
+### Phase 09: ClickUp Hierarchy Implementation 🔄 **IN PROGRESS**
+
+**Timeline:** Started 2026-01-07
+**Status:** 🔄 In Progress (Phase 1 Backend: Complete, Phase 5 Frontend: Complete)
+
+**Phase 1 Deliverables (COMPLETE):**
+
+- [x] 3 new domain entities created
+  - `Space` - First organizational level under Workspace
+  - `Folder` - Optional grouping container for Lists
+  - `TaskList` - Mandatory container for Tasks (display name: "List")
+- [x] 3 new EF Core configurations
+  - `SpaceConfiguration` - Space entity mapping with Workspace relationship
+  - `FolderConfiguration` - Folder entity mapping with Space relationship
+  - `TaskListConfiguration` - TaskList entity mapping with Space/Folder relationships
+- [x] Updated existing entities
+  - `Workspace` - Added Spaces collection
+  - `Task` - Added TaskListId (kept ProjectId for migration)
+  - `TaskStatus` - Added TaskListId (kept ProjectId for migration)
+  - `User` - Added OwnedTaskLists collection
+- [x] Updated AppDbContext with 3 new DbSets (27 total)
+- [x] ClickUp hierarchy model documented
+  - Workspace → Space → Folder (optional) → TaskList → Task
+
+**Phase 5 Deliverables (COMPLETE):**
+
+- [x] TypeScript type definitions (170 lines)
+  - Location: `/apps/frontend/src/features/spaces/types.ts`
+  - Interfaces for Space, Folder, List, SpaceTreeNode
+  - Request/Response DTOs matching backend
+- [x] API client methods (203 lines)
+  - Location: `/apps/frontend/src/features/spaces/api.ts`
+  - 13 methods for Spaces, Folders, Lists CRUD operations
+- [x] Tree building utilities (118 lines)
+  - Location: `/apps/frontend/src/features/spaces/utils.ts`
+  - buildSpaceTree(), filterSpacesByType(), findNodeById(), getBreadcrumbs()
+- [x] Navigation component (162 lines)
+  - Location: `/apps/frontend/src/components/spaces/space-tree-nav.tsx`
+  - Recursive tree rendering, expand/collapse, accessibility
+- [x] Barrel exports for clean imports
+  - `/apps/frontend/src/features/spaces/index.ts`
+  - `/apps/frontend/src/components/spaces/index.ts`
+
+**Total:** 6 files, 570+ lines of code, 100% TypeScript coverage
+
+**Phase 2 Deliverables (PENDING):**
+
+- [ ] Database migration for new tables
+- [ ] Space CRUD endpoints
+- [ ] Folder CRUD endpoints
+- [ ] TaskList CRUD endpoints
+- [ ] Migration scripts for Projects → TaskLists
+- [ ] Update existing Task endpoints to use TaskListId
+- [ ] Update RLS policies for new hierarchy
+- [ ] Backend testing and validation
+
+**Phase 6 Deliverables (PENDING):**
+
+- [ ] Update navigation sidebar ("Tasks" → "Spaces")
+- [ ] Create Spaces page (`/spaces`) with tree view
+- [ ] Create List detail page (`/lists/[id]`) with task board
+- [ ] Update task references (Project → List)
+- [ ] Frontend integration testing
+
+**ClickUp Hierarchy Model:**
+
+```
+Workspace (Top-level container)
+  └── Space (Department/Team/Client)
+      ├── Folder (Optional grouping)
+      │   └── TaskList (List - mandatory container)
+      │       └── Task (Individual task)
+      └── TaskList (Directly under Space - no Folder)
+          └── Task (Individual task)
+```
+
+**Key Features:**
+
+- **Spaces:** Organize work by departments, teams, clients, or high-level initiatives
+- **Folders:** Optional single-level grouping (no sub-folders)
+- **TaskLists:** Mandatory containers for Tasks (display name: "List")
+- **Flexible Organization:** TaskLists can exist directly under Spaces or within Folders
+- **Migration Path:** Project entity deprecated, TaskListId added to Task/TaskStatus
+- **Position Ordering:** Drag-and-drop support at all hierarchy levels
+
+**Migration Strategy:**
+
+1. **Phase 1 (Complete):** Create new entities and configurations
+2. **Phase 2 (Pending):** Create API endpoints and frontend components
+3. **Phase 3 (Pending):** Migrate existing Projects to TaskLists
+4. **Phase 4 (Pending):** Update all references from ProjectId to TaskListId
+5. **Phase 5 (Pending):** Remove deprecated Project entity
+
+**Files Modified:**
+
+**New Entities (3):**
+- `/apps/backend/src/Nexora.Management.Domain/Entities/Space.cs`
+- `/apps/backend/src/Nexora.Management.Domain/Entities/Folder.cs`
+- `/apps/backend/src/Nexora.Management.Domain/Entities/TaskList.cs`
+
+**Modified Entities (4):**
+- `/apps/backend/src/Nexora.Management.Domain/Entities/Workspace.cs` - Added Spaces collection
+- `/apps/backend/src/Nexora.Management.Domain/Entities/Task.cs` - Added TaskListId/TaskList
+- `/apps/backend/src/Nexora.Management.Domain/Entities/TaskStatus.cs` - Added TaskListId/TaskList
+- `/apps/backend/src/Nexora.Management.Domain/Entities/User.cs` - Added OwnedTaskLists
+
+**New Configurations (3):**
+- `/apps/backend/src/Nexora.Management.Infrastructure/Persistence/Configurations/SpaceConfiguration.cs`
+- `/apps/backend/src/Nexora.Management.Infrastructure/Persistence/Configurations/FolderConfiguration.cs`
+- `/apps/backend/src/Nexora.Management.Infrastructure/Persistence/Configurations/TaskListConfiguration.cs`
+
+**Modified Configurations (2):**
+- `/apps/backend/src/Nexora.Management.Infrastructure/Persistence/Configurations/TaskConfiguration.cs`
+- `/apps/backend/src/Nexora.Management.Infrastructure/Persistence/Configurations/TaskStatusConfiguration.cs`
+
+**Updated Context:**
+- `/apps/backend/src/Nexora.Management.Infrastructure/Persistence/AppDbContext.cs` - Added 3 DbSets (27 total)
+
+**Next Steps:**
+
+1. Create database migration for Spaces, Folders, and TaskLists tables
+2. Implement CQRS commands and queries for hierarchy management
+3. Create REST API endpoints for Space/Folder/TaskList CRUD operations
+4. Build frontend components for hierarchy navigation
+5. Develop migration scripts to convert Projects to TaskLists
+6. Update existing Task endpoints to use TaskListId
+7. Update RLS policies to enforce workspace membership
+8. Write comprehensive tests for new hierarchy
+9. Update documentation with migration guide
+
+---
+
+### Phase 10: File Attachments ⏳ **PLANNED**
 
 **Timeline:** Q2 2026
 **Status:** 📋 Planned
