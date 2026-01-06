@@ -7,8 +7,8 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { Task } from "@/components/tasks"
-import { TaskToolbar, TaskModal } from "@/components/tasks"
+import { Task, ViewMode } from "@/components/tasks"
+import { TaskToolbar, TaskModal, TaskBoard, TaskCalendar, TaskGantt } from "@/components/tasks"
 import { mockTasks } from "@/components/tasks"
 import {
   Table,
@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils"
 import { PRIORITY_COLORS, STATUS_LABELS } from "@/components/tasks/constants"
 
 export default function TasksPage() {
-  const [viewMode, setViewMode] = React.useState<"list" | "board">("list")
+  const [viewMode, setViewMode] = React.useState<ViewMode>("list")
   const [selectedTasks, setSelectedTasks] = React.useState<Set<string>>(new Set())
   const [isModalOpen, setIsModalOpen] = React.useState(false)
   const [editingTask, setEditingTask] = React.useState<Task | undefined>()
@@ -182,6 +182,7 @@ export default function TasksPage() {
           onViewModeChange={setViewMode}
         />
 
+        {/* List View */}
         {viewMode === "list" && (
           <div className="rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
             <Table>
@@ -233,6 +234,21 @@ export default function TasksPage() {
               </TableBody>
             </Table>
           </div>
+        )}
+
+        {/* Board View */}
+        {viewMode === "board" && (
+          <TaskBoard tasks={mockTasks} onTaskClick={handleEditTask} />
+        )}
+
+        {/* Calendar View */}
+        {viewMode === "calendar" && (
+          <TaskCalendar tasks={mockTasks} onTaskClick={handleEditTask} />
+        )}
+
+        {/* Gantt View */}
+        {viewMode === "gantt" && (
+          <TaskGantt tasks={mockTasks} onTaskClick={handleEditTask} />
         )}
       </div>
 

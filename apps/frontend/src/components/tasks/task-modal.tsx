@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import { memo } from "react"
-import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -27,12 +26,13 @@ import { cn } from "@/lib/utils"
  * TaskModal Component
  *
  * Modal dialog for creating/editing tasks with form validation.
- * Supports title, description, status, priority, and due date fields.
+ * Supports title, description, status, priority, assignee, and due date fields.
  *
  * Features:
  * - Create/edit modes with pre-filled data
  * - Form validation (title required)
  * - Loading state during submission
+ * - Assignee selection dropdown
  * - Accessible (aria-live announcements, ARIA labels)
  * - Optimized with React.memo
  *
@@ -78,6 +78,13 @@ const priorityOptions: { value: TaskPriority; label: string }[] = [
   { value: "low", label: "Low" },
 ]
 
+const assigneeOptions = [
+  { id: "user-1", name: "John Doe" },
+  { id: "user-2", name: "Jane Smith" },
+  { id: "user-3", name: "Bob Wilson" },
+  { id: "user-4", name: "Alice Brown" },
+]
+
 export const TaskModal = memo(function TaskModal({
   open,
   onOpenChange,
@@ -92,7 +99,14 @@ export const TaskModal = memo(function TaskModal({
     description: task?.description || "",
     status: task?.status || "todo",
     priority: task?.priority || "medium",
+    taskType: task?.taskType || "story",
+    parentTaskId: task?.parentTaskId || "",
+    epicId: task?.epicId || "",
+    storyId: task?.storyId || "",
+    assigneeId: task?.assignee?.id || "",
     dueDate: task?.dueDate || "",
+    startDate: task?.startDate || "",
+    estimatedHours: task?.estimatedHours || 0,
     projectId: task?.projectId || "",
     commentCount: task?.commentCount || 0,
     attachmentCount: task?.attachmentCount || 0,
@@ -103,12 +117,25 @@ export const TaskModal = memo(function TaskModal({
 
     if (!formData.title.trim()) return
 
+    // Find assignee details
+    const selectedAssignee = assigneeOptions.find(a => a.id === formData.assigneeId)
+
     onSubmit?.({
       title: formData.title,
       description: formData.description || undefined,
       status: formData.status,
       priority: formData.priority,
+      taskType: formData.taskType || "story",
+      parentTaskId: formData.parentTaskId || null,
+      epicId: formData.epicId || null,
+      storyId: formData.storyId || null,
+      assignee: selectedAssignee ? {
+        id: selectedAssignee.id,
+        name: selectedAssignee.name,
+      } : undefined,
       dueDate: formData.dueDate || undefined,
+      startDate: formData.startDate || undefined,
+      estimatedHours: formData.estimatedHours || undefined,
       projectId: formData.projectId || "default",
       commentCount: formData.commentCount,
       attachmentCount: formData.attachmentCount,
@@ -120,7 +147,14 @@ export const TaskModal = memo(function TaskModal({
         description: "",
         status: "todo",
         priority: "medium",
+        taskType: "story",
+        parentTaskId: "",
+        epicId: "",
+        storyId: "",
+        assigneeId: "",
         dueDate: "",
+        startDate: "",
+        estimatedHours: 0,
         projectId: "",
         commentCount: 0,
         attachmentCount: 0,
@@ -146,13 +180,7 @@ export const TaskModal = memo(function TaskModal({
           <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-white">
             {mode === "create" ? "Create Task" : "Edit Task"}
           </DialogTitle>
-          <button
-            onClick={() => onOpenChange?.(false)}
-            aria-label="Close dialog"
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          {/* DialogContent handles close button automatically - no need for custom X button */}
         </div>
 
         <DialogDescription className="text-sm text-gray-500 dark:text-gray-400 mb-4">
@@ -249,6 +277,33 @@ export const TaskModal = memo(function TaskModal({
                 {priorityOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Assignee */}
+          <div>
+            <label
+              htmlFor="assignee"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              Assignee
+            </label>
+            <Select
+              value={formData.assigneeId}
+              onValueChange={(value) =>
+                setFormData({ ...formData, assigneeId: value })
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select assignee" />
+              </SelectTrigger>
+              <SelectContent>
+                {assigneeOptions.map((assignee) => (
+                  <SelectItem key={assignee.id} value={assignee.id}>
+                    {assignee.name}
                   </SelectItem>
                 ))}
               </SelectContent>

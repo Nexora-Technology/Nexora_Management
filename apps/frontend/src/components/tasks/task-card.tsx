@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { memo } from "react"
-import { GripVertical, MessageSquare, Paperclip } from "lucide-react"
+import { GripVertical, MessageSquare, Paperclip, Layers } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
@@ -13,13 +13,14 @@ import { PRIORITY_COLORS, STATUS_LABELS, STATUS_BADGE_VARIANTS } from "./constan
  * TaskCard Component
  *
  * Kanban-style task card with drag handle, priority indicator, status badge,
- * assignee avatar, and comment/attachment counts.
+ * assignee avatar, comment/attachment counts, and hierarchy level indicator.
  *
  * Features:
  * - Keyboard navigation (Enter/Space to activate)
  * - Accessible ARIA labels
  * - Optimized with React.memo (prevents unnecessary re-renders)
  * - Smooth animations (fade-in, hover scale)
+ * - Task type indicator (Epic/Story/Subtask)
  *
  * @example
  * ```tsx
@@ -36,6 +37,12 @@ interface TaskCardProps {
   onClick?: () => void
   /** Additional CSS classes */
   className?: string
+}
+
+const TASK_TYPE_COLORS = {
+  epic: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+  story: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+  subtask: "bg-gray-100 text-gray-700 dark:bg-gray-700/30 dark:text-gray-300",
 }
 
 export const TaskCard = memo(function TaskCard({ task, onClick, className }: TaskCardProps) {
@@ -72,6 +79,20 @@ export const TaskCard = memo(function TaskCard({ task, onClick, className }: Tas
 
         {/* Content */}
         <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            {/* Task Type Badge */}
+            {task.taskType && (
+              <div className="flex items-center gap-1">
+                <Layers className="h-3 w-3" />
+                <span className={cn(
+                  "text-xs font-medium px-1.5 py-0.5 rounded",
+                  TASK_TYPE_COLORS[task.taskType]
+                )}>
+                  {task.taskType.charAt(0).toUpperCase() + task.taskType.slice(1)}
+                </span>
+              </div>
+            )}
+          </div>
           <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
             {task.title}
           </h4>
@@ -130,6 +151,7 @@ export const TaskCard = memo(function TaskCard({ task, onClick, className }: Tas
     prevProps.task.title === nextProps.task.title &&
     prevProps.task.status === nextProps.task.status &&
     prevProps.task.priority === nextProps.task.priority &&
+    prevProps.task.taskType === nextProps.task.taskType &&
     prevProps.onClick === nextProps.onClick &&
     prevProps.className === nextProps.className
   )

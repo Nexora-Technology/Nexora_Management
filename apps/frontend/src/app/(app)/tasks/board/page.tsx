@@ -1,14 +1,14 @@
 "use client"
 
 import * as React from "react"
-import { TaskBoard, TaskModal, TaskToolbar } from "@/components/tasks"
+import { TaskBoard, TaskModal, TaskToolbar, ViewMode } from "@/components/tasks"
 import { mockTasks } from "@/components/tasks"
 import { Task } from "@/components/tasks"
 import { useRouter } from "next/navigation"
 
 export default function BoardPage() {
   const router = useRouter()
-  const [viewMode, setViewMode] = React.useState<"list" | "board">("board")
+  const [viewMode, setViewMode] = React.useState<ViewMode>("board")
   const [isModalOpen, setIsModalOpen] = React.useState(false)
   const [editingTask, setEditingTask] = React.useState<Task | undefined>()
   const [isLoading, setIsLoading] = React.useState(false)
@@ -32,7 +32,7 @@ export default function BoardPage() {
     setIsModalOpen(false)
   }
 
-  const handleViewChange = (mode: "list" | "board") => {
+  const handleViewChange = (mode: ViewMode) => {
     setViewMode(mode)
     if (mode === "list") {
       router.push("/tasks")

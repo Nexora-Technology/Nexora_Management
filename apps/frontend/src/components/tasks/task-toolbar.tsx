@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Search, Plus, List, Grid } from "lucide-react"
+import { Search, Plus, List, Grid, Calendar, GitBranch } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -13,10 +13,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+export type ViewMode = "list" | "board" | "calendar" | "gantt"
+
 interface TaskToolbarProps {
   onAddTask?: () => void
-  viewMode?: "list" | "board"
-  onViewModeChange?: (mode: "list" | "board") => void
+  viewMode?: ViewMode
+  onViewModeChange?: (mode: ViewMode) => void
   className?: string
 }
 
@@ -69,12 +71,12 @@ export function TaskToolbar({
       <div className="flex items-center gap-2">
         {/* View Toggle */}
         {onViewModeChange && (
-          <div className="hidden sm:flex items-center border border-gray-200 dark:border-gray-700 rounded-md" role="group" aria-label="View mode">
+          <div className="hidden md:flex items-center border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden" role="group" aria-label="View mode">
             <Button
               variant={viewMode === "list" ? "secondary" : "ghost"}
               size="icon"
               onClick={() => onViewModeChange("list")}
-              className="rounded-r-none border-0"
+              className="rounded-none border-0 first:rounded-l-md last:rounded-r-md"
               aria-label="List view"
               aria-pressed={viewMode === "list"}
             >
@@ -84,11 +86,31 @@ export function TaskToolbar({
               variant={viewMode === "board" ? "secondary" : "ghost"}
               size="icon"
               onClick={() => onViewModeChange("board")}
-              className="rounded-l-none border-0"
+              className="rounded-none border-0"
               aria-label="Board view"
               aria-pressed={viewMode === "board"}
             >
               <Grid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "calendar" ? "secondary" : "ghost"}
+              size="icon"
+              onClick={() => onViewModeChange("calendar")}
+              className="rounded-none border-0"
+              aria-label="Calendar view"
+              aria-pressed={viewMode === "calendar"}
+            >
+              <Calendar className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "gantt" ? "secondary" : "ghost"}
+              size="icon"
+              onClick={() => onViewModeChange("gantt")}
+              className="rounded-none border-0"
+              aria-label="Gantt view"
+              aria-pressed={viewMode === "gantt"}
+            >
+              <GitBranch className="h-4 w-4" />
             </Button>
           </div>
         )}

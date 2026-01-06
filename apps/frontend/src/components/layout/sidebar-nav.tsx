@@ -12,6 +12,8 @@ import {
   Calendar,
   Settings,
   ChevronRight,
+  Target,
+  FileText,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -30,6 +32,16 @@ const navItems = [
     title: "Projects",
     href: "/projects",
     icon: Folder,
+  },
+  {
+    title: "Goals",
+    href: "/goals",
+    icon: Target,
+  },
+  {
+    title: "Documents",
+    href: "/documents",
+    icon: FileText,
   },
   {
     title: "Team",
