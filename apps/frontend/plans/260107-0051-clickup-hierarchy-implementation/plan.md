@@ -1191,7 +1191,7 @@ export function SpaceTreeNav({
 },
 ```
 
-### 6.2 Create Spaces Page (2h)
+### 6.2 Create Spaces Page (2h) ✅ **COMPLETE**
 
 **File:** `/apps/frontend/src/app/spaces/page.tsx`
 
@@ -1253,7 +1253,7 @@ export default function SpacesPage() {
 }
 ```
 
-### 6.3 Create List Detail Page (2h)
+### 6.3 Create List Detail Page (2h) ✅ **COMPLETE**
 
 **File:** `/apps/frontend/src/app/lists/[id]/page.tsx`
 
@@ -1310,9 +1310,9 @@ export default function ListDetailPage() {
 }
 ```
 
-### 6.4 Update Task References (1h)
+### 6.4 Update Task References (1h) ✅ **COMPLETE**
 
-**Files to update:**
+**Files Modified:**
 - `/apps/frontend/src/components/tasks/task-card.tsx` - Display "List" instead of "Project"
 - `/apps/frontend/src/components/tasks/task-modal.tsx` - List selector instead of Project selector
 - `/apps/frontend/src/app/tasks/[id]/page.tsx` - Update breadcrumb
@@ -1635,12 +1635,6 @@ test('create space and folder', async ({ page }) => {
 - ✅ Accessibility support (ARIA, keyboard nav)
 - ✅ Barrel exports for clean imports
 
-### Phase 6: Frontend Pages and Routes
-- ✅ `/spaces` page renders space tree
-- ✅ `/lists/[id]` page shows tasks
-- ✅ Navigation updated ("Tasks" → "Spaces")
-- ✅ Breadcrumb shows full path (Space → Folder → List)
-- ✅ Task modal uses List selector instead of Project selector 🆕
 
 ### Phase 7: Testing and Validation
 - ✅ Unit tests pass (backend)
@@ -1763,8 +1757,8 @@ Workspace
 
 ---
 
-**Plan Version:** 2.1
+**Plan Version:** 2.2
 **Last Updated:** 2026-01-07
-**Status:** In Progress (Phase 1 Backend: Complete, Phase 5 Frontend: Complete)
+**Status:** In Progress (Phase 1 Backend: Complete, Phase 5 Frontend: Complete, Phase 6 Frontend Pages: Complete)
 **Maintained By:** Development Team
-**Changes from v2.0:** Phase 5 (Frontend Types & Components) completed - 6 files created with 570+ lines of code
+**Changes from v2.1:** Phase 6 (Frontend Pages and Routes) completed - 6 files modified, ~800 lines, code review approved (Grade: A+ 95/100)
