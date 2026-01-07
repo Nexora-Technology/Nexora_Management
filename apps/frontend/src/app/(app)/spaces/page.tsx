@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
+import type { Route } from "next"
 import { spacesApi } from "@/features/spaces/api"
 import { buildSpaceTree } from "@/features/spaces/utils"
 import { SpaceTreeNav } from "@/components/spaces/space-tree-nav"
@@ -53,7 +54,7 @@ export default function SpacesPage() {
 
   const handleNodeClick = (node: SpaceTreeNode) => {
     if (node.type === "tasklist") {
-      router.push(`/lists/${node.id}` as any)
+      router.push(`/lists/${node.id}` as Route)
     } else if (node.type === "folder") {
       // TODO: Show folder detail view
       console.log("Folder clicked:", node)

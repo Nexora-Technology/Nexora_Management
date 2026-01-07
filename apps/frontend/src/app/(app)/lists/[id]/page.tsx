@@ -3,8 +3,9 @@
 import * as React from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useParams, useRouter } from "next/navigation"
+import type { Route } from "next"
 import { spacesApi } from "@/features/spaces/api"
-import type { TaskList } from "@/features/spaces/types"
+import type { Task } from "@/components/tasks/types"
 import { Breadcrumb } from "@/components/layout/breadcrumb"
 
 export default function ListDetailPage() {
@@ -35,9 +36,9 @@ export default function ListDetailPage() {
   const breadcrumbItems = React.useMemo(() => {
     if (!list) return []
 
-    const items = [
-      { label: "Home", href: "/" as const },
-      { label: "Spaces", href: "/spaces" as const },
+    const items: Array<{ label: string; href?: string }> = [
+      { label: "Home", href: "/" },
+      { label: "Spaces", href: "/spaces" },
     ]
 
     // TODO: Add space and folder names when available from API
@@ -45,7 +46,7 @@ export default function ListDetailPage() {
     // if (list.folderId) {
     //   items.push({ label: list.folderName, href: `/spaces/${list.spaceId}/folders/${list.folderId}` })
     // }
-    items.push({ label: list.name, href: `/lists/${list.id}` as any })
+    items.push({ label: list.name }) // Current page, no href needed
 
     return items
   }, [list])
@@ -66,7 +67,7 @@ export default function ListDetailPage() {
             List not found
           </h2>
           <button
-            onClick={() => router.push("/spaces" as any)}
+            onClick={() => router.push("/spaces" as Route)}
             className="text-primary hover:underline"
           >
             Return to Spaces
@@ -147,7 +148,7 @@ export default function ListDetailPage() {
         ) : tasks && tasks.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* TODO: Implement task board columns by status */}
-            {tasks.map((task: any) => (
+            {tasks.map((task: Task) => (
               <div
                 key={task.id}
                 className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700"

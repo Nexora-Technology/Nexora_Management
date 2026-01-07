@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { ArrowLeft, Calendar, User } from "lucide-react"
+import type { Route } from "next"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -23,7 +24,7 @@ export default function TaskDetailPage() {
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             Task not found
           </h2>
-          <Link href={"/spaces" as any}>
+          <Link href={"/spaces" as Route}>
             <Button variant="secondary">Back to Spaces</Button>
           </Link>
         </div>
@@ -43,13 +44,13 @@ export default function TaskDetailPage() {
           // ...(task.folderName ? [{ label: task.folderName, href: `/spaces/${task.spaceId}/folders/${task.folderId}` }] : []),
           // { label: task.listName, href: `/lists/${task.listId}` },
           { label: task.title },
-        ].filter(Boolean)}
+        ] as Array<{ label: string; href?: string }>}
         className="mb-6"
       />
 
       {/* Header */}
       <div className="mb-6">
-        <Link href={"/spaces" as any}>
+        <Link href={"/spaces" as Route}>
           <Button variant="ghost" size="sm" className="mb-4 gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back

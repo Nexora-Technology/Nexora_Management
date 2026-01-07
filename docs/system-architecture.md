@@ -1,7 +1,7 @@
 # System Architecture
 
 **Last Updated:** 2026-01-07
-**Version:** Phase 09 In Progress (ClickUp Hierarchy - Phase 5 Complete)
+**Version:** Phase 09 In Progress (ClickUp Hierarchy - Phase 6 Complete)
 
 ## Overview
 
@@ -886,6 +886,297 @@ import { MemoizedSpaceTreeNav } from '@/components/spaces';
 // Prevents unnecessary re-renders when props haven't changed
 <MemoizedSpaceTreeNav spaces={spaceTree} collapsed={false} />
 ```
+
+### Frontend Pages (Phase 09 - Phase 6)
+
+**Purpose:** ClickUp hierarchy navigation and list management pages
+
+**Pages Created:**
+
+#### 1. Spaces Overview Page
+
+**Location:** `/apps/frontend/src/app/(app)/spaces/page.tsx`
+
+**Route:** `/spaces`
+
+**Features:**
+
+- Two-column layout (tree sidebar + main content)
+- Left sidebar: Hierarchical space tree navigation (288px width)
+- Main content: Empty state with "Select a Space, Folder, or List"
+- React Query integration for spaces, folders, tasklists
+- Tree building with buildSpaceTree utility
+- Node click handlers:
+  - Space → Show space detail view (TODO)
+  - Folder → Show folder detail view (TODO)
+  - TaskList → Navigate to `/lists/[id]`
+
+**Component Structure:**
+
+```typescript
+// Data fetching
+const { data: spaces } = useQuery({
+  queryKey: ["spaces", workspaceId],
+  queryFn: () => spacesApi.getSpacesByWorkspace(workspaceId)
+})
+
+const { data: folders } = useQuery({
+  queryKey: ["folders"],
+  queryFn: () => fetch("/api/folders")
+})
+
+const { data: taskLists } = useQuery({
+  queryKey: ["tasklists"],
+  queryFn: () => spacesApi.getTaskLists()
+})
+
+// Build hierarchical tree
+const tree = useMemo(() => {
+  return buildSpaceTree(spaces, folders, taskLists)
+}, [spaces, folders, taskLists])
+
+// Node click handler
+const handleNodeClick = (node: SpaceTreeNode) => {
+  if (node.type === "tasklist") {
+    router.push(`/lists/${node.id}`)
+  }
+}
+```
+
+**Loading States:**
+
+- Skeleton with "Loading spaces..." message
+- Empty state with "No spaces yet" + "Create your first space" button
+- Selection placeholder with icon and instructions
+
+#### 2. List Detail Page
+
+**Location:** `/apps/frontend/src/app/(app)/lists/[id]/page.tsx`
+
+**Route:** `/lists/[id]`
+
+**Features:**
+
+- Breadcrumb navigation (Home → Spaces → List)
+- List header with:
+  - Name (h1, 2xl font-bold)
+  - Type badge (colored, based on list.listType)
+  - Description (if available)
+- Toolbar with:
+  - View toggle (Board/List buttons)
+  - "Add Task" button (primary color)
+- Task board grid layout (responsive: 1/2/3 columns)
+- Empty state with "No tasks yet" + "Add Task" button
+
+**Component Structure:**
+
+```typescript
+// Data fetching
+const { data: list } = useQuery({
+  queryKey: ["tasklists", listId],
+  queryFn: () => spacesApi.getTaskListById(listId)
+})
+
+const { data: tasks } = useQuery({
+  queryKey: ["tasks", listId],
+  queryFn: () => fetch(`/api/tasks?projectId=${listId}`),
+  enabled: !!listId
+})
+
+// Breadcrumb path
+const breadcrumbItems = [
+  { label: "Home", href: "/" },
+  { label: "Spaces", href: "/spaces" },
+  { label: list.name, href: `/lists/${list.id}` }
+]
+```
+
+**List Type Badge:**
+
+```typescript
+<span
+  className="px-2 py-1 text-xs font-medium rounded-full"
+  style={{
+    backgroundColor: list.color ? `${list.color}20` : "#6b728020",
+    color: list.color || "#6b7280"
+  }}
+>
+  {list.listType || "task"}
+</span>
+```
+
+**TODO Comments:**
+
+- Add view toggle (board/list/calendar) functionality
+- Implement task board columns by status
+- Fetch tasks with proper listId filtering
+- Add space and folder names to breadcrumb when available from API
+
+#### 3. Task Detail Page (Updated)
+
+**Location:** `/apps/frontend/src/app/(app)/tasks/[id]/page.tsx`
+
+**Route:** `/tasks/[id]`
+
+**Updates for Phase 6:**
+
+- Breadcrumb updated: "Tasks" → "Spaces"
+- Back button navigates to "/spaces" instead of "/tasks"
+- TODO comments added for future hierarchy:
+  ```typescript
+  // TODO: Add space, folder, and list names when available from API
+  // { label: task.spaceName, href: `/spaces/${task.spaceId}` },
+  // ...(task.folderName ? [{ label: task.folderName, href: `/spaces/${task.spaceId}/folders/${task.folderId}` }] : []),
+  // { label: task.listName, href: `/lists/${task.listId}` },
+  ```
+
+### Updated Components (Phase 09 - Phase 6)
+
+#### 1. Navigation Sidebar (Updated)
+
+**Location:** `/apps/frontend/src/components/layout/sidebar-nav.tsx`
+
+**Changes:**
+
+- Navigation item updated: "Tasks" → "Spaces"
+- Added navigation items: "Goals", "Documents"
+- Icon: Folder icon for Spaces
+- Route: `/spaces` for Spaces navigation
+
+```typescript
+const navItems = [
+  { title: "Home", href: "/", icon: Home },
+  { title: "Spaces", href: "/spaces", icon: Folder },  // Changed from "Tasks"
+  { title: "Goals", href: "/goals", icon: Target },     // NEW
+  { title: "Documents", href: "/documents", icon: FileText },  // NEW
+  { title: "Team", href: "/team", icon: Users },
+  { title: "Calendar", href: "/calendar", icon: Calendar },
+  { title: "Settings", href: "/settings", icon: Settings },
+]
+```
+
+#### 2. Task Modal (Updated)
+
+**Location:** `/apps/frontend/src/components/tasks/task-modal.tsx`
+
+**Changes:**
+
+- Added "List" dropdown field (lines 322-347)
+- Form data includes: listId field
+- List options: Engineering Tasks, Marketing Campaign, Sprint Backlog (TODO: fetch from API)
+
+```typescript
+// List (TaskList) field
+<div>
+  <label htmlFor="listId">List</label>
+  <Select value={formData.listId} onValueChange={(value) => setFormData({ ...formData, listId: value })}>
+    <SelectTrigger>
+      <SelectValue placeholder="Select list" />
+    </SelectTrigger>
+    <SelectContent>
+      {listOptions.map((list) => (
+        <SelectItem key={list.id} value={list.id}>
+          {list.name}
+        </SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+</div>
+```
+
+**TODO:**
+
+```typescript
+// TODO: Fetch available lists from spaces API
+const listOptions = [
+  { id: "list-1", name: "Engineering Tasks" },
+  { id: "list-2", name: "Marketing Campaign" },
+  { id: "list-3", name: "Sprint Backlog" },
+]
+```
+
+#### 3. Task Types (Updated)
+
+**Location:** `/apps/frontend/src/components/tasks/types.ts`
+
+**Changes:**
+
+- Added: listId?: string (line 28) - Reference to TaskList (replaces projectId)
+- Added: spaceId?: string (line 29) - Reference to Space
+- Added: folderId?: string (line 30) - Reference to Folder (optional)
+- Deprecated: projectId (kept for migration compatibility)
+
+```typescript
+export interface Task {
+  id: string
+  title: string
+  description?: string
+  status: TaskStatus
+  priority: TaskPriority
+  taskType: TaskType
+  // ... other fields
+
+  // Hierarchy fields - 3-level hierarchy: Epic → Story → Subtask
+  parentTaskId?: string | null
+  epicId?: string | null
+  storyId?: string | null
+
+  assignee?: { id: string; name: string; avatar?: string }
+  dueDate?: string
+  startDate?: string
+  estimatedHours?: number
+  commentCount: number
+  attachmentCount: number
+
+  projectId: string  // Deprecated: Use listId instead
+  listId?: string    // NEW: Reference to TaskList (replaces projectId)
+  spaceId?: string   // NEW: Reference to Space
+  folderId?: string  // NEW: Reference to Folder (optional)
+
+  createdAt: string
+  updatedAt: string
+}
+```
+
+**Migration Notes:**
+
+- `projectId` field kept for backward compatibility
+- New tasks should use `listId` instead of `projectId`
+- `spaceId` and `folderId` provide full hierarchy context
+- Future: Remove `projectId` after migration complete
+
+### Route Structure (Phase 6)
+
+**New Routes:**
+
+```
+/spaces              # Spaces overview page (NEW)
+/lists/[id]          # List detail page (NEW)
+```
+
+**Updated Routes:**
+
+```
+/tasks/[id]          # Task detail page (breadcrumb updated)
+```
+
+**Navigation Flow:**
+
+1. User clicks "Spaces" in sidebar
+2. Lands on `/spaces` overview page
+3. Navigates tree in left sidebar
+4. Clicks on TaskList node
+5. Redirected to `/lists/[id]` detail page
+6. Views tasks in board/list layout
+7. Clicks on task card
+8. Redirected to `/tasks/[id]` detail page
+9. Breadcrumb shows: Home → Spaces → [List] → [Task]
+
+**Future Enhancements:**
+
+- Space detail page (`/spaces/[id]`)
+- Folder detail page (`/spaces/[spaceId]/folders/[folderId]`)
+- Breadcrumb with full hierarchy (Space → Folder → List → Task)
 
 ## 4. API Layer
 
