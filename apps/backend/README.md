@@ -63,6 +63,7 @@ dotnet run --project src/Nexora.Management.API
 ```
 
 The API will be available at:
+
 - HTTP: http://localhost:5000
 - HTTPS: https://localhost:5001
 - Swagger UI: https://localhost:5001 (root URL)
@@ -108,7 +109,7 @@ Configure allowed origins in `appsettings.json`:
 ```json
 {
   "Cors": {
-    "AllowedOrigins": [ "http://localhost:3000" ]
+    "AllowedOrigins": ["http://localhost:3000"]
   }
 }
 ```
@@ -117,6 +118,54 @@ Configure allowed origins in `appsettings.json`:
 
 - Swagger UI is available at the root URL when running in Development mode
 - OpenAPI specification: `/swagger/v1/swagger.json`
+
+### ClickUp Hierarchy Endpoints
+
+The API follows ClickUp's hierarchy structure: **Workspace → Space → Folder (optional) → TaskList → Task**
+
+#### Spaces (`/api/spaces`)
+
+| Method | Route                          | Description              |
+| ------ | ------------------------------ | ------------------------ |
+| POST   | `/api/spaces`                  | Create space             |
+| GET    | `/api/spaces/{id}`             | Get space by ID          |
+| GET    | `/api/spaces?workspaceId={id}` | Get spaces by workspace  |
+| PUT    | `/api/spaces/{id}`             | Update space             |
+| DELETE | `/api/spaces/{id}`             | Delete space             |
+| GET    | `/api/spaces/{id}/folders`     | Get folders in space     |
+| POST   | `/api/spaces/{id}/folders`     | Create folder in space   |
+| POST   | `/api/spaces/{id}/lists`       | Create tasklist in space |
+
+#### Folders (`/api/folders`)
+
+| Method | Route                        | Description               |
+| ------ | ---------------------------- | ------------------------- |
+| POST   | `/api/folders`               | Create folder             |
+| GET    | `/api/folders/{id}`          | Get folder by ID          |
+| PUT    | `/api/folders/{id}`          | Update folder             |
+| DELETE | `/api/folders/{id}`          | Delete folder             |
+| PATCH  | `/api/folders/{id}/position` | Update folder position    |
+| GET    | `/api/folders/{id}/lists`    | Get tasklists in folder   |
+| POST   | `/api/folders/{id}/lists`    | Create tasklist in folder |
+
+#### TaskLists (`/api/tasklists`)
+
+| Method | Route                                       | Description              |
+| ------ | ------------------------------------------- | ------------------------ |
+| POST   | `/api/tasklists`                            | Create tasklist          |
+| GET    | `/api/tasklists/{id}`                       | Get tasklist by ID       |
+| GET    | `/api/tasklists?spaceId={id}&folderId={id}` | Get tasklists            |
+| PUT    | `/api/tasklists/{id}`                       | Update tasklist          |
+| PATCH  | `/api/tasklists/{id}/position`              | Update tasklist position |
+| DELETE | `/api/tasklists/{id}`                       | Delete tasklist          |
+| GET    | `/api/tasklists/{id}/tasks`                 | Get tasks in tasklist    |
+
+#### Migration Notes
+
+- **Deprecated:** `/api/projects` endpoint (kept for backward compatibility)
+- **Migrated:** Tasks now use `TaskListId` instead of `ProjectId`
+- **Database:** Migration scripts available in `/scripts/` directory
+- **Rollback:** Emergency rollback procedures documented in `/docs/migration/`
 
 ## Key Technologies
 
@@ -209,6 +258,7 @@ curl http://localhost:5000/health
 ```
 
 Response:
+
 ```json
 {
   "status": "healthy",

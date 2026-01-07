@@ -7,6 +7,9 @@ using Nexora.Management.Application.Folders.Commands.UpdateFolderPosition;
 using Nexora.Management.Application.Folders.DTOs;
 using Nexora.Management.Application.Folders.Queries.GetFolderById;
 using Nexora.Management.Application.Folders.Queries.GetFoldersBySpace;
+using Nexora.Management.Application.TaskLists.Commands.CreateTaskList;
+using Nexora.Management.Application.TaskLists.DTOs;
+using Nexora.Management.Application.TaskLists.Queries.GetTaskLists;
 
 namespace Nexora.Management.API.Endpoints;
 
@@ -124,5 +127,61 @@ public static class FolderEndpoints
         .WithName("DeleteFolder")
         .WithSummary("Delete folder")
         .WithDescription("Deletes a folder (cascades to tasklists and tasks)");
+
+        // Nested: Get tasklists by folder
+        group.MapGet("/{id}/lists", async (Guid id, ISender sender) =>
+        {
+            var query = new GetTaskListsQuery(null, id); // folderId = id
+            var result = await sender.Send(query);
+
+            if (result.IsFailure)
+            {
+                return Results.BadRequest(new { error = result.Error });
+            }
+
+            return Results.Ok(result.Value);
+        })
+        .WithName("GetTaskListsByFolder")
+        .WithSummary("Get tasklists by folder")
+        .WithDescription("Retrieves all tasklists in the specified folder");
+
+        // Nested: Create tasklist in folder
+        group.MapPost("/{id}/lists", async (
+            Guid id,
+            CreateTaskListRequest request,
+            ISender sender) =>
+        {
+            // First, get the folder to find its space ID
+            var folderResult = await sender.Send(new GetFolderByIdQuery(id));
+            if (folderResult.IsFailure)
+            {
+                return Results.NotFound(new { error = folderResult.Error });
+            }
+
+            var folder = folderResult.Value;
+
+            var command = new CreateTaskListCommand(
+                folder.SpaceId, // Use folder's space ID
+                id, // Use folder ID from route
+                request.Name,
+                request.Description,
+                request.Color,
+                request.Icon,
+                request.ListType,
+                request.OwnerId
+            );
+
+            var result = await sender.Send(command);
+
+            if (result.IsFailure)
+            {
+                return Results.BadRequest(new { error = result.Error });
+            }
+
+            return Results.Created($"/api/tasklists/{result.Value.Id}", result.Value);
+        })
+        .WithName("CreateTaskListInFolder")
+        .WithSummary("Create tasklist in folder")
+        .WithDescription("Creates a new tasklist in the specified folder");
     }
 }

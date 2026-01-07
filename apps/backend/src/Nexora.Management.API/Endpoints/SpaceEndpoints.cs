@@ -1,11 +1,16 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Nexora.Management.Application.Folders.Commands.CreateFolder;
+using Nexora.Management.Application.Folders.DTOs;
+using Nexora.Management.Application.Folders.Queries.GetFoldersBySpace;
 using Nexora.Management.Application.Spaces.Commands.CreateSpace;
 using Nexora.Management.Application.Spaces.Commands.DeleteSpace;
 using Nexora.Management.Application.Spaces.Commands.UpdateSpace;
 using Nexora.Management.Application.Spaces.DTOs;
 using Nexora.Management.Application.Spaces.Queries.GetSpaceById;
 using Nexora.Management.Application.Spaces.Queries.GetSpacesByWorkspace;
+using Nexora.Management.Application.TaskLists.Commands.CreateTaskList;
+using Nexora.Management.Application.TaskLists.DTOs;
 
 namespace Nexora.Management.API.Endpoints;
 
@@ -122,5 +127,79 @@ public static class SpaceEndpoints
         .WithName("DeleteSpace")
         .WithSummary("Delete space")
         .WithDescription("Deletes a space (cascades to folders, tasklists, and tasks)");
+
+        // Nested: Get folders by space
+        group.MapGet("/{id}/folders", async (Guid id, ISender sender) =>
+        {
+            var query = new GetFoldersBySpaceQuery(id);
+            var result = await sender.Send(query);
+
+            if (result.IsFailure)
+            {
+                return Results.BadRequest(new { error = result.Error });
+            }
+
+            return Results.Ok(result.Value);
+        })
+        .WithName("GetFoldersBySpace")
+        .WithSummary("Get folders by space")
+        .WithDescription("Retrieves all folders in the specified space");
+
+        // Nested: Create folder in space
+        group.MapPost("/{id}/folders", async (
+            Guid id,
+            CreateFolderRequest request,
+            ISender sender) =>
+        {
+            var command = new CreateFolderCommand(
+                id, // Use space ID from route
+                request.Name,
+                request.Description,
+                request.Color,
+                request.Icon
+            );
+
+            var result = await sender.Send(command);
+
+            if (result.IsFailure)
+            {
+                return Results.BadRequest(new { error = result.Error });
+            }
+
+            return Results.Created($"/api/folders/{result.Value.Id}", result.Value);
+        })
+        .WithName("CreateFolderInSpace")
+        .WithSummary("Create folder in space")
+        .WithDescription("Creates a new folder in the specified space");
+
+        // Nested: Create tasklist in space
+        group.MapPost("/{id}/lists", async (
+            Guid id,
+            CreateTaskListRequest request,
+            ISender sender) =>
+        {
+            var command = new CreateTaskListCommand(
+                id, // Use space ID from route
+                null, // No folder when creating directly under space
+                request.Name,
+                request.Description,
+                request.Color,
+                request.Icon,
+                request.ListType,
+                request.OwnerId
+            );
+
+            var result = await sender.Send(command);
+
+            if (result.IsFailure)
+            {
+                return Results.BadRequest(new { error = result.Error });
+            }
+
+            return Results.Created($"/api/tasklists/{result.Value.Id}", result.Value);
+        })
+        .WithName("CreateTaskListInSpace")
+        .WithSummary("Create tasklist in space")
+        .WithDescription("Creates a new tasklist directly in the specified space (not in a folder)");
     }
 }

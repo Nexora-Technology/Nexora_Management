@@ -1,10 +1,11 @@
 # Codebase Summary
 
 **Last Updated:** 2026-01-07
-**Version:** Phase 09 Complete (ClickUp Hierarchy - Phases 6, 7, 8)
-**Backend Files:** 177 files
+**Version:** Phase 09 Complete (ClickUp Hierarchy - Phases 6, 7, 8) + Phase 2 Backend Migration Complete
+**Backend Files:** 181 files (4 migration scripts added)
 **Frontend Files:** 117 TypeScript files (~13,029 lines)
 **Phase 07 Status:** DEFERRED - Test requirements documented, code quality fixes complete
+**Phase 2 Status:** ✅ COMPLETE - Backend Database Migration (4 scripts, 19 files updated)
 
 ## Documentation Section
 
@@ -243,6 +244,40 @@ Nexora Management is a ClickUp-inspired project management platform built with .
   - `AppDbContextModelSnapshot` - EF Core model snapshot
 
 - **appsettings.json** - Configuration including connection string
+
+- **Migration Scripts** (Phase 2 - Backend Database Migration) ✅ **COMPLETE**:
+  - `/scripts/MigrateProjectsToTaskLists.sql` - Projects → TaskLists migration script (~8KB)
+    - Creates TaskLists from existing Projects
+    - Preserves all Project properties (name, description, color, icon, status)
+    - Maps WorkspaceId, sets ListType to "project"
+    - Handles PositionOrder for drag-and-drop
+  - `/scripts/MigrateTasksToTaskLists.sql` - Tasks.ProjectId → TaskListId migration (~7KB)
+    - Updates Task.TaskListId from corresponding TaskList
+    - Updates TaskStatus.TaskListId from corresponding TaskList
+    - Preserves all existing task relationships
+    - Uses table locks to prevent concurrent modifications
+  - `/scripts/ValidateMigration.sql` - Post-migration validation script (~8KB)
+    - Verifies all Projects have corresponding TaskLists
+    - Verifies all Tasks have TaskListId set
+    - Verifies all TaskStatuses have TaskListId set
+    - Checks for orphaned records
+    - Provides detailed validation report
+  - `/scripts/RollbackMigration.sql` - Emergency rollback script (~7KB)
+    - Restores ProjectId on Tasks (if needed)
+    - Deletes created TaskLists
+    - Restores original state
+    - Transaction-safe with rollback confirmation
+  - **Documentation** (Phase 2):
+    - `/docs/migration/MIGRATION_README.md` - Comprehensive migration guide (~15KB)
+      - Step-by-step migration instructions
+      - Pre-migration checklist
+      - Validation procedures
+      - Rollback procedures
+      - Troubleshooting guide
+    - `/docs/migration/ROLLBACK_PROCEDURES.md` - Detailed rollback procedures (~6KB)
+      - Emergency rollback steps
+      - Data recovery procedures
+      - Validation after rollback
 
 ## Database Schema
 

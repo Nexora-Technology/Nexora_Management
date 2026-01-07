@@ -7,6 +7,7 @@ using Nexora.Management.Application.TaskLists.Commands.UpdateTaskListPosition;
 using Nexora.Management.Application.TaskLists.DTOs;
 using Nexora.Management.Application.TaskLists.Queries.GetTaskListById;
 using Nexora.Management.Application.TaskLists.Queries.GetTaskLists;
+using Nexora.Management.Application.Tasks.Queries;
 
 namespace Nexora.Management.API.Endpoints;
 
@@ -145,5 +146,41 @@ public static class TaskListEndpoints
         .WithName("DeleteTaskList")
         .WithSummary("Delete tasklist")
         .WithDescription("Deletes a tasklist (cascades to tasks)");
+
+        // Nested: Get tasks by tasklist
+        group.MapGet("/{id}/tasks", async (
+            Guid id,
+            ISender sender,
+            [FromQuery] Guid? statusId = null,
+            [FromQuery] Guid? assigneeId = null,
+            [FromQuery] string? search = null,
+            [FromQuery] string? sortBy = null,
+            [FromQuery] bool sortDesc = false,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 50) =>
+        {
+            var query = new GetTasksQuery(
+                id, // TaskListId
+                statusId,
+                assigneeId,
+                search,
+                sortBy,
+                sortDesc,
+                page,
+                pageSize
+            );
+
+            var result = await sender.Send(query);
+
+            if (result.IsFailure)
+            {
+                return Results.BadRequest(new { error = result.Error });
+            }
+
+            return Results.Ok(result.Value);
+        })
+        .WithName("GetTasksByTaskList")
+        .WithSummary("Get tasks by tasklist")
+        .WithDescription("Retrieves all tasks in the specified tasklist with optional filtering and pagination");
     }
 }
