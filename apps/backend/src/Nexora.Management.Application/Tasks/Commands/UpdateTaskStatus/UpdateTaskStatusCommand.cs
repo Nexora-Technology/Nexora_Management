@@ -36,7 +36,7 @@ public class UpdateTaskStatusCommandHandler : IRequestHandler<UpdateTaskStatusCo
 
         var taskDto = new TaskDto(
             task.Id,
-            task.ProjectId,
+            task.TaskListId,
             task.ParentTaskId,
             task.Title,
             task.Description,

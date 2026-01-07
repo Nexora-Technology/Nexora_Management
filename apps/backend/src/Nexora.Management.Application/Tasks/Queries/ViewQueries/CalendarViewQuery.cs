@@ -6,7 +6,7 @@ using Nexora.Management.Infrastructure.Interfaces;
 
 namespace Nexora.Management.Application.Tasks.Queries.ViewQueries;
 
-public record GetCalendarViewQuery(Guid ProjectId, int Year, int Month) : IRequest<Result<List<CalendarTaskDto>>>;
+public record GetCalendarViewQuery(Guid TaskListId, int Year, int Month) : IRequest<Result<List<CalendarTaskDto>>>;
 
 public class GetCalendarViewQueryHandler : IRequestHandler<GetCalendarViewQuery, Result<List<CalendarTaskDto>>>
 {
@@ -27,7 +27,7 @@ public class GetCalendarViewQueryHandler : IRequestHandler<GetCalendarViewQuery,
 
         // Get tasks with due dates in the specified month
         var tasks = await _db.Tasks
-            .Where(t => t.ProjectId == request.ProjectId)
+            .Where(t => t.TaskListId == request.TaskListId)
             .Where(t => t.DueDate.HasValue &&
                         t.DueDate.Value >= startDate &&
                         t.DueDate.Value <= endDate)

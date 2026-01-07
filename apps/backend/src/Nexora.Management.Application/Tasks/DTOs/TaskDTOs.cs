@@ -2,7 +2,7 @@ namespace Nexora.Management.Application.Tasks.DTOs;
 
 public record TaskDto(
     Guid Id,
-    Guid ProjectId,
+    Guid TaskListId,
     Guid? ParentTaskId,
     string Title,
     string? Description,
@@ -19,7 +19,7 @@ public record TaskDto(
 );
 
 public record CreateTaskRequest(
-    Guid ProjectId,
+    Guid TaskListId,
     string Title,
     string? Description = null,
     Guid? ParentTaskId = null,
@@ -43,7 +43,7 @@ public record UpdateTaskRequest(
 );
 
 public record GetTasksQueryRequest(
-    Guid? ProjectId = null,
+    Guid? TaskListId = null,
     Guid? StatusId = null,
     Guid? AssigneeId = null,
     string? Search = null,

@@ -31,7 +31,7 @@ public class GetTaskByIdQueryHandler : IRequestHandler<GetTaskByIdQuery, Result<
 
         var taskDto = new TaskDto(
             task.Id,
-            task.ProjectId,
+            task.TaskListId,
             task.ParentTaskId,
             task.Title,
             task.Description,
@@ -52,7 +52,7 @@ public class GetTaskByIdQueryHandler : IRequestHandler<GetTaskByIdQuery, Result<
 }
 
 public record GetTasksQuery(
-    Guid? ProjectId,
+    Guid? TaskListId,
     Guid? StatusId,
     Guid? AssigneeId,
     string? Search,
@@ -76,9 +76,9 @@ public class GetTasksQueryHandler : IRequestHandler<GetTasksQuery, Result<PagedR
         var query = _db.Tasks.AsQueryable();
 
         // Filters
-        if (request.ProjectId.HasValue)
+        if (request.TaskListId.HasValue)
         {
-            query = query.Where(t => t.ProjectId == request.ProjectId);
+            query = query.Where(t => t.TaskListId == request.TaskListId);
         }
 
         if (request.StatusId.HasValue)
@@ -123,7 +123,7 @@ public class GetTasksQueryHandler : IRequestHandler<GetTasksQuery, Result<PagedR
             .Take(request.PageSize)
             .Select(t => new TaskDto(
                 t.Id,
-                t.ProjectId,
+                t.TaskListId,
                 t.ParentTaskId,
                 t.Title,
                 t.Description,

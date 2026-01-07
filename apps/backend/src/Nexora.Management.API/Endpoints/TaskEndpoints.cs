@@ -30,7 +30,7 @@ public static class TaskEndpoints
             HttpContext httpContext) =>
         {
             var command = new CreateTaskCommand(
-                request.ProjectId,
+                request.TaskListId,
                 request.Title,
                 request.Description,
                 request.ParentTaskId,
@@ -48,18 +48,18 @@ public static class TaskEndpoints
                 return Results.BadRequest(new { error = result.Error });
             }
 
-            // Broadcast TaskCreated to project group
+            // Broadcast TaskCreated to tasklist group
             var currentUserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var message = new TaskUpdatedMessage
             {
                 TaskId = result.Value.Id,
-                ProjectId = request.ProjectId,
+                TaskListId = request.TaskListId,
                 Type = "created",
                 UpdatedBy = Guid.Parse(currentUserId ?? Guid.Empty.ToString()),
                 Timestamp = DateTime.UtcNow,
                 Data = result.Value
             };
-            await taskHub.Clients.Group($"project_{request.ProjectId}")
+            await taskHub.Clients.Group($"tasklist_{request.TaskListId}")
                 .SendAsync("TaskCreated", message);
 
             return Results.Created($"/api/tasks/{result.Value.Id}", result.Value);
@@ -89,7 +89,7 @@ public static class TaskEndpoints
             ISender sender) =>
         {
             var query = new GetTasksQuery(
-                request.ProjectId,
+                request.TaskListId,
                 request.StatusId,
                 request.AssigneeId,
                 request.Search,
@@ -136,18 +136,18 @@ public static class TaskEndpoints
                 return Results.BadRequest(new { error = result.Error });
             }
 
-            // Broadcast TaskUpdated to project group
+            // Broadcast TaskUpdated to tasklist group
             var currentUserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var message = new TaskUpdatedMessage
             {
                 TaskId = id,
-                ProjectId = result.Value.ProjectId,
+                TaskListId = result.Value.TaskListId,
                 Type = "updated",
                 UpdatedBy = Guid.Parse(currentUserId ?? Guid.Empty.ToString()),
                 Timestamp = DateTime.UtcNow,
                 Data = result.Value
             };
-            await taskHub.Clients.Group($"project_{result.Value.ProjectId}")
+            await taskHub.Clients.Group($"tasklist_{result.Value.TaskListId}")
                 .SendAsync("TaskUpdated", message);
 
             return Results.Ok(result.Value);
@@ -170,20 +170,20 @@ public static class TaskEndpoints
                 return Results.BadRequest(new { error = result.Error });
             }
 
-            // Broadcast TaskDeleted to project group
+            // Broadcast TaskDeleted to tasklist group
             if (result.Value.HasValue)
             {
                 var currentUserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 var message = new TaskUpdatedMessage
                 {
                     TaskId = id,
-                    ProjectId = result.Value.Value,
+                    TaskListId = result.Value.Value,
                     Type = "deleted",
                     UpdatedBy = Guid.Parse(currentUserId ?? Guid.Empty.ToString()),
                     Timestamp = DateTime.UtcNow,
                     Data = null
                 };
-                await taskHub.Clients.Group($"project_{result.Value.Value}")
+                await taskHub.Clients.Group($"tasklist_{result.Value.Value}")
                     .SendAsync("TaskDeleted", message);
             }
 
@@ -208,18 +208,18 @@ public static class TaskEndpoints
                 return Results.BadRequest(new { error = result.Error });
             }
 
-            // Broadcast TaskStatusChanged to project group
+            // Broadcast TaskStatusChanged to tasklist group
             var currentUserId = httpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             var message = new TaskUpdatedMessage
             {
                 TaskId = id,
-                ProjectId = result.Value.ProjectId,
+                TaskListId = result.Value.TaskListId,
                 Type = "status_changed",
                 UpdatedBy = Guid.Parse(currentUserId ?? Guid.Empty.ToString()),
                 Timestamp = DateTime.UtcNow,
                 Data = result.Value
             };
-            await taskHub.Clients.Group($"project_{result.Value.ProjectId}")
+            await taskHub.Clients.Group($"tasklist_{result.Value.TaskListId}")
                 .SendAsync("TaskStatusChanged", message);
 
             return Results.Ok(result.Value);
@@ -228,9 +228,9 @@ public static class TaskEndpoints
         .WithSummary("Update task status");
 
         // Board View - Get kanban board data
-        group.MapGet("/views/board/{projectId}", async (Guid projectId, ISender sender) =>
+        group.MapGet("/views/board/{taskListId}", async (Guid taskListId, ISender sender) =>
         {
-            var query = new GetBoardViewQuery(projectId);
+            var query = new GetBoardViewQuery(taskListId);
             var result = await sender.Send(query);
 
             if (result.IsFailure)
@@ -244,9 +244,9 @@ public static class TaskEndpoints
         .WithSummary("Get board view data");
 
         // Calendar View - Get calendar data
-        group.MapGet("/views/calendar/{projectId}", async (Guid projectId, int year, int month, ISender sender) =>
+        group.MapGet("/views/calendar/{taskListId}", async (Guid taskListId, int year, int month, ISender sender) =>
         {
-            var query = new GetCalendarViewQuery(projectId, year, month);
+            var query = new GetCalendarViewQuery(taskListId, year, month);
             var result = await sender.Send(query);
 
             if (result.IsFailure)
@@ -260,9 +260,9 @@ public static class TaskEndpoints
         .WithSummary("Get calendar view data");
 
         // Gantt View - Get gantt chart data
-        group.MapGet("/views/gantt/{projectId}", async (Guid projectId, ISender sender) =>
+        group.MapGet("/views/gantt/{taskListId}", async (Guid taskListId, ISender sender) =>
         {
-            var query = new GetGanttViewQuery(projectId);
+            var query = new GetGanttViewQuery(taskListId);
             var result = await sender.Send(query);
 
             if (result.IsFailure)

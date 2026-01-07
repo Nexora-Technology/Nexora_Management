@@ -4,9 +4,9 @@ namespace Nexora.Management.Domain.Entities;
 
 public class Task : BaseEntity
 {
-    // TODO: Migrate to TaskListId, keep ProjectId for backward compatibility during migration
-    public Guid ProjectId { get; set; } // DEPRECATED: Use TaskListId after migration
-    public Guid TaskListId { get; set; } // NEW: References TaskList in ClickUp hierarchy
+    [Obsolete("Use TaskListId instead. ProjectId is kept for backward compatibility during migration.")]
+    public Guid ProjectId { get; set; }
+    public Guid TaskListId { get; set; }
     public Guid? ParentTaskId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
@@ -21,8 +21,9 @@ public class Task : BaseEntity
     public Guid CreatedBy { get; set; }
 
     // Navigation properties
-    public Project Project { get; set; } = null!; // DEPRECATED: Remove after migration
-    public TaskList TaskList { get; set; } = null!; // NEW: TaskList navigation
+    [Obsolete("Use TaskList instead. Project is kept for backward compatibility during migration.")]
+    public Project Project { get; set; } = null!;
+    public TaskList TaskList { get; set; } = null!;
     public Task? ParentTask { get; set; }
     public ICollection<Task> Subtasks { get; set; } = new List<Task>();
     public User? Assignee { get; set; }

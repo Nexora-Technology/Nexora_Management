@@ -46,11 +46,11 @@ public static class CommentEndpoints
                 Data = result.Value
             };
 
-            // Get task's project ID from database
+            // Get task's tasklist ID from database
             var task = await sender.Send(new Nexora.Management.Application.Tasks.Queries.GetTaskByIdQuery(result.Value.TaskId));
             if (task.IsSuccess)
             {
-                await taskHub.Clients.Group($"project_{task.Value.ProjectId}")
+                await taskHub.Clients.Group($"tasklist_{task.Value.TaskListId}")
                     .SendAsync("CommentAdded", message);
             }
 
@@ -113,11 +113,11 @@ public static class CommentEndpoints
                 Data = result.Value
             };
 
-            // Get task's project ID from database
+            // Get task's tasklist ID from database
             var task = await sender.Send(new Nexora.Management.Application.Tasks.Queries.GetTaskByIdQuery(result.Value.TaskId));
             if (task.IsSuccess)
             {
-                await taskHub.Clients.Group($"project_{task.Value.ProjectId}")
+                await taskHub.Clients.Group($"tasklist_{task.Value.TaskListId}")
                     .SendAsync("CommentUpdated", message);
             }
 
@@ -155,11 +155,11 @@ public static class CommentEndpoints
                     Data = null
                 };
 
-                // Get task's project ID from database
+                // Get task's tasklist ID from database
                 var task = await sender.Send(new Nexora.Management.Application.Tasks.Queries.GetTaskByIdQuery(result.Value.Value));
                 if (task.IsSuccess)
                 {
-                    await taskHub.Clients.Group($"project_{task.Value.ProjectId}")
+                    await taskHub.Clients.Group($"tasklist_{task.Value.TaskListId}")
                         .SendAsync("CommentDeleted", message);
                 }
             }

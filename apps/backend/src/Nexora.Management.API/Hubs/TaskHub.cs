@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 namespace Nexora.Management.API.Hubs;
 
 /// <summary>
-/// Hub for real-time task updates within projects
+/// Hub for real-time task updates within tasklists
 /// </summary>
 [Authorize]
 public class TaskHub : Hub
@@ -17,33 +17,33 @@ public class TaskHub : Hub
     }
 
     /// <summary>
-    /// Join a project group to receive task updates
+    /// Join a tasklist group to receive task updates
     /// </summary>
-    public async Task JoinProject(Guid projectId)
+    public async Task JoinTaskList(Guid taskListId)
     {
-        var groupName = GetProjectGroupName(projectId);
+        var groupName = GetTaskListGroupName(taskListId);
         await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
-        _logger.LogInformation("User {UserId} joined project {ProjectId}", Context.UserIdentifier, projectId);
+        _logger.LogInformation("User {UserId} joined tasklist {TaskListId}", Context.UserIdentifier, taskListId);
     }
 
     /// <summary>
-    /// Leave a project group
+    /// Leave a tasklist group
     /// </summary>
-    public async Task LeaveProject(Guid projectId)
+    public async Task LeaveTaskList(Guid taskListId)
     {
-        var groupName = GetProjectGroupName(projectId);
+        var groupName = GetTaskListGroupName(taskListId);
         await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
-        _logger.LogInformation("User {UserId} left project {ProjectId}", Context.UserIdentifier, projectId);
+        _logger.LogInformation("User {UserId} left tasklist {TaskListId}", Context.UserIdentifier, taskListId);
     }
 
     /// <summary>
-    /// Broadcast task update to project group (called by server)
+    /// Broadcast task update to tasklist group (called by server)
     /// </summary>
-    public async Task BroadcastTaskUpdate(Guid projectId, string messageType, object data)
+    public async Task BroadcastTaskUpdate(Guid taskListId, string messageType, object data)
     {
-        var groupName = GetProjectGroupName(projectId);
+        var groupName = GetTaskListGroupName(taskListId);
         await Clients.Group(groupName).SendAsync(messageType, data);
-        _logger.LogDebug("Broadcasted {MessageType} to project {ProjectId}", messageType, projectId);
+        _logger.LogDebug("Broadcasted {MessageType} to tasklist {TaskListId}", messageType, taskListId);
     }
 
     public override async Task OnConnectedAsync()
@@ -65,5 +65,5 @@ public class TaskHub : Hub
         await base.OnDisconnectedAsync(exception);
     }
 
-    private static string GetProjectGroupName(Guid projectId) => $"project_{projectId}";
+    private static string GetTaskListGroupName(Guid taskListId) => $"tasklist_{taskListId}";
 }

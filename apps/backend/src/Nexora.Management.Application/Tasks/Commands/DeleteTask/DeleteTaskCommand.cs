@@ -31,10 +31,10 @@ public class DeleteTaskCommandHandler : IRequestHandler<DeleteTaskCommand, Resul
             return Result<Guid?>.Failure("Cannot delete task with subtasks. Delete or move subtasks first.");
         }
 
-        var projectId = task.ProjectId;
+        var taskListId = task.TaskListId;
         _db.Tasks.Remove(task);
         await _db.SaveChangesAsync(ct);
 
-        return Result<Guid?>.Success(projectId);
+        return Result<Guid?>.Success(taskListId);
     }
 }

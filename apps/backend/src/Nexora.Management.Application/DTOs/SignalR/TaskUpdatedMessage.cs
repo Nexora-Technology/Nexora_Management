@@ -6,7 +6,7 @@ namespace Nexora.Management.Application.DTOs.SignalR;
 public class TaskUpdatedMessage
 {
     public Guid TaskId { get; set; }
-    public Guid ProjectId { get; set; }
+    public Guid TaskListId { get; set; }
     public string Type { get; set; } = string.Empty; // "created", "updated", "deleted"
     public Guid UpdatedBy { get; set; }
     public DateTime Timestamp { get; set; }

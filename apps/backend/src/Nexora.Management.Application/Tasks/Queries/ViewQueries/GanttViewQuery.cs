@@ -6,7 +6,7 @@ using Nexora.Management.Infrastructure.Interfaces;
 
 namespace Nexora.Management.Application.Tasks.Queries.ViewQueries;
 
-public record GetGanttViewQuery(Guid ProjectId) : IRequest<Result<List<GanttTaskDto>>>;
+public record GetGanttViewQuery(Guid TaskListId) : IRequest<Result<List<GanttTaskDto>>>;
 
 public class GetGanttViewQueryHandler : IRequestHandler<GetGanttViewQuery, Result<List<GanttTaskDto>>>
 {
@@ -21,9 +21,9 @@ public class GetGanttViewQueryHandler : IRequestHandler<GetGanttViewQuery, Resul
         GetGanttViewQuery request,
         CancellationToken ct)
     {
-        // Get all tasks for the project
+        // Get all tasks for the tasklist
         var allTasks = await _db.Tasks
-            .Where(t => t.ProjectId == request.ProjectId)
+            .Where(t => t.TaskListId == request.TaskListId)
             .OrderBy(t => t.PositionOrder)
             .ToListAsync(ct);
 

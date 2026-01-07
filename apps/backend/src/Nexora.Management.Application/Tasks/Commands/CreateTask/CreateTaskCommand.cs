@@ -9,7 +9,7 @@ using DomainTask = Nexora.Management.Domain.Entities.Task;
 namespace Nexora.Management.Application.Tasks.Commands.CreateTask;
 
 public record CreateTaskCommand(
-    Guid ProjectId,
+    Guid TaskListId,
     string Title,
     string? Description,
     Guid? ParentTaskId,
@@ -34,31 +34,32 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, Resul
 
     public async System.Threading.Tasks.Task<Result<TaskDto>> Handle(CreateTaskCommand request, CancellationToken ct)
     {
-        // Validate project exists
-        var project = await _db.Projects.FirstOrDefaultAsync(p => p.Id == request.ProjectId, ct);
-        if (project == null)
+        // Validate tasklist exists
+        var tasklist = await _db.TaskLists.FirstOrDefaultAsync(tl => tl.Id == request.TaskListId, ct);
+        if (tasklist == null)
         {
-            return Result<TaskDto>.Failure("Project not found");
+            return Result<TaskDto>.Failure("TaskList not found");
         }
 
         // Validate parent task if provided
         if (request.ParentTaskId.HasValue)
         {
             var parentTask = await _db.Tasks.FirstOrDefaultAsync(t => t.Id == request.ParentTaskId.Value, ct);
-            if (parentTask == null || parentTask.ProjectId != request.ProjectId)
+            if (parentTask == null || parentTask.TaskListId != request.TaskListId)
             {
-                return Result<TaskDto>.Failure("Parent task not found or belongs to different project");
+                return Result<TaskDto>.Failure("Parent task not found or belongs to different tasklist");
             }
         }
 
         // Get max position for ordering
         var maxPosition = await _db.Tasks
-            .Where(t => t.ProjectId == request.ProjectId && t.ParentTaskId == request.ParentTaskId)
+            .Where(t => t.TaskListId == request.TaskListId && t.ParentTaskId == request.ParentTaskId)
             .MaxAsync(t => (int?)t.PositionOrder) ?? 0;
 
         var task = new DomainTask
         {
-            ProjectId = request.ProjectId,
+            TaskListId = request.TaskListId,
+            // ProjectId kept as NULL (deprecated, no longer set for backward compatibility)
             ParentTaskId = request.ParentTaskId,
             Title = request.Title,
             Description = request.Description,
@@ -78,7 +79,7 @@ public class CreateTaskCommandHandler : IRequestHandler<CreateTaskCommand, Resul
 
         var taskDto = new TaskDto(
             task.Id,
-            task.ProjectId,
+            task.TaskListId,
             task.ParentTaskId,
             task.Title,
             task.Description,

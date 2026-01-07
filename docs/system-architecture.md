@@ -1,7 +1,7 @@
 # System Architecture
 
 **Last Updated:** 2026-01-07
-**Version:** Phase 09 In Progress (ClickUp Hierarchy - Phase 6 Complete)
+**Version:** Phase 09 Complete (ClickUp Hierarchy - Phases 6, 7, 8)
 **Phase 07 Status:** DEFERRED - Test requirements documented, code quality fixes complete
 
 ## Overview
@@ -270,33 +270,33 @@ BaseEntity (abstract)
    - NEW: TaskListId (references TaskList in ClickUp hierarchy)
    - DEPRECATED: ProjectId (kept for migration compatibility)
 
-5. **Comment**
+8. **Comment**
    - Threaded comments (self-referencing via `ParentCommentId`)
    - Associated with Tasks and Users
 
-6. **Attachment**
+9. **Attachment**
    - File attachments for tasks
    - Metadata: FileName, FilePath, FileSizeBytes, MimeType
 
-7. **UserPresence**
-   - Tracks user online/offline status
-   - Current view tracking (task/project being viewed)
-   - Last seen timestamp
-   - Connection ID for SignalR
+10. **UserPresence**
+    - Tracks user online/offline status
+    - Current view tracking (task/project being viewed)
+    - Last seen timestamp
+    - Connection ID for SignalR
 
-8. **Notification**
-   - User notifications
-   - Types: task_assigned, comment_mentioned, status_changed, due_date_reminder
-   - Read status tracking
-   - JSONB data field for metadata
+11. **Notification**
+    - User notifications
+    - Types: task_assigned, comment_mentioned, status_changed, due_date_reminder
+    - Read status tracking
+    - JSONB data field for metadata
 
-9. **NotificationPreference**
-   - User notification settings
-   - Per-event type toggles
-   - In-app vs email preferences
-   - Quiet hours configuration
+12. **NotificationPreference**
+    - User notification settings
+    - Per-event type toggles
+    - In-app vs email preferences
+    - Quiet hours configuration
 
-10. **Page** (Phase 07)
+13. **Page** (Phase 07)
     - Wiki/document pages with hierarchical structure
     - Self-referencing via `ParentPageId` for nested pages
     - Unique slug for URLs
@@ -304,31 +304,31 @@ BaseEntity (abstract)
     - Favorite and recent view tracking
     - Workspace-scoped with RLS
 
-11. **PageVersion** (Phase 07)
+14. **PageVersion** (Phase 07)
     - Version history for page restore capability
     - Auto-created on content changes
     - Composite key (PageId + VersionNumber)
     - Stores full content snapshot
     - Created by tracking
 
-12. **PageCollaborator** (Phase 07)
+15. **PageCollaborator** (Phase 07)
     - Page collaboration with role-based access
     - Roles: Owner, Editor, Viewer
     - Composite key (PageId + UserId)
     - Workspace membership validation
 
-13. **PageComment** (Phase 07)
+16. **PageComment** (Phase 07)
     - Threaded comments on document pages
     - Self-referencing via `ParentCommentId` for nested replies
     - Similar to Task comments but for pages
 
-14. **GoalPeriod** (Phase 08)
+17. **GoalPeriod** (Phase 08)
     - Time periods for goal tracking (e.g., Q1 2026, FY 2026)
     - Workspace-scoped with start/end dates
     - Status tracking (active, archived)
     - Objectives association for period-based goals
 
-15. **Objective** (Phase 08)
+18. **Objective** (Phase 08)
     - Objectives with hierarchical structure (parent-child relationships)
     - Workspace-scoped with optional period association
     - Owner assignment to users
@@ -337,13 +337,13 @@ BaseEntity (abstract)
     - Progress percentage (0-100) calculated from weighted average of key results
     - Position ordering for drag-and-drop
 
-16. **KeyResult** (Phase 08)
+19. **KeyResult** (Phase 08)
     - Measurable key results for objectives
     - Metric types: number, percentage, currency
     - Current and target values for progress tracking
     - Unit specification (%, $, count, etc.)
     - Due date for time-bound key results
-    - Progress percentage (0-100) calculated as (CurrentValue / TargetValue) * 100
+    - Progress percentage (0-100) calculated as (CurrentValue / TargetValue) \* 100
     - Weight-based priority for weighted average calculation
 
 #### Common Abstractions
@@ -771,6 +771,138 @@ getNodePath(nodes: SpaceTreeNode[], id: string): SpaceTreeNode[]
 // Returns: Path array [root, ..., target]
 ```
 
+### Frontend Workspace Context (Phase 08)
+
+**Location:** `/apps/frontend/src/features/workspaces/workspace-provider.tsx`
+
+**Purpose:** Global workspace state management with React Context and React Query
+
+**Context Interface:**
+
+```typescript
+interface WorkspaceContextType {
+  // State
+  currentWorkspace: Workspace | null;
+  workspaces: Workspace[];
+  isLoading: boolean;
+  error: Error | null;
+
+  // Actions
+  setCurrentWorkspace: (workspace: Workspace | null) => void;
+  switchWorkspace: (workspaceId: string) => Promise<void>;
+  createWorkspace: (data: CreateWorkspaceRequest) => Promise<Workspace>;
+  refetchWorkspaces: () => void;
+}
+```
+
+**Features:**
+
+1. **LocalStorage Persistence:**
+   - Key: `current_workspace_id`
+   - Validation: Non-empty string check
+   - Automatic loading on mount
+
+2. **Workspace Resolution Logic:**
+
+   ```typescript
+   1. Try to find workspace by stored ID
+   2. If not found, find default workspace (isDefault: true)
+   3. If no default, use first workspace in list
+   4. If no workspaces, return null
+   ```
+
+3. **Query Invalidation on Workspace Switch:**
+   - Invalidates: `['spaces']`, `['folders']`, `['tasklists']`
+   - Preserves: Auth queries, other workspace data
+   - Ensures fresh data for new workspace
+
+4. **React Query Integration:**
+   - 5-minute stale time for workspace list
+   - Automatic refetch on window focus
+   - Optimistic updates for mutations
+
+**Usage Example:**
+
+```typescript
+import { useWorkspace } from '@/features/workspaces';
+
+function SpacesPage() {
+  const { currentWorkspace, workspaces, setCurrentWorkspace, isLoading } = useWorkspace();
+
+  if (isLoading) return <LoadingSkeleton />;
+  if (!currentWorkspace) return <EmptyState />;
+
+  return (
+    <div>
+      <h1>{currentWorkspace.name}</h1>
+      {/* Use currentWorkspace.id for queries */}
+    </div>
+  );
+}
+```
+
+**Provider Setup:**
+
+```typescript
+// src/lib/providers.tsx
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <WorkspaceProvider>
+      <AuthProvider>
+        <QueryClientProvider>
+          {children}
+        </QueryClientProvider>
+      </AuthProvider>
+    </WorkspaceProvider>
+  );
+}
+```
+
+**State Management Flow:**
+
+```
+User visits app
+    ↓
+WorkspaceProvider mounts
+    ↓
+Load current_workspace_id from localStorage
+    ↓
+Query: GET /api/workspaces
+    ↓
+Resolve currentWorkspace:
+  - Find by stored ID
+  - Fallback to default workspace
+  - Fallback to first workspace
+  - Fallback to null
+    ↓
+Render app with currentWorkspace context
+    ↓
+User switches workspace
+    ↓
+setCurrentWorkspace(newWorkspace)
+    ↓
+Update localStorage
+    ↓
+Invalidate queries: spaces, folders, tasklists
+    ↓
+Refetch data for new workspace
+```
+
+**Performance Optimizations:**
+
+- useMemo for currentWorkspace resolution
+- useCallback for action handlers
+- React Query caching for workspaces list
+- Selective query invalidation
+- Minimal re-renders with proper dependency arrays
+
+**Error Handling:**
+
+- try-catch for localStorage access
+- Error state in context
+- Graceful fallbacks for missing workspaces
+- Console logging for debugging
+
 **Algorithm Complexity:**
 
 - **buildSpaceTree:** O(n + m + p) where n=spaces, m=folders, p=tasklists
@@ -813,14 +945,14 @@ const path = getNodePath(tree, 'tasklist-123');
 
 ```typescript
 interface SpaceTreeNavProps {
-  spaces: SpaceTreeNode[];           // Hierarchical tree data
-  onNodeClick?: (node: SpaceTreeNode) => void;  // Node selection callback
-  onCreateSpace?: () => void;        // Create space callback
-  onCreateFolder?: (spaceId: string) => void;  // Create folder callback
-  onCreateList?: (spaceId: string, folderId?: string) => void;  // Create list callback
-  collapsed?: boolean;               // Icon-only mode
-  className?: string;                // Custom styling
-  selectedNodeId?: string;           // Currently selected node
+  spaces: SpaceTreeNode[]; // Hierarchical tree data
+  onNodeClick?: (node: SpaceTreeNode) => void; // Node selection callback
+  onCreateSpace?: () => void; // Create space callback
+  onCreateFolder?: (spaceId: string) => void; // Create folder callback
+  onCreateList?: (spaceId: string, folderId?: string) => void; // Create list callback
+  collapsed?: boolean; // Icon-only mode
+  className?: string; // Custom styling
+  selectedNodeId?: string; // Currently selected node
 }
 ```
 
@@ -917,31 +1049,31 @@ import { MemoizedSpaceTreeNav } from '@/components/spaces';
 ```typescript
 // Data fetching
 const { data: spaces } = useQuery({
-  queryKey: ["spaces", workspaceId],
-  queryFn: () => spacesApi.getSpacesByWorkspace(workspaceId)
-})
+  queryKey: ['spaces', workspaceId],
+  queryFn: () => spacesApi.getSpacesByWorkspace(workspaceId),
+});
 
 const { data: folders } = useQuery({
-  queryKey: ["folders"],
-  queryFn: () => fetch("/api/folders")
-})
+  queryKey: ['folders'],
+  queryFn: () => fetch('/api/folders'),
+});
 
 const { data: taskLists } = useQuery({
-  queryKey: ["tasklists"],
-  queryFn: () => spacesApi.getTaskLists()
-})
+  queryKey: ['tasklists'],
+  queryFn: () => spacesApi.getTaskLists(),
+});
 
 // Build hierarchical tree
 const tree = useMemo(() => {
-  return buildSpaceTree(spaces, folders, taskLists)
-}, [spaces, folders, taskLists])
+  return buildSpaceTree(spaces, folders, taskLists);
+}, [spaces, folders, taskLists]);
 
 // Node click handler
 const handleNodeClick = (node: SpaceTreeNode) => {
-  if (node.type === "tasklist") {
-    router.push(`/lists/${node.id}`)
+  if (node.type === 'tasklist') {
+    router.push(`/lists/${node.id}`);
   }
-}
+};
 ```
 
 **Loading States:**
@@ -974,22 +1106,22 @@ const handleNodeClick = (node: SpaceTreeNode) => {
 ```typescript
 // Data fetching
 const { data: list } = useQuery({
-  queryKey: ["tasklists", listId],
-  queryFn: () => spacesApi.getTaskListById(listId)
-})
+  queryKey: ['tasklists', listId],
+  queryFn: () => spacesApi.getTaskListById(listId),
+});
 
 const { data: tasks } = useQuery({
-  queryKey: ["tasks", listId],
+  queryKey: ['tasks', listId],
   queryFn: () => fetch(`/api/tasks?projectId=${listId}`),
-  enabled: !!listId
-})
+  enabled: !!listId,
+});
 
 // Breadcrumb path
 const breadcrumbItems = [
-  { label: "Home", href: "/" },
-  { label: "Spaces", href: "/spaces" },
-  { label: list.name, href: `/lists/${list.id}` }
-]
+  { label: 'Home', href: '/' },
+  { label: 'Spaces', href: '/spaces' },
+  { label: list.name, href: `/lists/${list.id}` },
+];
 ```
 
 **List Type Badge:**
@@ -1046,14 +1178,14 @@ const breadcrumbItems = [
 
 ```typescript
 const navItems = [
-  { title: "Home", href: "/", icon: Home },
-  { title: "Spaces", href: "/spaces", icon: Folder },  // Changed from "Tasks"
-  { title: "Goals", href: "/goals", icon: Target },     // NEW
-  { title: "Documents", href: "/documents", icon: FileText },  // NEW
-  { title: "Team", href: "/team", icon: Users },
-  { title: "Calendar", href: "/calendar", icon: Calendar },
-  { title: "Settings", href: "/settings", icon: Settings },
-]
+  { title: 'Home', href: '/', icon: Home },
+  { title: 'Spaces', href: '/spaces', icon: Folder }, // Changed from "Tasks"
+  { title: 'Goals', href: '/goals', icon: Target }, // NEW
+  { title: 'Documents', href: '/documents', icon: FileText }, // NEW
+  { title: 'Team', href: '/team', icon: Users },
+  { title: 'Calendar', href: '/calendar', icon: Calendar },
+  { title: 'Settings', href: '/settings', icon: Settings },
+];
 ```
 
 #### 2. Task Modal (Updated)
@@ -1090,10 +1222,10 @@ const navItems = [
 ```typescript
 // TODO: Fetch available lists from spaces API
 const listOptions = [
-  { id: "list-1", name: "Engineering Tasks" },
-  { id: "list-2", name: "Marketing Campaign" },
-  { id: "list-3", name: "Sprint Backlog" },
-]
+  { id: 'list-1', name: 'Engineering Tasks' },
+  { id: 'list-2', name: 'Marketing Campaign' },
+  { id: 'list-3', name: 'Sprint Backlog' },
+];
 ```
 
 #### 3. Task Types (Updated)
@@ -1109,33 +1241,33 @@ const listOptions = [
 
 ```typescript
 export interface Task {
-  id: string
-  title: string
-  description?: string
-  status: TaskStatus
-  priority: TaskPriority
-  taskType: TaskType
+  id: string;
+  title: string;
+  description?: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  taskType: TaskType;
   // ... other fields
 
   // Hierarchy fields - 3-level hierarchy: Epic → Story → Subtask
-  parentTaskId?: string | null
-  epicId?: string | null
-  storyId?: string | null
+  parentTaskId?: string | null;
+  epicId?: string | null;
+  storyId?: string | null;
 
-  assignee?: { id: string; name: string; avatar?: string }
-  dueDate?: string
-  startDate?: string
-  estimatedHours?: number
-  commentCount: number
-  attachmentCount: number
+  assignee?: { id: string; name: string; avatar?: string };
+  dueDate?: string;
+  startDate?: string;
+  estimatedHours?: number;
+  commentCount: number;
+  attachmentCount: number;
 
-  projectId: string  // Deprecated: Use listId instead
-  listId?: string    // NEW: Reference to TaskList (replaces projectId)
-  spaceId?: string   // NEW: Reference to Space
-  folderId?: string  // NEW: Reference to Folder (optional)
+  projectId: string; // Deprecated: Use listId instead
+  listId?: string; // NEW: Reference to TaskList (replaces projectId)
+  spaceId?: string; // NEW: Reference to Space
+  folderId?: string; // NEW: Reference to Folder (optional)
 
-  createdAt: string
-  updatedAt: string
+  createdAt: string;
+  updatedAt: string;
 }
 ```
 

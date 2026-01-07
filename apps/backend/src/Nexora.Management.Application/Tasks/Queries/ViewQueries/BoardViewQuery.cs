@@ -6,7 +6,7 @@ using Nexora.Management.Infrastructure.Interfaces;
 
 namespace Nexora.Management.Application.Tasks.Queries.ViewQueries;
 
-public record GetBoardViewQuery(Guid ProjectId) : IRequest<Result<List<BoardColumnDto>>>;
+public record GetBoardViewQuery(Guid TaskListId) : IRequest<Result<List<BoardColumnDto>>>;
 
 public class GetBoardViewQueryHandler : IRequestHandler<GetBoardViewQuery, Result<List<BoardColumnDto>>>
 {
@@ -21,19 +21,19 @@ public class GetBoardViewQueryHandler : IRequestHandler<GetBoardViewQuery, Resul
         GetBoardViewQuery request,
         CancellationToken ct)
     {
-        // Get all statuses for the project
+        // Get all statuses for the tasklist
         var statuses = await _db.TaskStatuses
-            .Where(s => s.ProjectId == request.ProjectId)
+            .Where(s => s.TaskListId == request.TaskListId)
             .OrderBy(s => s.OrderIndex)
             .ToListAsync(ct);
 
-        // Get all tasks for the project
+        // Get all tasks for the tasklist
         var tasks = await _db.Tasks
-            .Where(t => t.ProjectId == request.ProjectId)
+            .Where(t => t.TaskListId == request.TaskListId)
             .OrderBy(t => t.PositionOrder)
             .Select(t => new TaskDto(
                 t.Id,
-                t.ProjectId,
+                t.TaskListId,
                 t.ParentTaskId,
                 t.Title,
                 t.Description,

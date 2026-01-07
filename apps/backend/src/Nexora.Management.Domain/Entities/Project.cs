@@ -2,6 +2,7 @@ using Nexora.Management.Domain.Common;
 
 namespace Nexora.Management.Domain.Entities;
 
+[Obsolete("Use TaskList instead. Project is kept for backward compatibility during migration to ClickUp hierarchy (Workspace > Space > TaskList > Task).")]
 public class Project : BaseEntity
 {
     public Guid WorkspaceId { get; set; }
