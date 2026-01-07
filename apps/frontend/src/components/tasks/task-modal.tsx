@@ -85,6 +85,13 @@ const assigneeOptions = [
   { id: "user-4", name: "Alice Brown" },
 ]
 
+// TODO: Fetch available lists from spaces API
+const listOptions = [
+  { id: "list-1", name: "Engineering Tasks" },
+  { id: "list-2", name: "Marketing Campaign" },
+  { id: "list-3", name: "Sprint Backlog" },
+]
+
 export const TaskModal = memo(function TaskModal({
   open,
   onOpenChange,
@@ -108,6 +115,7 @@ export const TaskModal = memo(function TaskModal({
     startDate: task?.startDate || "",
     estimatedHours: task?.estimatedHours || 0,
     projectId: task?.projectId || "",
+    listId: task?.listId || "",
     commentCount: task?.commentCount || 0,
     attachmentCount: task?.attachmentCount || 0,
   })
@@ -156,6 +164,7 @@ export const TaskModal = memo(function TaskModal({
         startDate: "",
         estimatedHours: 0,
         projectId: "",
+        listId: "",
         commentCount: 0,
         attachmentCount: 0,
       })
@@ -304,6 +313,33 @@ export const TaskModal = memo(function TaskModal({
                 {assigneeOptions.map((assignee) => (
                   <SelectItem key={assignee.id} value={assignee.id}>
                     {assignee.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* List (TaskList) */}
+          <div>
+            <label
+              htmlFor="listId"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            >
+              List
+            </label>
+            <Select
+              value={formData.listId}
+              onValueChange={(value) =>
+                setFormData({ ...formData, listId: value })
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select list" />
+              </SelectTrigger>
+              <SelectContent>
+                {listOptions.map((list) => (
+                  <SelectItem key={list.id} value={list.id}>
+                    {list.name}
                   </SelectItem>
                 ))}
               </SelectContent>

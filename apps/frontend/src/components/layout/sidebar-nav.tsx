@@ -24,13 +24,8 @@ const navItems = [
     icon: Home,
   },
   {
-    title: "Tasks",
-    href: "/tasks",
-    icon: CheckSquare,
-  },
-  {
-    title: "Projects",
-    href: "/projects",
+    title: "Spaces",
+    href: "/spaces",
     icon: Folder,
   },
   {

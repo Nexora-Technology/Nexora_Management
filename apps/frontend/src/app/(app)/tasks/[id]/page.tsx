@@ -23,8 +23,8 @@ export default function TaskDetailPage() {
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             Task not found
           </h2>
-          <Link href="/tasks">
-            <Button variant="secondary">Back to Tasks</Button>
+          <Link href={"/spaces" as any}>
+            <Button variant="secondary">Back to Spaces</Button>
           </Link>
         </div>
       </div>
@@ -37,15 +37,19 @@ export default function TaskDetailPage() {
       <Breadcrumb
         items={[
           { label: "Home", href: "/" },
-          { label: "Tasks", href: "/tasks" },
+          { label: "Spaces", href: "/spaces" },
+          // TODO: Add space, folder, and list names when available from API
+          // { label: task.spaceName, href: `/spaces/${task.spaceId}` },
+          // ...(task.folderName ? [{ label: task.folderName, href: `/spaces/${task.spaceId}/folders/${task.folderId}` }] : []),
+          // { label: task.listName, href: `/lists/${task.listId}` },
           { label: task.title },
-        ]}
+        ].filter(Boolean)}
         className="mb-6"
       />
 
       {/* Header */}
       <div className="mb-6">
-        <Link href="/tasks">
+        <Link href={"/spaces" as any}>
           <Button variant="ghost" size="sm" className="mb-4 gap-2">
             <ArrowLeft className="h-4 w-4" />
             Back

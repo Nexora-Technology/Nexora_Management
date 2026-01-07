@@ -24,7 +24,10 @@ export interface Task {
   estimatedHours?: number
   commentCount: number
   attachmentCount: number
-  projectId: string
+  projectId: string  // Deprecated: Use listId instead
+  listId?: string    // NEW: Reference to TaskList (replaces projectId)
+  spaceId?: string   // NEW: Reference to Space
+  folderId?: string  // NEW: Reference to Folder (optional)
   createdAt: string
   updatedAt: string
 }
