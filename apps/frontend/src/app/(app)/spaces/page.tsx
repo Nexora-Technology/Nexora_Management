@@ -3,54 +3,100 @@
 import * as React from "react"
 import { useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
+import { Building2 } from "lucide-react"
 import type { Route } from "next"
 import { spacesApi } from "@/features/spaces/api"
 import { buildSpaceTree } from "@/features/spaces/utils"
 import { SpaceTreeNav } from "@/components/spaces/space-tree-nav"
+import { useWorkspace } from "@/features/workspaces"
 import type { SpaceTreeNode } from "@/features/spaces/types"
 import { cn } from "@/lib/utils"
 
 export default function SpacesPage() {
   const router = useRouter()
-
-  // TODO: Get current workspace ID from auth context
-  const currentWorkspaceId = "default-workspace"
+  const { currentWorkspace, isLoading: workspaceLoading } = useWorkspace()
 
   const { data: spaces, isLoading: spacesLoading } = useQuery({
-    queryKey: ["spaces", currentWorkspaceId],
+    queryKey: ["spaces", currentWorkspace?.id],
     queryFn: async () => {
-      const response = await spacesApi.getSpacesByWorkspace(currentWorkspaceId)
+      if (!currentWorkspace) return []
+      const response = await spacesApi.getSpacesByWorkspace(currentWorkspace.id)
       return response.data
     },
+    enabled: !!currentWorkspace,
   })
 
   // Get folders for all spaces
   const { data: folders, isLoading: foldersLoading } = useQuery({
-    queryKey: ["folders"],
+    queryKey: ["folders", currentWorkspace?.id],
     queryFn: async () => {
+      if (!currentWorkspace || !spaces) return []
       // TODO: Implement getFoldersByWorkspace endpoint or aggregate from spaces
       const response = await fetch("/api/folders")
       return response.json()
     },
-    enabled: !!spaces,
+    enabled: !!currentWorkspace && !!spaces,
   })
 
   // Get tasklists for all spaces
   const { data: taskLists, isLoading: taskListsLoading } = useQuery({
-    queryKey: ["tasklists"],
+    queryKey: ["tasklists", currentWorkspace?.id],
     queryFn: async () => {
+      if (!currentWorkspace) return []
       const response = await spacesApi.getTaskLists()
       return response.data
     },
+    enabled: !!currentWorkspace,
   })
 
-  const isLoading = spacesLoading || foldersLoading || taskListsLoading
+  const isLoading = workspaceLoading || spacesLoading || foldersLoading || taskListsLoading
 
-  // Build hierarchical tree
+  // Build hierarchical tree (must be before early returns to satisfy React Hooks rules)
   const tree: SpaceTreeNode[] = React.useMemo(() => {
     if (!spaces || !folders || !taskLists) return []
     return buildSpaceTree(spaces, folders, taskLists)
   }, [spaces, folders, taskLists])
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex h-full">
+        {/* Left sidebar with space tree */}
+        <div className="w-72 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+            Spaces
+          </h2>
+          <div className="flex items-center justify-center py-8">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Loading...
+            </div>
+          </div>
+        </div>
+
+        {/* Main content area */}
+        <div className="flex-1 overflow-auto bg-gray-50 dark:bg-gray-900" />
+      </div>
+    )
+  }
+
+  // Show no workspace state
+  if (!currentWorkspace) {
+    return (
+      <div className="flex h-full items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center max-w-md">
+          <div className="mb-4">
+            <Building2 className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            No Workspace Selected
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Create or select a workspace from the header to start organizing your spaces and tasks.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   const handleNodeClick = (node: SpaceTreeNode) => {
     if (node.type === "tasklist") {

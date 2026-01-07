@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState, type ReactNode } from "react";
 import { AuthProvider } from "@/features/auth/providers/auth-provider";
+import { WorkspaceProvider } from "@/features/workspaces";
 import { NotificationCenter, type Notification } from "@/features/notifications/NotificationCenter";
 
 interface ProvidersProps {
@@ -30,12 +31,14 @@ export function Providers({ children }: ProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        {children}
-        <NotificationCenter
-          notifications={mockNotifications}
-          unreadCount={unreadCount}
-        />
-        <ReactQueryDevtools initialIsOpen={false} />
+        <WorkspaceProvider>
+          {children}
+          <NotificationCenter
+            notifications={mockNotifications}
+            unreadCount={unreadCount}
+          />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </WorkspaceProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

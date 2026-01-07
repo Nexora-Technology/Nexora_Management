@@ -5,6 +5,7 @@ import { Menu, Search, Bell, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
+import { WorkspaceSelector } from "@/components/workspaces"
 
 interface AppHeaderProps {
   sidebarCollapsed: boolean
@@ -33,6 +34,9 @@ export function AppHeader({ onToggleSidebar }: AppHeaderProps) {
             Nexora
           </span>
         </div>
+
+        {/* Workspace Selector */}
+        <WorkspaceSelector />
 
         {/* Search */}
         <div className="hidden md:block ml-4">
