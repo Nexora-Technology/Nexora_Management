@@ -2,6 +2,23 @@
 
 A powerful, ClickUp-inspired project management platform built with modern technologies. Nexora provides teams with a comprehensive solution for task management, collaboration, and productivity tracking.
 
+## Current Status
+
+**Latest Updates (January 2026):**
+- ✅ Workspace CRUD operations with CQRS layer
+- ✅ ClickUp Hierarchy API (Spaces, Folders, TaskLists)
+- ✅ Swagger UI documentation enabled
+- ✅ Docker configuration fixed (CORS, API ports)
+- ⚠️ Test coverage: 0% (critical issue)
+- ⚠️ Production readiness: Grade B- (82/100)
+
+**Quick Stats:**
+- Backend: 203 C# files (~24,790 LOC)
+- Frontend: 117 TypeScript files
+- Database: 27 entities, 7 migrations
+- API Endpoints: 11 endpoint groups
+- SignalR Hubs: 3 real-time hubs
+
 ## Tech Stack
 
 ### Frontend
@@ -23,6 +40,7 @@ A powerful, ClickUp-inspired project management platform built with modern techn
 - **SignalR** - Real-time WebSocket communication
 - **PostgreSQL** - Primary database with Row-Level Security
 - **JWT Authentication** - Secure token-based auth
+- **Swagger/Swashbuckle 7.2.0** - API documentation
 
 ### DevOps & Tooling
 
@@ -53,7 +71,8 @@ docker-compose up -d
 
 # Access the application
 # Frontend: http://localhost:3000
-# Backend API: http://localhost:5000
+# Backend API: http://localhost:5001 (Docker network: backend:8080)
+# Swagger UI: http://localhost:5001/swagger
 # PostgreSQL: localhost:5432
 ```
 
@@ -225,11 +244,26 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [x] ClickUp Hierarchy - Spaces, Folders, TaskLists (100% complete)
 - [x] Workspace Context and Auth Integration (100% complete)
 - [x] Backend Database Migration - Phase 2 (100% complete) ✅
-- [ ] Testing infrastructure (DEFERRED)
+- [x] Swagger UI documentation (2026-01-09)
+- [x] Docker configuration fixes (CORS, API ports) (2026-01-09)
+- [ ] Testing infrastructure (DEFERRED) ⚠️ **CRITICAL: 0% test coverage**
 - [ ] Advanced filtering and search
 - [ ] Mobile responsive design
 - [ ] Performance optimization
 - [ ] Deployment to production
+
+## Known Issues
+
+**Critical:**
+1. **Test Coverage:** 0% (only 1 placeholder test for 24,563 LOC)
+2. **CORS Configuration:** AllowAnyOrigin() breaks JWT auth (security issue)
+3. **Database Migrations:** RolePermissions seed data bug, Projects→TaskLists migration not executed
+4. **Production Readiness:** Not ready (Grade B- 82/100)
+
+**Blockers:**
+- Test infrastructure not set up
+- Security audit not completed
+- Performance benchmarks not met
 
 ## Current Phase: ClickUp Hierarchy Implementation (Phase 09 - Complete) ✅
 

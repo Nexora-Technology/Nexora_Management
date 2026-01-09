@@ -424,7 +424,7 @@ namespace Nexora.Management.API.Persistence.Migrations
                 name: "idx_comments_parent",
                 table: "Comments",
                 column: "ParentCommentId",
-                filter: "parent_comment_id IS NOT NULL");
+                filter: "\"ParentCommentId\" IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "idx_comments_task",
@@ -445,7 +445,7 @@ namespace Nexora.Management.API.Persistence.Migrations
                 name: "idx_projects_workspace",
                 table: "Projects",
                 column: "WorkspaceId",
-                filter: "status = 'active'");
+                filter: "\"Status\" = 'active'");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RolePermissions_PermissionId",
@@ -462,7 +462,7 @@ namespace Nexora.Management.API.Persistence.Migrations
                 name: "idx_tasks_assignee",
                 table: "Tasks",
                 column: "AssigneeId",
-                filter: "assignee_id IS NOT NULL");
+                filter: "\"AssigneeId\" IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "idx_tasks_custom_fields",
@@ -474,7 +474,7 @@ namespace Nexora.Management.API.Persistence.Migrations
                 name: "idx_tasks_due_date",
                 table: "Tasks",
                 column: "DueDate",
-                filter: "due_date IS NOT NULL");
+                filter: "\"DueDate\" IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "idx_tasks_list",
@@ -485,7 +485,7 @@ namespace Nexora.Management.API.Persistence.Migrations
                 name: "idx_tasks_parent",
                 table: "Tasks",
                 column: "ParentTaskId",
-                filter: "parent_task_id IS NOT NULL");
+                filter: "\"ParentTaskId\" IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "idx_tasks_project",

@@ -382,7 +382,7 @@ namespace Nexora.Management.API.Persistence.Migrations
                 name: "idx_tasklists_space_active",
                 table: "TaskLists",
                 column: "SpaceId",
-                filter: "status = 'active'");
+                filter: "\"Status\" = 'active'");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TaskLists_OwnerId",

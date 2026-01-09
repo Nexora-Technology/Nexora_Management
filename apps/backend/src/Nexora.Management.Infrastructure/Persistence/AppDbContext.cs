@@ -45,6 +45,8 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<GoalPeriod> GoalPeriods => Set<GoalPeriod>();
     public DbSet<Objective> Objectives => Set<Objective>();
     public DbSet<KeyResult> KeyResults => Set<KeyResult>();
+    public DbSet<TimeEntry> TimeEntries => Set<TimeEntry>();
+    public DbSet<TimeRate> TimeRates => Set<TimeRate>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -30,6 +30,8 @@ public interface IAppDbContext
     DbSet<GoalPeriod> GoalPeriods { get; }
     DbSet<Objective> Objectives { get; }
     DbSet<KeyResult> KeyResults { get; }
+    DbSet<TimeEntry> TimeEntries { get; }
+    DbSet<TimeRate> TimeRates { get; }
     DbSet<Space> Spaces { get; }
     DbSet<Folder> Folders { get; }
     DbSet<TaskList> TaskLists { get; }

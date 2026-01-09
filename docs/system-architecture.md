@@ -1,8 +1,10 @@
 # System Architecture
 
-**Last Updated:** 2026-01-07
-**Version:** Phase 09 Complete (ClickUp Hierarchy - Phases 6, 7, 8)
-**Phase 07 Status:** DEFERRED - Test requirements documented, code quality fixes complete
+**Last Updated:** 2026-01-09
+**Version:** Phase 09 Complete + Docker Testing Phase (Phases 17/18 In Progress)
+**Backend Files:** 203 C# files (~24,790 LOC)
+**Test Coverage:** 0% (critical issue)
+**Docker Testing:** COMPLETE - 3/4 services healthy, 3 critical issues found
 
 ## Overview
 
@@ -1366,7 +1368,9 @@ export interface Task {
    });
    ```
 
-4. **Swagger/OpenAPI:**
+   **⚠️ SECURITY ISSUE:** Current implementation uses `AllowAnyOrigin()` which breaks JWT authentication. Must be fixed before production deployment.
+
+4. **Swagger/OpenAPI (NEW 2026-01-09):**
 
    ```csharp
    builder.Services.AddEndpointsApiExplorer();
@@ -1382,7 +1386,21 @@ export interface Task {
        provider.GetRequiredService<AppDbContext>());
    ```
 
-6. **MediatR Registration:**
+6. **Workspace Endpoints (NEW 2026-01-09):**
+
+   ```csharp
+   // Register Workspace CRUD endpoints
+   builder.Services.AddWorkspaceEndpoints();
+
+   // Maps to:
+   // POST /api/workspaces
+   // GET /api/workspaces
+   // GET /api/workspaces/{id}
+   // PUT /api/workspaces/{id}
+   // DELETE /api/workspaces/{id}
+   ```
+
+7. **MediatR Registration:**
 
    ```csharp
    builder.Services.AddMediatR(cfg =>
@@ -1402,6 +1420,8 @@ export interface Task {
    builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
    builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
    ```
+
+9. **Workspace Authorization Middleware:**
 
 **Middleware Pipeline:**
 
@@ -1525,14 +1545,45 @@ builder.Services.AddAuthentication()
 - **PresenceService** - In-memory user presence tracking with auto-cleanup
 - **NotificationService** - Notification creation and delivery with preference filtering
 
-**Endpoints:**
+**API Endpoints (11 Groups):**
+
+- **AuthEndpoints.cs** - Authentication at `/api/auth`
+- **TaskEndpoints.cs** - Task CRUD at `/api/tasks`
+- **CommentEndpoints.cs** - Comments at `/api/comments`
+- **AttachmentEndpoints.cs** - File attachments at `/api/attachments`
+- **DocumentEndpoints.cs** - Document management at `/api/documents`
+- **GoalEndpoints.cs** - Goal tracking at `/api/goals`
+- **WorkspaceEndpoints.cs** - Workspace CRUD at `/api/workspaces` (NEW 2026-01-09)
+- **SpaceEndpoints.cs** - Space CRUD at `/api/spaces` (ClickUp hierarchy)
+- **FolderEndpoints.cs** - Folder CRUD at `/api/spaces/{spaceId}/folders` (ClickUp hierarchy)
+- **TaskListEndpoints.cs** - TaskList CRUD at `/api/tasklists` (ClickUp hierarchy)
+- **NotificationHub.cs** - Real-time notifications at `/hubs/notifications`
+
+**Endpoint Routes:**
 
 - `GET /` - Welcome message with API info
 - `GET /health` - Health check endpoint
-- `/swagger` - Swagger UI (root in development)
+- `GET /swagger` - Swagger UI (development only) (NEW 2026-01-09)
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
 - `POST /api/auth/refresh` - Token refresh
+
+**Workspace Endpoints (NEW 2026-01-09):**
+- `POST /api/workspaces` - Create workspace
+- `GET /api/workspaces` - List workspaces
+- `GET /api/workspaces/{id}` - Get workspace by ID
+- `PUT /api/workspaces/{id}` - Update workspace
+- `DELETE /api/workspaces/{id}` - Delete workspace
+
+**ClickUp Hierarchy Endpoints:**
+- `POST /api/spaces` - Create space
+- `GET /api/spaces?workspaceId={id}` - List spaces
+- `POST /api/folders` - Create folder
+- `GET /api/spaces/{spaceId}/folders` - List folders
+- `POST /api/tasklists` - Create tasklist
+- `GET /api/tasklists?spaceId={id}&folderId={id}` - List tasklists
+
+**Task Endpoints:**
 - `POST /api/tasks` - Create task
 - `GET /api/tasks/{id}` - Get task by ID
 - `GET /api/tasks` - List tasks with filters
@@ -2126,26 +2177,76 @@ PostgreSQL :5432
 /hubs/tasks, /hubs/presence, /hubs/notifications
 ```
 
-### Docker Compose (Planned)
+### Docker Compose (Implemented - Testing Phase Complete)
+
+**Status:** ✅ Implemented (2026-01-07) | **Production Ready:** ❌ No (3-4 days work required)
+
+**Current Configuration:**
 
 ```yaml
 services:
   frontend:
     image: nexora-frontend
     ports: ['3000:3000']
+    healthcheck:
+      test: wget -spider http://localhost:3000/api/health
+      interval: 30s
+      retries: 3
 
   backend:
     image: nexora-backend
     ports: ['5001:8080']
-    environment:
-      - ConnectionStrings__DefaultConnection=Host=postgres;...
+    healthcheck:
+      test: curl -f http://localhost:8080/health
+      interval: 30s
+      retries: 3
 
   postgres:
-    image: postgres:16
+    image: postgres:16-alpine
     ports: ['5432:5432']
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: pg_isready -U nexora
+      interval: 10s
+
+  redis:
+    image: redis:7-alpine
+    ports: ['6379:6379']
+    healthcheck:
+      test: redis-cli ping
+      interval: 10s
 ```
+
+**Test Results (2026-01-07):**
+
+| Service | Status | Health Check | Response Time |
+|---------|--------|--------------|---------------|
+| PostgreSQL | ✅ Healthy | Passing (5/5) | ~50ms |
+| Redis | ✅ Healthy | Passing (5/5) | ~66ms |
+| Backend | ✅ Healthy | Passing (5/5) | ~65ms |
+| Frontend | ❌ Unhealthy | Failing (15/15) | Endpoint missing |
+
+**Test Coverage:** 0% (1 placeholder test only)
+
+**Critical Issues Found (3):**
+
+1. **SECURITY:** Hardcoded credentials in docker-compose.yml
+2. **RELIABILITY:** Frontend health check endpoint missing
+3. **QUALITY:** Zero test coverage across backend and frontend
+
+**Production Readiness Score:** 4.5/10
+
+**Estimated Time to Production-Ready:** 3-4 days (52 hours)
+
+**See Also:** `/docs/project-roadmap.md` - Phase 17/18: Docker Testing & Production Setup
+
+**Files:**
+- `/docker/docker-compose.yml` - Base configuration
+- `/docker/docker-compose.override.yml` - Development overrides
+- `/Dockerfile.backend` - Multi-stage backend build
+- `/Dockerfile.frontend` - Multi-stage frontend build
+- `/docker/postgres-init/01-init.sql` - Database initialization
 
 ## Performance Considerations
 

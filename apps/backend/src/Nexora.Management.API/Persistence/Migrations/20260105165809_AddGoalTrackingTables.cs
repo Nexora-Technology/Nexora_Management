@@ -186,7 +186,7 @@ namespace Nexora.Management.API.Persistence.Migrations
                 name: "idx_comments_parent",
                 table: "Comments",
                 column: "ParentCommentId",
-                filter: "parent_comment_id IS NOT NULL");
+                filter: "\"ParentCommentId\" IS NOT NULL");
         }
     }
 }

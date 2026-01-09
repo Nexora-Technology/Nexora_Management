@@ -179,13 +179,13 @@ namespace Nexora.Management.API.Persistence.Migrations
                 name: "idx_page_comments_parent",
                 table: "PageComments",
                 column: "ParentCommentId",
-                filter: "parent_comment_id IS NOT NULL");
+                filter: "\"ParentCommentId\" IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "idx_page_comments_resolved",
                 table: "PageComments",
                 column: "ResolvedAt",
-                filter: "resolved_at IS NOT NULL");
+                filter: "\"ResolvedAt\" IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "idx_page_comments_user",
@@ -202,7 +202,7 @@ namespace Nexora.Management.API.Persistence.Migrations
                 name: "idx_pages_parent",
                 table: "Pages",
                 column: "ParentPageId",
-                filter: "parent_page_id IS NOT NULL");
+                filter: "\"ParentPageId\" IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "idx_pages_slug",

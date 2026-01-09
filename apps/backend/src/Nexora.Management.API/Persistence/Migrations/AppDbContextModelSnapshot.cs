@@ -1280,6 +1280,132 @@ namespace Nexora.Management.API.Persistence.Migrations
                     b.ToTable("TaskStatuses", (string)null);
                 });
 
+            modelBuilder.Entity("Nexora.Management.Domain.Entities.TimeEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v4()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<int>("DurationMinutes")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("EndTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsBillable")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("draft");
+
+                    b.Property<Guid?>("TaskId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("WorkspaceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StartTime")
+                        .HasDatabaseName("idx_time_entries_start_time");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("idx_time_entries_status");
+
+                    b.HasIndex("TaskId")
+                        .HasDatabaseName("idx_time_entries_task");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("idx_time_entries_user");
+
+                    b.HasIndex("WorkspaceId")
+                        .HasDatabaseName("idx_time_entries_workspace");
+
+                    b.HasIndex("UserId", "EndTime")
+                        .IsUnique()
+                        .HasDatabaseName("uq_time_entries_active_timer")
+                        .HasFilter("EndTime IS NULL");
+
+                    b.HasIndex("UserId", "StartTime")
+                        .HasDatabaseName("idx_time_entries_user_time");
+
+                    b.ToTable("time_entries", (string)null);
+                });
+
+            modelBuilder.Entity("Nexora.Management.Domain.Entities.TimeRate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v4()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasDefaultValue("USD");
+
+                    b.Property<DateTime>("EffectiveFrom")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("EffectiveTo")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<decimal>("HourlyRate")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<Guid?>("ProjectId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProjectId")
+                        .HasDatabaseName("idx_time_rates_project");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("idx_time_rates_user");
+
+                    b.HasIndex("ProjectId", "EffectiveFrom")
+                        .HasDatabaseName("idx_time_rates_project_effective");
+
+                    b.HasIndex("UserId", "EffectiveFrom")
+                        .HasDatabaseName("idx_time_rates_user_effective");
+
+                    b.ToTable("time_rates", (string)null);
+                });
+
             modelBuilder.Entity("Nexora.Management.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1885,6 +2011,48 @@ namespace Nexora.Management.API.Persistence.Migrations
                     b.Navigation("Project");
 
                     b.Navigation("TaskList");
+                });
+
+            modelBuilder.Entity("Nexora.Management.Domain.Entities.TimeEntry", b =>
+                {
+                    b.HasOne("Nexora.Management.Domain.Entities.Task", "Task")
+                        .WithMany()
+                        .HasForeignKey("TaskId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Nexora.Management.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Nexora.Management.Domain.Entities.Workspace", "Workspace")
+                        .WithMany()
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Task");
+
+                    b.Navigation("User");
+
+                    b.Navigation("Workspace");
+                });
+
+            modelBuilder.Entity("Nexora.Management.Domain.Entities.TimeRate", b =>
+                {
+                    b.HasOne("Nexora.Management.Domain.Entities.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Nexora.Management.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Project");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Nexora.Management.Domain.Entities.UserPresence", b =>

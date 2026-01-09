@@ -66,22 +66,29 @@ builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizat
 // Register Permission Authorization Handler (scoped to get DbContext)
 builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
-// Configure CORS
-var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? new[] { "http://localhost:3000" };
+// Configure CORS - Allow all origins (user will restrict later)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend", policy =>
+    options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins(allowedOrigins)
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
+              .AllowAnyMethod();
     });
 });
 
-// Configure OpenAPI
+// Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Nexora Management API",
+        Version = "v1",
+        Description = "Team management, task tracking, and project coordination API"
+    });
+});
 
 // Register Application layer services
 builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Nexora.Management.Application.Common.ApiResponse<>).Assembly));
@@ -152,11 +159,19 @@ var app = builder.Build();
 // }
 
 // Configure the HTTP request pipeline
-// Note: OpenAPI JSON available at /openapi/v1.json in development
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+        options.RoutePrefix = "swagger";
+    });
+}
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowFrontend");
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -168,6 +183,9 @@ app.MapControllers();
 
 // Map Auth endpoints
 app.MapAuthEndpoints();
+
+// Map Workspace endpoints
+app.MapWorkspaceEndpoints();
 
 // Map Task endpoints
 app.MapTaskEndpoints();
@@ -188,6 +206,7 @@ app.MapGoalEndpoints();
 app.MapSpaceEndpoints();
 app.MapFolderEndpoints();
 app.MapTaskListEndpoints();
+app.MapTimeEndpoints();
 
 // Map SignalR Hubs
 app.MapHub<TaskHub>("/hubs/tasks");
