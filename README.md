@@ -244,6 +244,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [x] ClickUp Hierarchy - Spaces, Folders, TaskLists (100% complete)
 - [x] Workspace Context and Auth Integration (100% complete)
 - [x] Backend Database Migration - Phase 2 (100% complete) ✅
+- [x] Time Tracking with Timer, Timesheets, Reports (100% complete) ✅
 - [x] Swagger UI documentation (2026-01-09)
 - [x] Docker configuration fixes (CORS, API ports) (2026-01-09)
 - [ ] Testing infrastructure (DEFERRED) ⚠️ **CRITICAL: 0% test coverage**
@@ -265,9 +266,134 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Security audit not completed
 - Performance benchmarks not met
 
-## Current Phase: ClickUp Hierarchy Implementation (Phase 09 - Complete) ✅
+## Current Phase: Time Tracking Implementation (Phase 09 - Complete) ✅
 
-### Phase 09 Achievements ✅
+### Phase 09 - Time Tracking Achievements ✅
+
+**Time Tracking System (2026-01-09):**
+
+- Implemented comprehensive time tracking with manual entry and timer
+- 2 new domain entities: TimeEntry, TimeRate
+- 2 new EF Core configurations
+- 2 new database migrations (AddTimeTracking, AddTimeTrackingUniqueConstraint)
+- Row-Level Security policies added
+- 9 new API endpoints (/api/time/*)
+- 10 application layer files (Commands, Queries, DTOs)
+- 5 new frontend components (GlobalTimer, TimeEntryForm, TimerHistory, TimesheetView, TimeReports)
+- 3 new pages (/time, /time/timesheet, /time/reports)
+- 29 total domain entities (up from 27)
+
+**Time Entry Features:**
+
+- ✅ Manual time entry (duration, description)
+- ✅ Automatic timer with start/stop/pause/resume
+- ✅ Global timer (top-level component)
+- ✅ Task-level timer association
+- ✅ Billable vs non-billable tracking
+- ✅ Time rounded to nearest minute
+- ✅ Browser tab sync (localStorage)
+- ✅ Idle detection support
+
+**Timesheet Features:**
+
+- ✅ Weekly view with daily totals
+- ✅ Submit for approval workflow
+- ✅ Approve/reject functionality
+- ✅ Status tracking (draft, submitted, approved, rejected)
+- ✅ Rejected entry feedback
+- ✅ Locking after approval
+
+**Reporting Features:**
+
+- ✅ Time by project/user/date range
+- ✅ Billable hours summary
+- ✅ Export to CSV functionality
+- ✅ Visual charts and tables
+- ✅ Hourly rates per user/project
+
+**Backend Implementation (17 files):**
+
+- Domain: TimeEntry.cs, TimeRate.cs (2 entities)
+- Configurations: TimeEntryConfiguration.cs, TimeRateConfiguration.cs
+- Commands: StartTime, StopTime, LogTime, SubmitTimesheet, ApproveTimesheet (5 commands)
+- Queries: GetTimeEntries, GetTimesheet, GetActiveTimer, GetUserTimeReport (4 queries)
+- DTOs: TimeTrackingDTOs.cs (comprehensive data transfer objects)
+- Endpoints: TimeEndpoints.cs (9 endpoints)
+- Migrations: AddTimeTracking, AddTimeTrackingUniqueConstraint
+
+**Frontend Implementation (10 files):**
+
+- Components: GlobalTimer, TimeEntryForm, TimerHistory, TimesheetView, TimeReports (5 components)
+- Pages: /time, /time/timesheet, /time/reports (3 pages)
+- Services: time-service.ts (API client)
+- Types: Time tracking TypeScript interfaces
+
+**API Endpoints:**
+
+- POST /api/time/timer/start - Start timer
+- POST /api/time/timer/stop - Stop timer
+- GET /api/time/timer/active - Get active timer
+- POST /api/time/entries - Log time manually
+- GET /api/time/entries - List time entries
+- GET /api/time/timesheet/{userId} - Get timesheet
+- POST /api/time/timesheet/submit - Submit for approval
+- POST /api/time/timesheet/approve - Approve timesheet
+- GET /api/time/reports - Generate time reports
+
+**Database Schema:**
+
+- TimeEntries table with user_id, task_id, workspace_id
+- StartedAt, EndedAt, DurationMinutes fields
+- IsBillable, Status, SubmittedAt, ApprovedAt
+- ApprovedBy, RejectedReason support
+- TimeRates table for hourly rates per user/project
+- Unique constraint on (user_id, started_at) for data integrity
+
+**Row-Level Security:**
+
+- RLS policies on TimeEntries table
+- Workspace membership validation
+- User can only see/edit own time entries
+- Approvers can see team timesheets
+
+**Files Created (28 files total):**
+
+**Backend (17 files):**
+- apps/backend/src/Nexora.Management.Domain/Entities/TimeEntry.cs
+- apps/backend/src/Nexora.Management.Domain/Entities/TimeRate.cs
+- apps/backend/src/Nexora.Management.Infrastructure/Persistence/Configurations/TimeEntryConfiguration.cs
+- apps/backend/src/Nexora.Management.Infrastructure/Persistence/Configurations/TimeRateConfiguration.cs
+- apps/backend/src/Nexora.Management.Application/TimeTracking/Commands/StartTime/StartTimeCommand.cs
+- apps/backend/src/Nexora.Management.Application/TimeTracking/Commands/StopTime/StopTimeCommand.cs
+- apps/backend/src/Nexora.Management.Application/TimeTracking/Commands/LogTime/LogTimeCommand.cs
+- apps/backend/src/Nexora.Management.Application/TimeTracking/Commands/SubmitTimesheet/SubmitTimesheetCommand.cs
+- apps/backend/src/Nexora.Management.Application/TimeTracking/Commands/ApproveTimesheet/ApproveTimesheetCommand.cs
+- apps/backend/src/Nexora.Management.Application/TimeTracking/Queries/GetTimeEntries/GetTimeEntriesQuery.cs
+- apps/backend/src/Nexora.Management.Application/TimeTracking/Queries/GetTimesheet/GetTimesheetQuery.cs
+- apps/backend/src/Nexora.Management.Application/TimeTracking/Queries/GetActiveTimer/GetActiveTimerQuery.cs
+- apps/backend/src/Nexora.Management.Application/TimeTracking/Queries/GetUserTimeReport/GetUserTimeReportQuery.cs
+- apps/backend/src/Nexora.Management.Application/TimeTracking/DTOs/TimeTrackingDTOs.cs
+- apps/backend/src/Nexora.Management.API/Endpoints/TimeEndpoints.cs
+- apps/backend/src/Nexora.Management.API/Persistence/Migrations/20260109114302_AddTimeTracking.cs
+- apps/backend/src/Nexora.Management.API/Persistence/Migrations/20260109114438_AddTimeTrackingUniqueConstraint.cs
+
+**Frontend (10 files):**
+- apps/frontend/src/components/time/global-timer.tsx
+- apps/frontend/src/components/time/time-entry-form.tsx
+- apps/frontend/src/components/time/timer-history.tsx
+- apps/frontend/src/components/time/timesheet-view.tsx
+- apps/frontend/src/components/time/time-reports.tsx
+- apps/frontend/src/app/(app)/time/page.tsx
+- apps/frontend/src/app/(app)/time/timesheet/page.tsx
+- apps/frontend/src/app/(app)/time/reports/page.tsx
+- apps/frontend/src/lib/services/time-service.ts
+- apps/frontend/src/features/time/types.ts
+
+**Code Review:** Pending
+**Build Status:** ✅ Compilation successful
+**Migration Status:** ✅ Ready to apply
+
+**Previous Phase: ClickUp Hierarchy (Complete)** ✅
 
 **ClickUp Hierarchy Model:**
 

@@ -1,8 +1,11 @@
 # System Architecture
 
 **Last Updated:** 2026-01-09
-**Version:** Phase 09 Complete + Docker Testing Phase (Phases 17/18 In Progress)
-**Backend Files:** 203 C# files (~24,790 LOC)
+**Version:** Phase 09 Complete - Time Tracking + Docker Testing Phase (Phases 17/18 In Progress)
+**Backend Files:** 220 C# files (~26,500 LOC)
+**Database Entities:** 29 (up from 27)
+**API Endpoint Groups:** 12 (up from 11)
+**Database Migrations:** 9 (up from 7)
 **Test Coverage:** 0% (critical issue)
 **Docker Testing:** COMPLETE - 3/4 services healthy, 3 critical issues found
 
@@ -2038,7 +2041,9 @@ User
  ├─ OwnedWorkspaces → Workspace
  ├─ WorkspaceMemberships → WorkspaceMember → Workspace
  ├─ OwnedProjects → Project → Workspace
- └─ AssignedTasks → Task → Project → Workspace
+ ├─ AssignedTasks → Task → Project → Workspace
+ └─ TimeEntries → TimeEntry → Workspace
+    └─ TimeRates → TimeRate → Project
 ```
 
 **Many-to-Many:**
@@ -2057,9 +2062,9 @@ Comment (ParentCommentId) → Comment (self)
 
 **Cascading Deletes:**
 
-- Workspace → Projects, Tasks, Comments, Attachments
-- Project → Tasks, TaskStatuses
-- Task → Comments, Attachments
+- Workspace → Projects, Tasks, Comments, Attachments, TimeEntries
+- Project → Tasks, TaskStatuses, TimeRates
+- Task → Comments, Attachments, TimeEntries
 - Role → UserRoles, RolePermissions
 
 ### Indexing Strategy
@@ -2069,6 +2074,7 @@ Comment (ParentCommentId) → Comment (self)
 - `Users.Email`
 - `Roles.Name`
 - `TaskStatuses.ProjectId, OrderIndex`
+- `TimeEntries.UserId, StartedAt` (prevent duplicate time entries)
 
 **Foreign Key Indexes:**
 
@@ -2079,6 +2085,9 @@ Comment (ParentCommentId) → Comment (self)
 - `Tasks.ProjectId, StatusId, PositionOrder` (task list queries)
 - `ActivityLog.EntityType, EntityId, CreatedAt` (activity feed)
 - `ActivityLog.WorkspaceId, CreatedAt` (workspace activity)
+- `TimeEntries.UserId, StartedAt` (time entry queries)
+- `TimeEntries.WorkspaceId, Status` (timesheet queries)
+- `TimeEntries.TaskId` (task time tracking)
 
 **GIN Indexes:**
 

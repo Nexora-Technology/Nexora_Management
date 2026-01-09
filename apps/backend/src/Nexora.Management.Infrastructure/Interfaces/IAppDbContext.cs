@@ -35,6 +35,7 @@ public interface IAppDbContext
     DbSet<Space> Spaces { get; }
     DbSet<Folder> Folders { get; }
     DbSet<TaskList> TaskLists { get; }
+    DbSet<Dashboard> Dashboards { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 

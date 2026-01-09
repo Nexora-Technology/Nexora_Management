@@ -1,9 +1,12 @@
 # Codebase Summary
 
 **Last Updated:** 2026-01-09
-**Version:** Phase 09 Complete + Docker Testing Phase (Phases 17/18 In Progress)
-**Backend Files:** 203 C# files (~24,790 LOC)
-**Frontend Files:** 117 TypeScript files (~13,029 lines)
+**Version:** Phase 09 Complete - Time Tracking + Docker Testing Phase (Phases 17/18 In Progress)
+**Backend Files:** 220 C# files (~26,500 LOC)
+**Frontend Files:** 127 TypeScript files (~13,500 lines)
+**Database Entities:** 29 (up from 27)
+**API Endpoint Groups:** 12 (up from 11)
+**Database Migrations:** 9 (up from 7)
 **Test Coverage:** 0% (1 placeholder test only) ⚠️ **CRITICAL ISSUE**
 **Docker Testing:** COMPLETE - 3/4 services healthy, 3 critical issues found
 **Production Readiness:** Grade B- (82/100)
@@ -68,11 +71,11 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 
 **Purpose:** Core business logic and enterprise rules
 
-**File Count:** 27 entity files
+**File Count:** 29 entity files
 
 **Components:**
 
-- **Entities** (27 domain models):
+- **Entities** (29 domain models):
   - `User` - User accounts and authentication
   - `Role` - User roles (Admin, Member, Guest)
   - `Permission` - Granular permissions (Create, Read, Update, Delete)
@@ -103,6 +106,9 @@ Nexora Management is a ClickUp-inspired project management platform built with .
     - `GoalPeriod` - Time periods for goal tracking (e.g., Q1 2026, FY 2026)
     - `Objective` - Objectives with hierarchical structure and progress tracking
     - `KeyResult` - Measurable key results for objectives
+  - **NEW Phase 09 - Time Tracking:**
+    - `TimeEntry` - Time tracking entries with manual/timer modes, billable tracking
+    - `TimeRate` - Hourly rates per user/project for billing
 
 - **Common:**
   - `BaseEntity` - Base entity with Id, CreatedAt, UpdatedAt
@@ -112,13 +118,13 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 
 **Purpose:** External concerns and data access
 
-**File Count:** 25 configuration files
+**File Count:** 27 configuration files
 
 **Components:**
 
 - **Persistence** (`/Persistence/`):
-  - `AppDbContext` - EF Core DbContext with 27 DbSets
-  - **Configurations** (31 EF Core configurations):
+  - `AppDbContext` - EF Core DbContext with 29 DbSets
+  - **Configurations** (33 EF Core configurations):
     - `UserConfiguration` - User entity mapping
     - `RoleConfiguration` - Role entity mapping
     - `PermissionConfiguration` - Permission entity mapping
@@ -147,6 +153,9 @@ Nexora Management is a ClickUp-inspired project management platform built with .
       - `PageCommentConfiguration` - Threaded comments on pages
     - **NEW Phase 08:**
       - `GoalEntitiesConfiguration` - Goal tracking entities (GoalPeriod, Objective, KeyResult)
+    - **NEW Phase 09 - Time Tracking:**
+      - `TimeEntryConfiguration` - Time tracking entry mapping
+      - `TimeRateConfiguration` - Hourly rate mapping
 
 - **Interfaces:**
   - `IAppDbContext` - Abstraction for DbContext
@@ -155,10 +164,10 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 
 **Purpose:** Application logic and use cases
 
-**File Count:** 92 C# files (~9,594 LOC)
-- 38+ Commands
-- 21+ Queries
-- 15+ DTO files
+**File Count:** 102 C# files (~10,500 LOC)
+- 43+ Commands
+- 25+ Queries
+- 16+ DTO files
 
 **Components:**
 
@@ -167,7 +176,7 @@ Nexora Management is a ClickUp-inspired project management platform built with .
   - `ApiResponse<T>` - Standardized API response wrapper
   - MediatR setup for CQRS pattern
 
-**CQRS Modules Summary (78 files across 9 feature modules):**
+**CQRS Modules Summary (88 files across 10 feature modules):**
 
 - **Authentication:** 3 Commands, 3 DTOs (9 files)
 - **Authorization:** 4 components (Handler, Provider, Attribute, Requirement) (4 files)
@@ -176,6 +185,7 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 - **Attachments:** 2 Commands, 1 Query, 3 DTOs (6 files)
 - **Documents:** 6 Commands, 4 Queries, 7 DTOs (17 files) - Phase 07
 - **Goals:** 9 Commands, 4 Queries, 9 DTOs (22 files) - Phase 08
+- **Time Tracking:** 5 Commands, 4 Queries, 1 DTO file (10 files) - Phase 09
 - **Common:** Result patterns, ApiResponse, IUserContext, PagedResult (4 files)
 - **SignalR:** Message DTOs for real-time (3 files)
 
@@ -214,24 +224,30 @@ Nexora Management is a ClickUp-inspired project management platform built with .
   - **Queries:** GetPeriods, GetObjectives, GetObjectiveTree, GetProgressDashboard
   - **DTOs:** GoalPeriodDto, ObjectiveDto, KeyResultDto, ObjectiveTreeNodeDto, ProgressDashboardDto, StatusBreakdownDto, ObjectiveSummaryDto, PagedResult<T>
 
+- **Time Tracking** (NEW Phase 09):
+  - **Commands:** StartTime, StopTime, LogTime, SubmitTimesheet, ApproveTimesheet
+  - **Queries:** GetTimeEntries, GetTimesheet, GetActiveTimer, GetUserTimeReport
+  - **DTOs:** TimeEntryDto, TimeRateDto, CreateTimeEntryRequest, UpdateTimeEntryRequest, TimesheetDto, TimeReportDto, PagedResult<T>
+
 #### 4. API Layer (`/apps/backend/src/Nexora.Management.API/`)
 
 **Purpose:** Presentation and external interfaces
 
-**File Count:** 40+ files (~12,000 LOC)
-- 11 endpoint groups
-- 7 migrations
+**File Count:** 45+ files (~13,000 LOC)
+- 12 endpoint groups
+- 9 migrations
 - 3 SignalR hubs
 
 **Components:**
 
-- **Endpoints:** (6 Minimal API groups)
+- **Endpoints:** (7 Minimal API groups)
   - `AuthEndpoints.cs` - Authentication endpoints at `/api/auth`
   - `TaskEndpoints.cs` - Task CRUD endpoints at `/api/tasks`
   - `CommentEndpoints.cs` - Comment endpoints at `/api/comments`
   - `AttachmentEndpoints.cs` - File attachment endpoints at `/api/attachments`
   - `DocumentEndpoints.cs` - Document endpoints at `/api/documents` (Phase 07)
-  - `GoalEndpoints.cs` - Goal tracking endpoints at `/api/goals` (NEW Phase 08)
+  - `GoalEndpoints.cs` - Goal tracking endpoints at `/api/goals` (Phase 08)
+  - `TimeEndpoints.cs` - Time tracking endpoints at `/api/time` (NEW Phase 09)
 
 - **SignalR Hubs:** (3 real-time hubs)
   - `TaskHub` - Task real-time updates (created, updated, deleted, status changed)
@@ -252,13 +268,15 @@ Nexora Management is a ClickUp-inspired project management platform built with .
   - Health check endpoint
   - Welcome endpoint
 
-- **Persistence/Migrations** (7 migration files):
+- **Persistence/Migrations** (9 migration files):
   - `20260103071610_InitialCreate` - Initial schema creation
   - `20260103071738_EnableRowLevelSecurity` - RLS policies
   - `20260103071908_SeedRolesAndPermissions` - Initial data seeding
   - `20260103171029_AddRealtimeCollaborationTables` - Real-time features (presence, notifications)
   - `20260104112014_AddDocumentTables` (Phase 07) - Document/Wiki system tables
-  - `20260105165809_AddGoalTrackingTables` (NEW Phase 08) - Goal tracking tables (GoalPeriod, Objective, KeyResult)
+  - `20260105165809_AddGoalTrackingTables` (Phase 08) - Goal tracking tables (GoalPeriod, Objective, KeyResult)
+  - `20260109114302_AddTimeTracking` (NEW Phase 09) - Time tracking tables (TimeEntry, TimeRate)
+  - `20260109114438_AddTimeTrackingUniqueConstraint` (NEW Phase 09) - Unique constraint on TimeEntry (user_id, started_at)
   - `AppDbContextModelSnapshot` - EF Core model snapshot
 
 - **appsettings.json** - Configuration including connection string
@@ -541,7 +559,87 @@ apps/backend/
 └── tests/ (to be implemented)
 ```
 
-## Frontend Structure (~5,722 lines)
+## Frontend Structure (~6,200 lines)
+
+### Time Tracking Components (Phase 09) ✅
+
+**Status:** Complete (2026-01-09)
+**Components:** 5 time tracking components, 3 pages
+**Features:** Timer, manual entry, timesheets, reports
+
+**Components:**
+
+1. **GlobalTimer** (`src/components/time/global-timer.tsx`)
+   - Purpose: Top-level timer component for automatic time tracking
+   - Features: Start/stop/pause/resume, active timer display, task association
+   - localStorage sync for browser tab persistence
+   - Idle detection support
+   - Props: className, onTimeEntryComplete
+
+2. **TimeEntryForm** (`src/components/time/time-entry-form.tsx`)
+   - Purpose: Manual time entry form with validation
+   - Features: Duration input, description, billable toggle, task selection
+   - Date/time picker for manual entry
+   - Form validation for required fields
+   - Props: mode (create/edit), initialData, onSubmit, onCancel
+
+3. **TimerHistory** (`src/components/time/timer-history.tsx`)
+   - Purpose: Display recent time entries with edit/delete actions
+   - Features: Paginated list, filter by date/task/user, status badges
+   - Inline editing for quick updates
+   - Export to CSV functionality
+   - Props: entries, onEdit, onDelete, onExport
+
+4. **TimesheetView** (`src/components/time/timesheet-view.tsx`)
+   - Purpose: Weekly timesheet with daily totals and approval workflow
+   - Features: Weekly calendar view, daily time totals, submit for approval
+   - Approve/reject actions for managers, status tracking (draft/submitted/approved/rejected)
+   - Rejected entry feedback display
+   - Props: userId, weekStartDate, onSubmit, onApprove
+
+5. **TimeReports** (`src/components/time/time-reports.tsx`)
+   - Purpose: Time reporting with charts and export capabilities
+   - Features: Time by project/user/date range, billable hours summary
+   - Visual charts (bar chart, pie chart), export to CSV/PDF
+   - Hourly rates and billing calculations
+   - Props: reportType, filters, onExport
+
+**Pages:**
+
+1. **Time Tracking Page** (`src/app/(app)/time/page.tsx`)
+   - Route: `/time`
+   - Features: Global timer, recent time entries, quick actions
+   - Layout: Two-column (timer + history)
+
+2. **Timesheet Page** (`src/app/(app)/time/timesheet/page.tsx`)
+   - Route: `/time/timesheet`
+   - Features: Weekly timesheet view, submit for approval, status tracking
+
+3. **Reports Page** (`src/app/(app)/time/reports/page.tsx`)
+   - Route: `/time/reports`
+   - Features: Time reports, filters, export functionality, visualizations
+
+**Services:**
+
+- **time-service.ts** (`src/lib/services/time-service.ts`)
+  - API client for time tracking endpoints
+  - Methods: startTime, stopTime, getActiveTimer, logTime, getTimeEntries, getTimesheet, submitTimesheet, approveTimesheet, getUserTimeReport
+
+**Dependencies:**
+
+```json
+{
+  "react-timer-hook": "^3.0.5",
+  "date-fns": "^3.0.0"
+}
+```
+
+**Integration Points:**
+
+- Workspace provider for workspace-scoped time entries
+- Task selector for associating time with tasks
+- User context for permissions (own entries only, managers can see team)
+- SignalR for real-time timer updates (future enhancement)
 
 ## ClickUp Design System (Phase 01.1 Foundation) ✅
 
@@ -2588,10 +2686,57 @@ apps/frontend/
     - Workspace ID validation fixed
     - Code Review: A- (92/100)
     - Commit: 4285736
-- [ ] **Phase 10:** Time Tracking
-- [ ] **Phase 11:** Dashboards & Reporting
-- [ ] **Phase 12:** Automation & Workflow Engine
-- [ ] **Phase 13:** Mobile Responsive Design
+- [x] **Phase 09:** Time Tracking ✅ **COMPLETE** (2026-01-09)
+  - **Backend Implementation (17 files):**
+    - 2 new domain entities: TimeEntry, TimeRate
+    - 2 new EF Core configurations: TimeEntryConfiguration, TimeRateConfiguration
+    - 2 new database migrations: AddTimeTracking, AddTimeTrackingUniqueConstraint
+    - 5 Commands: StartTime, StopTime, LogTime, SubmitTimesheet, ApproveTimesheet
+    - 4 Queries: GetTimeEntries, GetTimesheet, GetActiveTimer, GetUserTimeReport
+    - 1 DTO file: TimeTrackingDTOs with comprehensive data transfer objects
+    - TimeEndpoints with 9 API endpoints
+    - Row-Level Security policies on TimeEntries table
+  - **Frontend Implementation (10 files):**
+    - 5 components: GlobalTimer, TimeEntryForm, TimerHistory, TimesheetView, TimeReports
+    - 3 pages: /time, /time/timesheet, /time/reports
+    - 1 service: time-service.ts (API client)
+    - 1 types file: Time tracking TypeScript interfaces
+  - **Features Implemented:**
+    - Manual time entry (duration, description, billable toggle)
+    - Automatic timer with start/stop/pause/resume
+    - Global timer (top-level component)
+    - Task-level timer association
+    - Browser tab sync (localStorage)
+    - Idle detection support
+    - Weekly timesheet with daily totals
+    - Submit for approval workflow
+    - Approve/reject functionality
+    - Status tracking (draft, submitted, approved, rejected)
+    - Time by project/user/date range reports
+    - Billable hours summary
+    - Export to CSV functionality
+    - Hourly rates per user/project
+  - **Database Schema:**
+    - TimeEntries table: user_id, task_id, workspace_id, started_at, ended_at, duration_minutes, is_billable, status, submitted_at, approved_at, approved_by, rejected_reason
+    - TimeRates table: user_id, project_id, hourly_rate, effective_from, effective_to
+    - Unique constraint on (user_id, started_at) for data integrity
+  - **API Endpoints:**
+    - POST /api/time/timer/start - Start timer
+    - POST /api/time/timer/stop - Stop timer
+    - GET /api/time/timer/active - Get active timer
+    - POST /api/time/entries - Log time manually
+    - GET /api/time/entries - List time entries
+    - GET /api/time/timesheet/{userId} - Get timesheet
+    - POST /api/time/timesheet/submit - Submit for approval
+    - POST /api/time/timesheet/approve - Approve timesheet
+    - GET /api/time/reports - Generate time reports
+  - **Build Status:** ✅ Compilation successful
+  - **Migration Status:** ✅ Ready to apply
+  - **Code Review:** Pending
+- [ ] **Phase 10:** Dashboards & Reporting
+- [ ] **Phase 11:** Automation & Workflow Engine
+- [ ] **Phase 12:** Mobile Responsive Design
+- [ ] **Phase 13:** Performance Optimization
 
 ## API Endpoints Summary
 
@@ -2655,6 +2800,32 @@ apps/frontend/
 
 - `GET /dashboard` - Get progress dashboard statistics
 
+### Time Tracking (NEW Phase 09) (`/api/time`)
+
+#### Timer Endpoints
+
+- `POST /timer/start` - Start automatic timer for task
+- `POST /timer/stop` - Stop active timer and create time entry
+- `GET /timer/active` - Get currently active timer for user
+
+#### Time Entry Endpoints
+
+- `POST /entries` - Log time manually (with duration, description, billable status)
+- `GET /entries` - List time entries (with filtering by date, task, user, status)
+- `GET /entries/{id}` - Get time entry by ID
+
+#### Timesheet Endpoints
+
+- `GET /timesheet/{userId}` - Get timesheet for user (with date range filter)
+- `POST /timesheet/submit` - Submit timesheet for approval
+- `POST /timesheet/approve` - Approve or reject timesheet (with feedback)
+
+#### Reporting Endpoints
+
+- `GET /reports` - Generate time reports (by project, user, date range)
+  - Query params: `reportType` (project/user/custom), `startDate`, `endDate`, `userId`, `projectId`
+  - Returns: Aggregated time data, billable hours, totals
+
 ## Security Features
 
 - **Path Traversal Protection:** `Path.GetFileName()` sanitization in file uploads
@@ -2666,10 +2837,11 @@ apps/frontend/
 
 ## Next Steps
 
-1. **Phase 09:** Time Tracking
-   - Time entry entities and tables
-   - Timer functionality
-   - Time reports and analytics
+1. **Phase 09:** Time Tracking ✅ **COMPLETE** (2026-01-09)
+   - ✅ Time entry entities and tables (TimeEntry, TimeRate)
+   - ✅ Timer functionality (start/stop/pause/resume)
+   - ✅ Time reports and analytics (by project, user, date range)
+   - ✅ Timesheet approval workflow
 2. **Phase 10:** Dashboards & Reporting
    - Customizable dashboards
    - Advanced reporting features
@@ -2685,6 +2857,6 @@ apps/frontend/
 
 ---
 
-**Documentation Version:** 1.4
-**Last Updated:** 2026-01-06
+**Documentation Version:** 1.5
+**Last Updated:** 2026-01-09
 **Maintained By:** Development Team

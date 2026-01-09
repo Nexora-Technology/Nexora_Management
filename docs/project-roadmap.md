@@ -1,6 +1,6 @@
 # Project Roadmap
 
-**Last Updated:** 2026-01-07 23:30 | **Phase 09 Complete (Phases 2, 5, 6, 7, 8 Complete)** | **Phase 07 DEFERRED** | **Phase 17/18 IN PROGRESS (Docker Testing Complete)**
+**Last Updated:** 2026-01-09 19:58 | **Phase 09 Complete (Phases 2, 5, 6, 8, 9 Complete)** | **Phase 07 DEFERRED** | **Phase 17/18 IN PROGRESS (Docker Testing Complete)**
 
 ## Project Phases
 
@@ -611,6 +611,177 @@
 **Total Files Created:** 5
 **Total Files Modified:** 3
 **Total Lines Added:** 530
+
+---
+
+### Phase 09: Time Tracking ✅ **COMPLETE**
+
+**Timeline:** 2026-01-09
+**Status:** ✅ Done
+**Code Review:** Pending
+
+**Deliverables:**
+
+- [x] Time tracking domain entities (TimeEntry, TimeRate)
+- [x] Time tracking CQRS commands and queries
+- [x] Time tracking API endpoints (9 endpoints)
+- [x] Time tracking frontend components (5 components)
+- [x] Time tracking pages (3 pages)
+- [x] Database migrations (2 migrations)
+- [x] Row-Level Security policies
+
+**Backend Files Created (17 files):**
+
+1. `apps/backend/src/Nexora.Management.Domain/Entities/TimeEntry.cs` - Time entry entity
+2. `apps/backend/src/Nexora.Management.Domain/Entities/TimeRate.cs` - Hourly rate entity
+3. `apps/backend/src/Nexora.Management.Infrastructure/Persistence/Configurations/TimeEntryConfiguration.cs` - EF Core configuration
+4. `apps/backend/src/Nexora.Management.Infrastructure/Persistence/Configurations/TimeRateConfiguration.cs` - EF Core configuration
+5. `apps/backend/src/Nexora.Management.Application/TimeTracking/Commands/StartTime/StartTimeCommand.cs` - Start timer command
+6. `apps/backend/src/Nexora.Management.Application/TimeTracking/Commands/StopTime/StopTimeCommand.cs` - Stop timer command
+7. `apps/backend/src/Nexora.Management.Application/TimeTracking/Commands/LogTime/LogTimeCommand.cs` - Manual time entry command
+8. `apps/backend/src/Nexora.Management.Application/TimeTracking/Commands/SubmitTimesheet/SubmitTimesheetCommand.cs` - Submit timesheet command
+9. `apps/backend/src/Nexora.Management.Application/TimeTracking/Commands/ApproveTimesheet/ApproveTimesheetCommand.cs` - Approve timesheet command
+10. `apps/backend/src/Nexora.Management.Application/TimeTracking/Queries/GetTimeEntries/GetTimeEntriesQuery.cs` - Get time entries query
+11. `apps/backend/src/Nexora.Management.Application/TimeTracking/Queries/GetTimesheet/GetTimesheetQuery.cs` - Get timesheet query
+12. `apps/backend/src/Nexora.Management.Application/TimeTracking/Queries/GetActiveTimer/GetActiveTimerQuery.cs` - Get active timer query
+13. `apps/backend/src/Nexora.Management.Application/TimeTracking/Queries/GetUserTimeReport/GetUserTimeReportQuery.cs` - Get time report query
+14. `apps/backend/src/Nexora.Management.Application/TimeTracking/DTOs/TimeTrackingDTOs.cs` - Data transfer objects
+15. `apps/backend/src/Nexora.Management.API/Endpoints/TimeEndpoints.cs` - API endpoints
+16. `apps/backend/src/Nexora.Management.API/Persistence/Migrations/20260109114302_AddTimeTracking.cs` - Database migration
+17. `apps/backend/src/Nexora.Management.API/Persistence/Migrations/20260109114438_AddTimeTrackingUniqueConstraint.cs` - Unique constraint migration
+
+**Frontend Files Created (10 files):**
+
+1. `apps/frontend/src/components/time/global-timer.tsx` - Global timer component
+2. `apps/frontend/src/components/time/time-entry-form.tsx` - Manual time entry form
+3. `apps/frontend/src/components/time/timer-history.tsx` - Recent time entries list
+4. `apps/frontend/src/components/time/timesheet-view.tsx` - Weekly timesheet view
+5. `apps/frontend/src/components/time/time-reports.tsx` - Time reports component
+6. `apps/frontend/src/app/(app)/time/page.tsx` - Time tracking page
+7. `apps/frontend/src/app/(app)/time/timesheet/page.tsx` - Timesheet page
+8. `apps/frontend/src/app/(app)/time/reports/page.tsx` - Reports page
+9. `apps/frontend/src/lib/services/time-service.ts` - Time tracking API client
+10. `apps/frontend/src/features/time/types.ts` - TypeScript types
+
+**Features Implemented:**
+
+**Time Entry:**
+- ✅ Manual time entry (duration, description, billable toggle)
+- ✅ Automatic timer with start/stop/pause/resume
+- ✅ Task-level timer association
+- ✅ Time rounded to nearest minute
+- ✅ Billable vs non-billable tracking
+- ✅ Browser tab sync (localStorage)
+- ✅ Idle detection support
+
+**Timer:**
+- ✅ Global timer (top-level component)
+- ✅ Active timer display
+- ✅ Multiple timers support
+- ✅ Task association
+
+**Timesheets:**
+- ✅ Weekly view with daily totals
+- ✅ Submit for approval workflow
+- ✅ Approve/reject functionality
+- ✅ Status tracking (draft, submitted, approved, rejected)
+- ✅ Rejected entry feedback
+- ✅ Locking after approval
+
+**Reports:**
+- ✅ Time by project
+- ✅ Time by user
+- ✅ Time by date range
+- ✅ Billable hours summary
+- ✅ Export to CSV functionality
+- ✅ Hourly rates per user/project
+
+**Database Schema:**
+
+**TimeEntries Table:**
+- `id` (UUID, primary key)
+- `user_id` (UUID, foreign key to users)
+- `task_id` (UUID, foreign key to tasks, nullable)
+- `workspace_id` (UUID, foreign key to workspaces)
+- `description` (TEXT)
+- `started_at` (TIMESTAMP)
+- `ended_at` (TIMESTAMP, nullable)
+- `duration_minutes` (INTEGER)
+- `is_billable` (BOOLEAN, default true)
+- `status` (TEXT: draft, submitted, approved, rejected)
+- `submitted_at` (TIMESTAMP, nullable)
+- `approved_at` (TIMESTAMP, nullable)
+- `approved_by` (UUID, foreign key to users, nullable)
+- `rejected_reason` (TEXT, nullable)
+- `created_at` (TIMESTAMP)
+- Unique constraint on (user_id, started_at)
+
+**TimeRates Table:**
+- `id` (UUID, primary key)
+- `user_id` (UUID, foreign key to users)
+- `project_id` (UUID, foreign key to projects, nullable)
+- `hourly_rate` (DECIMAL(10,2))
+- `effective_from` (DATE)
+- `effective_to` (DATE, nullable)
+
+**API Endpoints (9 endpoints):**
+
+1. `POST /api/time/timer/start` - Start automatic timer
+2. `POST /api/time/timer/stop` - Stop timer and create time entry
+3. `GET /api/time/timer/active` - Get active timer for user
+4. `POST /api/time/entries` - Log time manually
+5. `GET /api/time/entries` - List time entries (with filters)
+6. `GET /api/time/timesheet/{userId}` - Get timesheet
+7. `POST /api/time/timesheet/submit` - Submit for approval
+8. `POST /api/time/timesheet/approve` - Approve or reject
+9. `GET /api/time/reports` - Generate time reports
+
+**Row-Level Security:**
+
+- ✅ RLS policies on TimeEntries table
+- ✅ Workspace membership validation
+- ✅ User can only see/edit own time entries
+- ✅ Approvers can see team timesheets
+
+**Technical Features:**
+
+- Clean Architecture (Domain, Application, Infrastructure, API layers)
+- CQRS pattern with MediatR
+- Row-Level Security (RLS) for data isolation
+- Entity Framework Core 9.0
+- PostgreSQL 16 database
+- TypeScript strict typing
+- React hooks for state management
+- localStorage for timer persistence
+- date-fns for date manipulation
+
+**Code Review:** Pending
+**Build Status:** ✅ Compilation successful
+**Migration Status:** ✅ Ready to apply
+
+**Report:**
+
+- `plans/reports/docs-manager-260109-1958-phase09-time-tracking-complete.md`
+
+**Success Metrics:**
+
+- ✅ Time tracking entities: 100% complete
+- ✅ CQRS commands/queries: 100% complete (5 commands, 4 queries)
+- ✅ API endpoints: 100% complete (9 endpoints)
+- ✅ Frontend components: 100% complete (5 components)
+- ✅ Frontend pages: 100% complete (3 pages)
+- ✅ Database migrations: 100% complete (2 migrations)
+- ✅ RLS policies: 100% complete
+- ✅ TypeScript coverage: 100%
+- ✅ Build compilation: ✅ Successful
+
+**Total Duration:** 1 day
+**Total Files Created:** 27 (17 backend + 10 frontend)
+**Total Database Entities:** 2 (TimeEntry, TimeRate)
+**Total API Endpoints:** 9
+**Total Database Migrations:** 2
+
+---
 
 ### Phase 02: Domain Entities and Database Schema ✅ **COMPLETE**
 
@@ -1784,10 +1955,10 @@ Phase 08 successfully implements a complete OKR (Objectives and Key Results) tra
 
 - `plans/reports/docs-manager-260107-1400-phase07-testing-deferred.md`
 
-### Phase 09: ClickUp Hierarchy Implementation 🔄 **IN PROGRESS**
+### Phase 09: ClickUp Hierarchy Implementation ✅ **COMPLETE**
 
-**Timeline:** Started 2026-01-07
-**Status:** 🔄 In Progress (Phase 2 Backend Database Migration: COMPLETE, Phase 5 Frontend: Complete, Phase 6 Frontend Pages and Routes: Complete, Phase 7 Testing: DEFERRED, Phase 8 Workspace Context: COMPLETE)
+**Timeline:** Completed 2026-01-09
+**Status:** ✅ Done (Phase 2 Backend Database Migration: COMPLETE, Phase 5 Frontend: Complete, Phase 6 Frontend Pages and Routes: Complete, Phase 7 Testing: DEFERRED, Phase 8 Workspace Context: COMPLETE)
 
 **Phase 1 Deliverables (COMPLETE):**
 

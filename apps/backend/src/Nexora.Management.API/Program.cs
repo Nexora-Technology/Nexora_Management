@@ -207,6 +207,8 @@ app.MapSpaceEndpoints();
 app.MapFolderEndpoints();
 app.MapTaskListEndpoints();
 app.MapTimeEndpoints();
+app.MapAnalyticsEndpoints();
+app.MapDashboardEndpoints();
 
 // Map SignalR Hubs
 app.MapHub<TaskHub>("/hubs/tasks");

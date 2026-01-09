@@ -47,6 +47,7 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<KeyResult> KeyResults => Set<KeyResult>();
     public DbSet<TimeEntry> TimeEntries => Set<TimeEntry>();
     public DbSet<TimeRate> TimeRates => Set<TimeRate>();
+    public DbSet<Dashboard> Dashboards => Set<Dashboard>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

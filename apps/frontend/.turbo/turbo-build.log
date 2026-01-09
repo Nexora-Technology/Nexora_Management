@@ -16,17 +16,82 @@
      ✓ typedRoutes
 
    Creating an optimized production build ...
- ✓ Compiled successfully in 1258ms
+ ✓ Compiled successfully in 469ms
    Linting and checking validity of types ...
+
+./src/app/(app)/dashboards/[id]/page.tsx
+4:28  Warning: 'DashboardDto' is defined but never used.  @typescript-eslint/no-unused-vars
+5:10  Warning: 'analyticsService' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(app)/dashboards/page.tsx
+4:28  Warning: 'DashboardDto' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(app)/goals/[id]/page.tsx
+35:6  Warning: React Hook React.useEffect has a missing dependency: 'loadObjective'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/app/(app)/goals/page.tsx
+35:6  Warning: React Hook React.useEffect has a missing dependency: 'loadData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
 
 ./src/app/(app)/tasks/board/page.tsx
 26:35  Warning: 'taskData' is defined but never used.  @typescript-eslint/no-unused-vars
 
 ./src/app/(app)/tasks/page.tsx
-42:35  Warning: 'taskData' is defined but never used.  @typescript-eslint/no-unused-vars
+43:35  Warning: 'taskData' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/app/(app)/time/page.tsx
+12:30  Warning: 'entry' is defined but never used.  @typescript-eslint/no-unused-vars
 
 ./src/app/page.tsx
 6:8  Warning: 'Link' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/analytics/dashboard-stats.tsx
+4:28  Warning: 'DashboardStatsDto' is defined but never used.  @typescript-eslint/no-unused-vars
+6:10  Warning: 'CheckCircle2' is defined but never used.  @typescript-eslint/no-unused-vars
+6:24  Warning: 'Clock' is defined but never used.  @typescript-eslint/no-unused-vars
+6:31  Warning: 'AlertCircle' is defined but never used.  @typescript-eslint/no-unused-vars
+6:44  Warning: 'Users' is defined but never used.  @typescript-eslint/no-unused-vars
+6:51  Warning: 'FolderOpen' is defined but never used.  @typescript-eslint/no-unused-vars
+6:63  Warning: 'TrendingUp' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/goals/objective-card.tsx
+6:10  Warning: 'Badge' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/layout/sidebar-nav.tsx
+9:3  Warning: 'CheckSquare' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/spaces/space-tree-nav.tsx
+154:6  Warning: React Hook useCallback has a missing dependency: 'selectedNodeId'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/tasks/task-board.example.tsx
+171:35  Warning: 'taskId' is defined but never used.  @typescript-eslint/no-unused-vars
+171:51  Warning: 'status' is defined but never used.  @typescript-eslint/no-unused-vars
+244:3  Warning: 'onUpdate' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/tasks/task-board.tsx
+25:23  Warning: 'BoardColumn' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/tasks/task-calendar.tsx
+7:10  Warning: 'Badge' is defined but never used.  @typescript-eslint/no-unused-vars
+9:10  Warning: 'STATUS_BADGE_VARIANTS' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/tasks/task-gantt.tsx
+18:22  Warning: 'endDate' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/time/global-timer.tsx
+6:10  Warning: 'Input' is defined but never used.  @typescript-eslint/no-unused-vars
+82:6  Warning: React Hook useEffect has a missing dependency: 'stopTimer'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+126:13  Warning: 'entry' is assigned a value but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/time/time-entry-form.tsx
+18:10  Warning: 'format' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/components/time/time-reports.tsx
+15:35  Warning: 'TaskTimeBreakdown' is defined but never used.  @typescript-eslint/no-unused-vars
+28:6  Warning: React Hook useEffect has a missing dependency: 'loadReport'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/time/timesheet-view.tsx
+6:34  Warning: 'DailyTime' is defined but never used.  @typescript-eslint/no-unused-vars
+17:6  Warning: React Hook useEffect has a missing dependency: 'loadTimesheet'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
 
 ./src/components/ui/tooltip.tsx
 14:3  Warning: 'delayDuration' is assigned a value but never used.  @typescript-eslint/no-unused-vars
@@ -39,6 +104,9 @@
 16:16  Warning: 'Trash2' is defined but never used.  @typescript-eslint/no-unused-vars
 16:24  Warning: 'Check' is defined but never used.  @typescript-eslint/no-unused-vars
 43:3  Warning: 'onDelete' is defined but never used.  @typescript-eslint/no-unused-vars
+
+./src/features/spaces/utils.ts
+19:9  Warning: 'tree' is assigned a value but never used.  @typescript-eslint/no-unused-vars
 
 ./src/features/tasks/TaskDetailWithRealtime.tsx
 43:23  Warning: 'setTypingUsers' is assigned a value but never used.  @typescript-eslint/no-unused-vars
@@ -84,34 +152,17 @@
 
 info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
    Collecting page data ...
-   Generating static pages (0/13) ...
-   Generating static pages (3/13) 
-   Generating static pages (6/13) 
-   Generating static pages (9/13) 
- ✓ Generating static pages (13/13)
+   Generating static pages (0/2) ...
+ ✓ Generating static pages (2/2)
    Finalizing page optimization ...
    Collecting build traces ...
 
-Route (app)                                 Size  First Load JS
-┌ ○ /                                    2.42 kB         114 kB
-├ ○ /_not-found                            990 B         103 kB
-├ ○ /components/showcase                 6.51 kB         118 kB
-├ ○ /dashboard                           1.93 kB         113 kB
-├ ○ /forgot-password                       120 B         102 kB
-├ ○ /login                               2.67 kB         117 kB
-├ ƒ /projects/[id]                       27.9 kB         139 kB
-├ ○ /register                            2.74 kB         117 kB
-├ ○ /tasks                               16.7 kB         166 kB
-├ ƒ /tasks/[id]                          3.16 kB         156 kB
-├ ○ /tasks/board                           734 B         150 kB
-├ ○ /workspaces                            163 B         106 kB
-└ ƒ /workspaces/[id]/projects              163 B         106 kB
-+ First Load JS shared by all             102 kB
-  ├ chunks/18-1d63ee0134f9e01b.js          46 kB
-  ├ chunks/87c73c54-24122e7b92478d00.js  54.2 kB
-  └ other shared chunks (total)          1.92 kB
+Route (pages)                                Size  First Load JS
+─ ○ /404                                    180 B        96.1 kB
++ First Load JS shared by all             95.9 kB
+  ├ chunks/framework-ea3d558b313aa702.js  57.6 kB
+  ├ chunks/main-0c47211581705dae.js       36.6 kB
+  └ other shared chunks (total)           1.65 kB
 
-
-○  (Static)   prerendered as static content
-ƒ  (Dynamic)  server-rendered on demand
+○  (Static)  prerendered as static content
 
