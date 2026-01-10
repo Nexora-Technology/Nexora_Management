@@ -177,6 +177,53 @@ namespace Nexora.Management.API.Persistence.Migrations
                     b.ToTable("Comments", (string)null);
                 });
 
+            modelBuilder.Entity("Nexora.Management.Domain.Entities.Dashboard", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("uuid_generate_v4()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsTemplate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Layout")
+                        .HasMaxLength(10000)
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("WorkspaceId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedBy")
+                        .HasDatabaseName("idx_dashboards_created_by");
+
+                    b.HasIndex("IsTemplate")
+                        .HasDatabaseName("idx_dashboards_is_template");
+
+                    b.HasIndex("WorkspaceId")
+                        .HasDatabaseName("idx_dashboards_workspace");
+
+                    b.ToTable("dashboards", (string)null);
+                });
+
             modelBuilder.Entity("Nexora.Management.Domain.Entities.Folder", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1666,6 +1713,25 @@ namespace Nexora.Management.API.Persistence.Migrations
                     b.Navigation("Task");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Nexora.Management.Domain.Entities.Dashboard", b =>
+                {
+                    b.HasOne("Nexora.Management.Domain.Entities.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Nexora.Management.Domain.Entities.Workspace", "Workspace")
+                        .WithMany()
+                        .HasForeignKey("WorkspaceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Creator");
+
+                    b.Navigation("Workspace");
                 });
 
             modelBuilder.Entity("Nexora.Management.Domain.Entities.Folder", b =>

@@ -56,9 +56,42 @@ public class AppDbContext : DbContext, IAppDbContext
         // Apply configurations from assembly
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
-        // Setup PostgreSQL extensions
-        modelBuilder.HasPostgresExtension("uuid-ossp");
-        modelBuilder.HasPostgresExtension("pg_trgm");
+        // Setup PostgreSQL extensions only when using PostgreSQL provider
+        if (Database.IsNpgsql())
+        {
+            modelBuilder.HasPostgresExtension("uuid-ossp");
+            modelBuilder.HasPostgresExtension("pg_trgm");
+        }
+        else
+        {
+            // For non-PostgreSQL (InMemory, SQLite, etc.), ignore JSONB properties
+            // These aren't supported outside PostgreSQL
+            var jsonbProperties = new[]
+            {
+                typeof(ActivityLog).GetProperty("ChangesJsonb"),
+                typeof(Workspace).GetProperty("SettingsJsonb"),
+                typeof(Project).GetProperty("SettingsJsonb"),
+                typeof(Space).GetProperty("SettingsJsonb"),
+                typeof(Folder).GetProperty("SettingsJsonb"),
+                typeof(TaskList).GetProperty("SettingsJsonb"),
+                typeof(Domain.Entities.Task).GetProperty("CustomFieldsJsonb"),
+                typeof(UserPresence).GetProperty("Metadata"),
+                typeof(Page).GetProperty("Content"),
+                typeof(PageVersion).GetProperty("Content"),
+                typeof(PageComment).GetProperty("Selection"),
+                typeof(Notification).GetProperty("Metadata"),
+                typeof(Dashboard).GetProperty("Layout")
+            };
+
+            foreach (var property in jsonbProperties)
+            {
+                if (property != null)
+                {
+                    modelBuilder.Entity(property.DeclaringType)
+                        .Ignore(property.Name);
+                }
+            }
+        }
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

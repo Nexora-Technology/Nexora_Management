@@ -145,7 +145,7 @@ cat > appsettings.Development.json << EOF
     "DefaultConnection": "Host=localhost;Port=5432;Database=nexora_dev;Username=nexora;Password=nexora_dev"
   },
   "Cors": {
-    "AllowedOrigins": ["http://localhost:3000"]
+    "AllowedOrigins": ["http://localhost:3000", "https://localhost:3000"]
   },
   "Serilog": {
     "MinimumLevel": {
@@ -155,6 +155,15 @@ cat > appsettings.Development.json << EOF
 }
 EOF
 ```
+
+**⚠️ CORS Configuration (CRITICAL):**
+
+As of 2026-01-09, CORS policy requires whitelisted origins. You must configure `AllowedOrigins` in appsettings.json:
+
+- **Development:** `["http://localhost:3000", "https://localhost:3000"]`
+- **Production:** `["https://yourdomain.com"]` (replace with actual domain)
+
+**Security Note:** The system uses `AllowCredentials()` for JWT authentication, which requires explicit origin whitelisting. `AllowAnyOrigin()` is intentionally disabled for security reasons.
 
 **5. Run Migrations:**
 
@@ -912,9 +921,9 @@ NODE_OPTIONS='--inspect' npm run dev
 ### Pre-Deployment
 
 - [ ] All environment variables configured (especially JWT settings)
-- [ ] Database migrations applied
+- [ ] Database migrations applied (including FixRolePermissionsSeedData.sql if needed)
 - [ ] SSL certificates configured
-- [ ] CORS settings updated for production domain
+- [ ] **CORS settings updated for production domain (CRITICAL - see CORS Configuration below)**
 - [ ] Logging and monitoring configured
 - [ ] Backup strategy in place
 - [ ] Health check endpoints configured
@@ -922,7 +931,11 @@ NODE_OPTIONS='--inspect' npm run dev
 - [ ] CDN configured for static assets
 - [ ] Database connection pooling optimized
 
-**Security Note:** Ensure JWT secret is at least 32 characters and stored securely in production (never commit to git). Use environment variables or secret management services.
+**Security Notes:**
+
+1. **CORS Configuration:** Must update `Cors:AllowedOrigins` in appsettings.json with production domain(s). The system uses `AllowCredentials()` for JWT, requiring explicit origin whitelisting.
+2. **JWT Secret:** Ensure JWT secret is at least 32 characters and stored securely in production (never commit to git). Use environment variables or secret management services.
+3. **RolePermissions:** If upgrading from before 2026-01-09, run `FixRolePermissionsSeedData.sql` migration to fix permission seed data issues.
 
 ### Post-Deployment
 

@@ -41,6 +41,7 @@ public class TaskConfiguration : IEntityTypeConfiguration<TaskEntity>
         builder.Property(t => t.PositionOrder)
             .HasDefaultValue(0);
 
+        // JSONB column - configured for PostgreSQL
         builder.Property(t => t.CustomFieldsJsonb)
             .HasColumnType("jsonb");
 
@@ -73,6 +74,7 @@ public class TaskConfiguration : IEntityTypeConfiguration<TaskEntity>
         builder.HasIndex(t => new { t.ProjectId, t.StatusId, t.PositionOrder })
             .HasDatabaseName("idx_tasks_list");
 
+        // GIN index for JSONB
         builder.HasIndex(t => t.CustomFieldsJsonb)
             .HasMethod("gin")
             .HasDatabaseName("idx_tasks_custom_fields");

@@ -1416,7 +1416,21 @@ return BadRequest(new { error = "Invalid data" });
 
 ## Testing Standards
 
-### Unit Testing
+### Unit Testing (UPDATED 2026-01-09)
+
+**Test Infrastructure:**
+
+- **Backend:** xUnit 2.9.2, FluentAssertions 6.12.0, Moq 4.20.70, EF Core InMemory 9.0.0
+- **Frontend:** Vitest 4.0.16, @testing-library/react 16.3.1, @testing-library/user-event 14.6.1
+- **Coverage:** coverlet.collector 6.0.2 (backend), v8 (frontend)
+
+**Test Coverage (Current):**
+
+- Backend: 33 tests across 6 test files (14 passing)
+- Frontend: 21 tests across 4 test files (9 passing)
+- Target: 60%+ coverage across all layers
+
+**Backend Testing (xUnit):**
 
 ```csharp
 // ✅ Good: Arrange-Act-Assert pattern, descriptive names
@@ -1447,7 +1461,87 @@ public async Task Test1()
 }
 ```
 
-### Integration Testing
+**Frontend Testing (Vitest):**
+
+```typescript
+// ✅ Good: Descriptive test with proper setup
+import { describe, it, expect } from 'vitest';
+import { render, screen } from '@/test/test-utils';
+import { Badge } from '../badge';
+
+describe('Badge Component', () => {
+  it('renders badge with text', () => {
+    render(<Badge status="neutral">Test Badge</Badge>);
+    expect(screen.getByText('Test Badge')).toBeInTheDocument();
+  });
+
+  it('applies complete status styling', () => {
+    render(<Badge status="complete">Complete</Badge>);
+    const badge = screen.getByText('Complete');
+    expect(badge).toHaveClass('bg-emerald-100');
+  });
+});
+```
+
+**Testing Best Practices:**
+
+1. **Test Naming:** Use `MethodName_Scenario_ExpectedResult` format
+2. **Test Isolation:** Each test should be independent
+3. **Test Data:** Use factories, not hardcoded values
+4. **Mock External Dependencies:** Use Moq (backend) and vi.mock (frontend)
+5. **Arrange-Act-Assert:** Clear separation in test structure
+6. **Coverage Targets:** 60%+ backend, 60%+ frontend
+7. **Test Speed:** Unit tests should run in milliseconds
+8. **Assertions:** Be specific - test one thing per test
+
+**Running Tests:**
+
+```bash
+# Backend
+dotnet test apps/backend/tests/Nexora.Management.Tests/Nexora.Management.Tests.csproj
+
+# Frontend
+cd apps/frontend && npm test
+
+# With coverage
+# Backend: dotnet test --collect:"XPlat Code Coverage"
+# Frontend: npm test -- --coverage
+```
+
+**Test Organization:**
+
+```
+apps/backend/tests/Nexora.Management.Tests/
+├── Helpers/
+│   ├── TestBase.cs              # Base class for all tests
+│   ├── TestDataBuilder.cs       # Test data factory
+│   └── MockJwtService.cs        # JWT token mocking
+├── Core/Entities/               # Domain entity tests
+│   ├── UserTests.cs
+│   ├── TaskTests.cs
+│   └── WorkspaceTests.cs
+├── Application/                 # CQRS handler tests
+│   ├── Authentication/
+│   │   └── RegisterCommandTests.cs
+│   └── Tasks/
+│       └── CreateTaskCommandTests.cs
+└── Infrastructure/              # Data access tests
+    └── Persistence/
+        └── AppDbContextTests.cs
+
+apps/frontend/src/
+├── test/
+│   ├── setup.ts                 # Test setup and mocks
+│   └── test-utils.tsx           # Custom render utilities
+├── components/ui/__tests__/
+│   ├── badge.test.tsx
+│   └── card.test.tsx
+└── lib/__tests__/
+    ├── utils.test.ts
+    └── date.test.ts
+```
+
+### Integration Testing (UPDATED 2026-01-09)
 
 ```csharp
 // ✅ Good: API endpoint testing with WebApplicationFactory

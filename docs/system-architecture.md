@@ -1,11 +1,12 @@
 # System Architecture
 
 **Last Updated:** 2026-01-09
-**Version:** Phase 09 Complete - Time Tracking + Docker Testing Phase (Phases 17/18 In Progress)
-**Backend Files:** 220 C# files (~26,500 LOC)
-**Database Entities:** 29 (up from 27)
-**API Endpoint Groups:** 12 (up from 11)
-**Database Migrations:** 9 (up from 7)
+**Version:** Phase 10 Complete - Dashboards & Reporting (Phases 17/18 In Progress)
+**Backend Files:** 237 C# files (~28,200 LOC)
+**Database Entities:** 30 (up from 29)
+**API Endpoint Groups:** 13 (up from 12)
+**Database Migrations:** 10 (up from 9)
+**Materialized Views:** 1 (mv_task_stats with auto-refresh triggers)
 **Test Coverage:** 0% (critical issue)
 **Docker Testing:** COMPLETE - 3/4 services healthy, 3 critical issues found
 
@@ -405,6 +406,7 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<GoalPeriod> GoalPeriods => Set<GoalPeriod>();
     public DbSet<Objective> Objectives => Set<Objective>();
     public DbSet<KeyResult> KeyResults => Set<KeyResult>();
+    public DbSet<Dashboard> Dashboards => Set<Dashboard>();
 
     // Auto-audit on SaveChangesAsync
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -1356,22 +1358,35 @@ export interface Task {
    builder.Services.AddAuthorization();
    ```
 
-3. **CORS Policy:**
+3. **CORS Policy (FIXED 2026-01-09):**
 
    ```csharp
    builder.Services.AddCors(options =>
    {
-       options.AddPolicy("AllowFrontend", policy =>
+       options.AddDefaultPolicy(policy =>
        {
-           policy.WithOrigins(allowedOrigins)
-                 .AllowAnyHeader()
-                 .AllowAnyMethod()
-                 .AllowCredentials();
+           // Use whitelisted origins from configuration for security
+           // AllowAnyOrigin() would break JWT authentication with credentials
+           if (corsSettings.AllowedOrigins.Length > 0)
+           {
+               policy.WithOrigins(corsSettings.AllowedOrigins)
+                     .AllowAnyHeader()
+                     .AllowAnyMethod()
+                     .AllowCredentials(); // Required for JWT cookies/headers
+           }
+           else
+           {
+               // Fallback: only localhost for development if no config provided
+               policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
+                     .AllowAnyHeader()
+                     .AllowAnyMethod()
+                     .AllowCredentials();
+           }
        });
    });
    ```
 
-   **⚠️ SECURITY ISSUE:** Current implementation uses `AllowAnyOrigin()` which breaks JWT authentication. Must be fixed before production deployment.
+   **✅ SECURITY FIX:** Replaced `AllowAnyOrigin()` with whitelisted origins from configuration. Added `AllowCredentials()` for JWT authentication support. Configured via `CorsSettings` class with `AllowedOrigins` array in appsettings.json.
 
 4. **Swagger/OpenAPI (NEW 2026-01-09):**
 
@@ -1410,7 +1425,7 @@ export interface Task {
        cfg.RegisterServicesFromAssembly(typeof(Nexora.Management.Application.Common.ApiResponse<>).Assembly));
    ```
 
-7. **Infrastructure Services:**
+8. **Infrastructure Services:**
 
    ```csharp
    builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
@@ -1418,13 +1433,14 @@ export interface Task {
    builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
    ```
 
-8. **Authorization Services:**
+9. **Authorization Services:**
+
    ```csharp
    builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
    builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
    ```
 
-9. **Workspace Authorization Middleware:**
+10. **Workspace Authorization Middleware:**
 
 **Middleware Pipeline:**
 
@@ -1548,10 +1564,12 @@ builder.Services.AddAuthentication()
 - **PresenceService** - In-memory user presence tracking with auto-cleanup
 - **NotificationService** - Notification creation and delivery with preference filtering
 
-**API Endpoints (11 Groups):**
+**API Endpoints (13 Groups):**
 
 - **AuthEndpoints.cs** - Authentication at `/api/auth`
 - **TaskEndpoints.cs** - Task CRUD at `/api/tasks`
+- **DashboardEndpoints.cs** - Dashboard CRUD at `/api/dashboards` (NEW Phase 10)
+- **AnalyticsEndpoints.cs** - Analytics at `/api/analytics` (NEW Phase 10)
 - **CommentEndpoints.cs** - Comments at `/api/comments`
 - **AttachmentEndpoints.cs** - File attachments at `/api/attachments`
 - **DocumentEndpoints.cs** - Document management at `/api/documents`
@@ -1572,6 +1590,7 @@ builder.Services.AddAuthentication()
 - `POST /api/auth/refresh` - Token refresh
 
 **Workspace Endpoints (NEW 2026-01-09):**
+
 - `POST /api/workspaces` - Create workspace
 - `GET /api/workspaces` - List workspaces
 - `GET /api/workspaces/{id}` - Get workspace by ID
@@ -1579,6 +1598,7 @@ builder.Services.AddAuthentication()
 - `DELETE /api/workspaces/{id}` - Delete workspace
 
 **ClickUp Hierarchy Endpoints:**
+
 - `POST /api/spaces` - Create space
 - `GET /api/spaces?workspaceId={id}` - List spaces
 - `POST /api/folders` - Create folder
@@ -1587,6 +1607,7 @@ builder.Services.AddAuthentication()
 - `GET /api/tasklists?spaceId={id}&folderId={id}` - List tasklists
 
 **Task Endpoints:**
+
 - `POST /api/tasks` - Create task
 - `GET /api/tasks/{id}` - Get task by ID
 - `GET /api/tasks` - List tasks with filters
@@ -2229,12 +2250,12 @@ services:
 
 **Test Results (2026-01-07):**
 
-| Service | Status | Health Check | Response Time |
-|---------|--------|--------------|---------------|
-| PostgreSQL | ✅ Healthy | Passing (5/5) | ~50ms |
-| Redis | ✅ Healthy | Passing (5/5) | ~66ms |
-| Backend | ✅ Healthy | Passing (5/5) | ~65ms |
-| Frontend | ❌ Unhealthy | Failing (15/15) | Endpoint missing |
+| Service    | Status       | Health Check    | Response Time    |
+| ---------- | ------------ | --------------- | ---------------- |
+| PostgreSQL | ✅ Healthy   | Passing (5/5)   | ~50ms            |
+| Redis      | ✅ Healthy   | Passing (5/5)   | ~66ms            |
+| Backend    | ✅ Healthy   | Passing (5/5)   | ~65ms            |
+| Frontend   | ❌ Unhealthy | Failing (15/15) | Endpoint missing |
 
 **Test Coverage:** 0% (1 placeholder test only)
 
@@ -2251,6 +2272,7 @@ services:
 **See Also:** `/docs/project-roadmap.md` - Phase 17/18: Docker Testing & Production Setup
 
 **Files:**
+
 - `/docker/docker-compose.yml` - Base configuration
 - `/docker/docker-compose.override.yml` - Development overrides
 - `/Dockerfile.backend` - Multi-stage backend build

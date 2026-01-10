@@ -16,6 +16,7 @@ using Nexora.Management.Application.Authorization;
 using Nexora.Management.Application.Common;
 using Nexora.Management.API.Hubs;
 using Nexora.Management.API.Services;
+using Nexora.Management.API.Common;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -66,14 +67,32 @@ builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizat
 // Register Permission Authorization Handler (scoped to get DbContext)
 builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
-// Configure CORS - Allow all origins (user will restrict later)
+// Configure CORS with whitelisted origins for JWT security
+var corsSettings = new CorsSettings();
+builder.Configuration.GetSection(CorsSettings.SectionName).Bind(corsSettings);
+builder.Services.AddSingleton(corsSettings);
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        // Use whitelisted origins from configuration for security
+        // AllowAnyOrigin() would break JWT authentication with credentials
+        if (corsSettings.AllowedOrigins.Length > 0)
+        {
+            policy.WithOrigins(corsSettings.AllowedOrigins)
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials(); // Required for JWT cookies/headers
+        }
+        else
+        {
+            // Fallback: only localhost for development if no config provided
+            policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        }
     });
 });
 
