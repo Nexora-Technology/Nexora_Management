@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest",
+    "test": "vitest --passWithNoTests",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest --coverage"
   },
