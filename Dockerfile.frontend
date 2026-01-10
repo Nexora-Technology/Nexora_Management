@@ -3,16 +3,15 @@ FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy package files
+# Copy package files (root for turborepo)
 COPY package*.json ./
 COPY apps/frontend/package*.json ./apps/frontend/
-COPY packages/*/package*.json ./packages/*/
 
-# Install dependencies
+# Install dependencies using turborepo
 RUN npm ci
 
 # Stage 2: Build
-# Force cache invalidate: 2026-01-04-01:44-webpack-build
+# Force cache invalidate: 2026-01-10-docker-fix
 FROM node:20-alpine AS builder
 WORKDIR /app
 
@@ -24,12 +23,11 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-# Build application
-WORKDIR /app/apps/frontend
-RUN npm run build
+# Build application using turborepo
+RUN npx turbo run build --filter=@nexora/frontend
 
 # Stage 3: Production runner
-# Force cache invalidate: 2026-01-04-01:43
+# Force cache invalidate: 2026-01-10-docker-fix
 FROM node:20-alpine AS runner
 WORKDIR /app
 
@@ -42,9 +40,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy built application
 COPY --from=builder /app/apps/frontend/public ./apps/frontend/public
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone ./apps/frontend/.next/standalone
 COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/static ./apps/frontend/.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/server ./apps/frontend/.next/server
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone ./
+COPY --from=builder /app/apps/frontend/package*.json ./apps/frontend/
 
 USER nextjs
 
@@ -57,4 +55,4 @@ ENV HOSTNAME="0.0.0.0"
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
 
-CMD ["node", "apps/frontend/server.js"]
+CMD ["node", "apps/frontend/.next/standalone/apps/frontend/server.js"]
