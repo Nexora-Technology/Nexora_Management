@@ -1,18 +1,18 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
-import { dashboardService, DashboardDto } from '@/lib/services/dashboard-service';
-import { analyticsService } from '@/lib/services/analytics-service';
+import { use, useQuery } from '@tanstack/react-query';
+import { dashboardService } from '@/lib/services/dashboard-service';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Settings } from 'lucide-react';
 import Link from 'next/link';
 import { DashboardStats } from '@/components/analytics/dashboard-stats';
 import { ChartContainer } from '@/components/analytics/chart-container';
 
-export default function DashboardDetailPage({ params }: { params: { id: string } }) {
+export default function DashboardDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const { data: dashboard, isLoading } = useQuery({
-    queryKey: ['dashboard', params.id],
-    queryFn: () => dashboardService.getDashboard(params.id),
+    queryKey: ['dashboard', id],
+    queryFn: () => dashboardService.getDashboard(id),
   });
 
   if (isLoading) return <div>Loading...</div>;
