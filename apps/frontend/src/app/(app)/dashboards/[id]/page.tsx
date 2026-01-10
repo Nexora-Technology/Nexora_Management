@@ -1,6 +1,7 @@
 'use client';
 
-import { use, useQuery } from '@tanstack/react-query';
+import { use } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { dashboardService } from '@/lib/services/dashboard-service';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Settings } from 'lucide-react';
