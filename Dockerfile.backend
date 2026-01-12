@@ -2,22 +2,22 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
 WORKDIR /src
 
-# Copy project files
-COPY ["apps/backend/src/Nexora.Management.API/Nexora.Management.API.csproj", "Nexora.Management.API/"]
-COPY ["apps/backend/src/Nexora.Management.Application/Nexora.Management.Application.csproj", "Nexora.Management.Application/"]
-COPY ["apps/backend/src/Nexora.Management.Domain/Nexora.Management.Domain.csproj", "Nexora.Management.Domain/"]
-COPY ["apps/backend/src/Nexora.Management.Infrastructure/Nexora.Management.Infrastructure.csproj", "Nexora.Management.Infrastructure/"]
+# Copy project files only (no IDE files, test files, etc)
+COPY apps/backend/src/Nexora.Management.API/Nexora.Management.API.csproj Nexora.Management.API/
+COPY apps/backend/src/Nexora.Management.Application/Nexora.Management.Application.csproj Nexora.Management.Application/
+COPY apps/backend/src/Nexora.Management.Domain/Nexora.Management.Domain.csproj Nexora.Management.Domain/
+COPY apps/backend/src/Nexora.Management.Infrastructure/Nexora.Management.Infrastructure.csproj Nexora.Management.Infrastructure/
 
 # Restore dependencies
-RUN dotnet restore "Nexora.Management.API/Nexora.Management.API.csproj"
+RUN dotnet restore Nexora.Management.API/Nexora.Management.API.csproj
 
-# Copy all source files
+# Copy source code only (excludes test files, IDE files via .dockerignore)
 COPY apps/backend/src/ .
 
 # Build and publish
-WORKDIR "/src/Nexora.Management.API"
-RUN dotnet build "Nexora.Management.API.csproj" -c Release -o /app/build
-RUN dotnet publish "Nexora.Management.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+WORKDIR /src/Nexora.Management.API
+RUN dotnet build Nexora.Management.API.csproj -c Release -o /app/build
+RUN dotnet publish Nexora.Management.API.csproj -c Release -o /app/publish /p:UseAppHost=false
 
 # Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine AS final
@@ -27,19 +27,16 @@ WORKDIR /app
 RUN addgroup -g 1000 -S nexora && \
     adduser -u 1000 -S nexora -G nexora
 
-# Copy published output
+# Copy only published output (no source code, no build artifacts)
 COPY --from=build /app/publish .
 
 # Set ownership
 RUN chown -R nexora:nexora /app
 USER nexora
 
-# Expose port
 EXPOSE 8080
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
 
-# Entry point
 ENTRYPOINT ["dotnet", "Nexora.Management.API.dll"]

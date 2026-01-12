@@ -16,12 +16,8 @@
      ✓ typedRoutes
 
    Creating an optimized production build ...
- ✓ Compiled successfully in 469ms
+ ✓ Compiled successfully in 1913ms
    Linting and checking validity of types ...
-
-./src/app/(app)/dashboards/[id]/page.tsx
-4:28  Warning: 'DashboardDto' is defined but never used.  @typescript-eslint/no-unused-vars
-5:10  Warning: 'analyticsService' is defined but never used.  @typescript-eslint/no-unused-vars
 
 ./src/app/(app)/dashboards/page.tsx
 4:28  Warning: 'DashboardDto' is defined but never used.  @typescript-eslint/no-unused-vars
@@ -55,9 +51,6 @@
 
 ./src/components/goals/objective-card.tsx
 6:10  Warning: 'Badge' is defined but never used.  @typescript-eslint/no-unused-vars
-
-./src/components/layout/sidebar-nav.tsx
-9:3  Warning: 'CheckSquare' is defined but never used.  @typescript-eslint/no-unused-vars
 
 ./src/components/spaces/space-tree-nav.tsx
 154:6  Warning: React Hook useCallback has a missing dependency: 'selectedNodeId'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
@@ -152,17 +145,57 @@
 
 info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
    Collecting page data ...
-   Generating static pages (0/2) ...
- ✓ Generating static pages (2/2)
+   Generating static pages (0/26) ...
+   Generating static pages (6/26) 
+   Generating static pages (12/26) 
+   Generating static pages (19/26) 
+ ✓ Generating static pages (26/26)
    Finalizing page optimization ...
    Collecting build traces ...
+ ⚠ Failed to copy traced files for /Users/nhatduyfirst/Documents/Projects/Nexora_Management/apps/frontend/.next/server/app/(app)/page.js [Error: ENOENT: no such file or directory, copyfile '/Users/nhatduyfirst/Documents/Projects/Nexora_Management/apps/frontend/.next/server/app/(app)/page_client-reference-manifest.js' -> '/Users/nhatduyfirst/Documents/Projects/Nexora_Management/apps/frontend/.next/standalone/apps/frontend/.next/server/app/(app)/page_client-reference-manifest.js'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'copyfile',
+  path: '/Users/nhatduyfirst/Documents/Projects/Nexora_Management/apps/frontend/.next/server/app/(app)/page_client-reference-manifest.js',
+  dest: '/Users/nhatduyfirst/Documents/Projects/Nexora_Management/apps/frontend/.next/standalone/apps/frontend/.next/server/app/(app)/page_client-reference-manifest.js'
+}
 
-Route (pages)                                Size  First Load JS
-─ ○ /404                                    180 B        96.1 kB
-+ First Load JS shared by all             95.9 kB
-  ├ chunks/framework-ea3d558b313aa702.js  57.6 kB
-  ├ chunks/main-0c47211581705dae.js       36.6 kB
-  └ other shared chunks (total)           1.65 kB
+Route (app)                                 Size  First Load JS
+┌ ○ /                                    3.57 kB         114 kB
+├ ○ /_not-found                            997 B         104 kB
+├ ○ /analytics                           4.48 kB         144 kB
+├ ○ /calendar                              137 B         103 kB
+├ ○ /components/showcase                 7.98 kB         119 kB
+├ ○ /dashboard                            3.1 kB         114 kB
+├ ○ /dashboards                          6.37 kB         149 kB
+├ ƒ /dashboards/[id]                     3.88 kB         147 kB
+├ ○ /documents                            126 kB         260 kB
+├ ○ /folders                             3.91 kB         143 kB
+├ ○ /forgot-password                       137 B         103 kB
+├ ○ /goals                               5.13 kB         140 kB
+├ ƒ /goals/[id]                          5.34 kB         140 kB
+├ ƒ /lists/[id]                          2.43 kB         145 kB
+├ ○ /login                               3.82 kB         118 kB
+├ ƒ /projects/[id]                       8.47 kB         142 kB
+├ ○ /register                             3.9 kB         118 kB
+├ ○ /reports                             3.64 kB         114 kB
+├ ○ /settings                              137 B         103 kB
+├ ○ /spaces                               5.8 kB         145 kB
+├ ○ /tasks                               19.2 kB         189 kB
+├ ƒ /tasks/[id]                          2.03 kB         213 kB
+├ ○ /tasks/board                         3.74 kB         174 kB
+├ ○ /team                                  137 B         103 kB
+├ ○ /time                                5.58 kB         157 kB
+├ ○ /time/reports                        4.64 kB         171 kB
+├ ○ /time/timesheet                      4.27 kB         142 kB
+├ ○ /workspaces                            169 B         106 kB
+└ ƒ /workspaces/[id]/projects              169 B         106 kB
++ First Load JS shared by all             103 kB
+  ├ chunks/18-f90a2cd1d449c47a.js        46.4 kB
+  ├ chunks/87c73c54-09e1ba5c70e60a51.js  54.2 kB
+  └ other shared chunks (total)          1.94 kB
 
-○  (Static)  prerendered as static content
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
 

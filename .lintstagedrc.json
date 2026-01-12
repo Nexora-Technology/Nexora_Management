@@ -1,5 +1,5 @@
 {
   "*.{cs,csproj}": ["cd apps/backend && dotnet format"],
-  "*.{ts,tsx,js,jsx}": ["eslint --fix", "prettier --write"],
+  "apps/frontend/**/*.{ts,tsx,js,jsx}": ["cd apps/frontend && eslint --fix", "prettier --write"],
   "*.{json,md}": ["prettier --write"]
 }

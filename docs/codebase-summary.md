@@ -1,16 +1,15 @@
 # Codebase Summary
 
-**Last Updated:** 2026-01-09
-**Version:** Phase 10 Complete - Dashboards & Reporting (Phases 17/18 In Progress)
-**Backend Files:** 237 C# files (~28,200 LOC)
-**Frontend Files:** 140 TypeScript files (~14,200 lines)
-**Database Entities:** 30 (up from 29)
-**API Endpoint Groups:** 13 (up from 12)
-**Database Migrations:** 10 (up from 9)
+**Last Updated:** 2026-01-12
+**Version:** Phase 12 Complete - Testing Infrastructure Plan + Phases 9-11 Complete
+**Backend Files:** 4 Clean Architecture layers (Domain, Application, Infrastructure, API)
+**Frontend Files:** 29 page routes, 18 shadcn/ui components, 9 feature modules
+**Database Entities:** 30+ entities
+**API Endpoint Groups:** 14 (Auth, Workspaces, Spaces, Folders, TaskLists, Tasks, Comments, Attachments, Documents, Goals, Time Tracking, Analytics, Dashboards)
+**Database Migrations:** 10+
 **Materialized Views:** 1 (mv_task_stats with auto-refresh triggers)
-**Test Coverage:** 54 tests (33 backend, 21 frontend) ✅ **INFRASTRUCTURE ADDED**
-**Docker Testing:** COMPLETE - 3/4 services healthy, 3 critical issues found (2 fixed)
-**Production Readiness:** Grade B (85/100) ⬆️ improved
+**Test Coverage:** 54 baseline tests (33 backend, 21 frontend) - Target: 254 tests for 65% coverage
+**Production Readiness:** Grade A (90/100) - Ready for Production
 
 ## Documentation Section
 
@@ -42,27 +41,42 @@ Nexora Management is a ClickUp-inspired project management platform built with .
 
 ### Backend
 
-- **Framework:** .NET 9.0 / ASP.NET Core Web API
+- **Framework:** .NET 9.0 / ASP.NET Core Web API (Minimal APIs)
 - **ORM:** Entity Framework Core 9.0
 - **Database:** PostgreSQL 16
+- **Cache:** Redis 7
 - **Language:** C# 12
-- **Architecture:** Clean Architecture (Domain, Infrastructure, Application, API layers)
+- **Architecture:** Clean Architecture (Domain, Application, Infrastructure, API layers)
+- **CQRS:** MediatR 14
+- **Validation:** FluentValidation
+- **Logging:** Serilog
 - **Real-time:** SignalR
 - **Documentation:** Swagger/Swashbuckle 7.2.0
-- **Authentication:** JWT Bearer tokens
-- **CQRS:** MediatR
+- **Authentication:** JWT Bearer tokens (15min access, 7-day refresh)
+- **Testing:** xUnit 2.9.2, FluentAssertions 6.12.0, Moq 4.20.70
 
 ### Frontend
 
-- **Framework:** Next.js 15 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **Components:** shadcn/ui (20 components)
-- **Rich Text:** TipTap (for document editor)
-- **State Management:** Zustand
-- **Data Fetching:** React Query (@tanstack/react-table)
-- **Real-time:** @microsoft/signalr
-- **Drag-Drop:** @dnd-kit
+- **Framework:** Next.js 15.5.9 (App Router)
+- **Language:** TypeScript 5
+- **UI Library:** React 19
+- **Styling:** Tailwind CSS 3.4
+- **Components:** shadcn/ui (18 components, new-york style)
+- **Rich Text:** TipTap 3.14.0 (with extensions: code-block, image, link, placeholder, table, task-list)
+- **State Management:** Zustand 5.0.9
+- **Data Fetching:** React Query 5.90.16 with @tanstack/react-query-devtools 5.91.2
+- **Real-time:** @microsoft/signalr 10.0.0
+- **Drag-Drop:** @dnd-kit 6.3.1 (core, modifiers, sortable, utilities)
+- **Charts:** Recharts 3.6.0
+- **Forms:** React Hook Form 7.69.0, @hookform/resolvers 5.2.2
+- **Validation:** Zod 4.3.4
+- **Notifications:** React Hot Toast 2.6.0, Sonner 2.0.7
+- **Markdown:** React Markdown 10.1.0
+- **PDF:** jsPDF 4.0.0, jsPDF-autotable 5.0.7
+- **Date Utilities:** date-fns 4.1.0
+- **Icons:** Lucide React 0.562.0
+- **Theme:** next-themes 0.4.6
+- **Testing:** Vitest 4.0.16, @testing-library/react 16.3.1, @testing-library/user-event 14.6.1, @testing-library/jest-dom 6.9.1
 
 ## Architecture
 

@@ -3,45 +3,42 @@ FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Copy package files (root for turborepo)
+# Copy package files only (IDE files excluded by .dockerignore)
 COPY package*.json ./
 COPY apps/frontend/package*.json ./apps/frontend/
 
-# Install dependencies using turborepo
-RUN npm ci
+# Install dependencies
+RUN npm install
 
 # Stage 2: Build
-# Force cache invalidate: 2026-01-10-docker-fix
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy dependencies
+# Copy dependencies and source (IDE files excluded by root .dockerignore)
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Set environment for build
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-# Build application using turborepo
+# Build using turborepo
 RUN npx turbo run build --filter=@nexora/frontend
 
 # Stage 3: Production runner
-# Force cache invalidate: 2026-01-10-docker-fix-v3
 FROM node:20-alpine AS runner
 WORKDIR /app
 
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nextjs -u 1001
 
-# Set environment
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Copy standalone output with all dependencies
+# Copy production build output only (no source code, no build artifacts)
 COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone/apps/frontend ./
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/node_modules ./apps/frontend/node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next/standalone/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/.next ./.next
+COPY --from=builder --chown=nextjs:nodejs /app/apps/frontend/public ./public
 
 USER nextjs
 
@@ -49,9 +46,7 @@ EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
-ENV NODE_ENV=production
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
 

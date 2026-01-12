@@ -1,0 +1,49 @@
+# Build outputs
+bin/
+obj/
+out/
+publish/
+
+# IDE files
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.cache
+*.sln.ide/
+
+# Git
+.git/
+.gitignore
+.github/
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test files
+Tests/
+TestResults/
+*.Tests/
+*.test.csproj
+
+# Coverage
+coverage/
+*.coverage
+*.coveragexml
